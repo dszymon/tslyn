@@ -80,6 +80,11 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
              return new SyntaxIdentifierWithTrivia(SyntaxKind.IdentifierToken, text, text, leading, trailing);
         }
 
+        internal static SyntaxToken Identifier(SyntaxKind contextualKind, GreenNode? leading, string text, string valueText, GreenNode? trailing)
+        {
+            return new SyntaxIdentifierWithTrivia(contextualKind, text, valueText, leading, trailing);
+        }
+
         internal static SyntaxToken WithValue<T>(SyntaxKind kind, string text, T value)
         {
              return new SyntaxTokenWithValue<T>(kind, text, value);

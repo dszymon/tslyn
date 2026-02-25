@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.Syntax.InternalSyntax;
 
 namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 {
-    internal static class SyntaxFactory
+    internal static partial class SyntaxFactory
     {
         internal static readonly SyntaxTrivia Space = SyntaxTrivia.Create(SyntaxKind.WhitespaceTrivia, " ");
         internal static readonly SyntaxTrivia ElasticSpace = SyntaxTrivia.Create(SyntaxKind.WhitespaceTrivia, " "); // Should be elastic

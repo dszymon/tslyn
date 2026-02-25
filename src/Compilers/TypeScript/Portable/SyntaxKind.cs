@@ -234,6 +234,7 @@ namespace Microsoft.CodeAnalysis.TypeScript
 
         // Special Tokens
         EndOfFileToken,
+        BadToken,
 
         // Nodes - Declarations
         SourceFile,
