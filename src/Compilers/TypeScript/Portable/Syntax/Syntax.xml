@@ -18,9 +18,13 @@
 
   <AbstractNode Name="DeclarationSyntax" Base="StatementSyntax">
       <Field Name="Modifiers" Type="SyntaxTokenList" Optional="true"/>
+      <Field Name="Decorators" Type="SyntaxList&lt;DecoratorSyntax&gt;" Optional="true"/>
   </AbstractNode>
 
   <AbstractNode Name="TypeElementSyntax" Base="TypeScriptSyntaxNode">
+  </AbstractNode>
+
+  <AbstractNode Name="ModuleBodySyntax" Base="TypeScriptSyntaxNode">
   </AbstractNode>
 
   <!-- Common Structures -->
@@ -38,6 +42,14 @@
           <Kind Name="DotToken"/>
       </Field>
       <Field Name="Right" Type="IdentifierNameSyntax"/>
+  </Node>
+
+  <Node Name="DecoratorSyntax" Base="TypeScriptSyntaxNode">
+      <Kind Name="Decorator"/>
+      <Field Name="AtToken" Type="SyntaxToken">
+          <Kind Name="AtToken"/>
+      </Field>
+      <Field Name="Expression" Type="ExpressionSyntax"/>
   </Node>
 
   <Node Name="TypeParameterListSyntax" Base="TypeScriptSyntaxNode">
@@ -58,7 +70,52 @@
       <Field Name="Default" Type="TypeSyntax" Optional="true"/>
   </Node>
 
+  <Node Name="ParameterListSyntax" Base="TypeScriptSyntaxNode">
+      <Kind Name="ParameterList"/>
+      <Field Name="OpenParenToken" Type="SyntaxToken">
+          <Kind Name="OpenParenToken"/>
+      </Field>
+      <Field Name="Parameters" Type="SeparatedSyntaxList&lt;ParameterSyntax&gt;"/>
+      <Field Name="CloseParenToken" Type="SyntaxToken">
+          <Kind Name="CloseParenToken"/>
+      </Field>
+  </Node>
+
+  <Node Name="ParameterSyntax" Base="TypeScriptSyntaxNode">
+      <Kind Name="Parameter"/>
+      <Field Name="Decorators" Type="SyntaxList&lt;DecoratorSyntax&gt;" Optional="true"/>
+      <Field Name="Modifiers" Type="SyntaxTokenList" Optional="true"/>
+      <Field Name="DotDotDotToken" Type="SyntaxToken" Optional="true">
+          <Kind Name="DotDotDotToken"/>
+      </Field>
+      <Field Name="Name" Type="BindingNameSyntax"/>
+      <Field Name="QuestionToken" Type="SyntaxToken" Optional="true">
+          <Kind Name="QuestionToken"/>
+      </Field>
+      <Field Name="TypeAnnotation" Type="TypeAnnotationSyntax" Optional="true"/>
+      <Field Name="Initializer" Type="EqualsValueClauseSyntax" Optional="true"/>
+  </Node>
+
   <!-- Declarations -->
+  <Node Name="ClassDeclarationSyntax" Base="DeclarationSyntax">
+      <Kind Name="ClassDeclaration"/>
+      <Field Name="ClassKeyword" Type="SyntaxToken">
+          <Kind Name="ClassKeyword"/>
+      </Field>
+      <Field Name="Identifier" Type="SyntaxToken" Optional="true">
+          <Kind Name="IdentifierToken"/>
+      </Field>
+      <Field Name="TypeParameters" Type="TypeParameterListSyntax" Optional="true"/>
+      <Field Name="HeritageClauses" Type="SyntaxList&lt;HeritageClauseSyntax&gt;" Optional="true"/>
+      <Field Name="OpenBraceToken" Type="SyntaxToken">
+          <Kind Name="OpenBraceToken"/>
+      </Field>
+      <Field Name="Members" Type="SyntaxList&lt;TypeElementSyntax&gt;"/>
+      <Field Name="CloseBraceToken" Type="SyntaxToken">
+          <Kind Name="CloseBraceToken"/>
+      </Field>
+  </Node>
+
   <Node Name="InterfaceDeclarationSyntax" Base="DeclarationSyntax">
       <Kind Name="InterfaceDeclaration"/>
       <Field Name="InterfaceKeyword" Type="SyntaxToken">
@@ -76,6 +133,159 @@
       <Field Name="CloseBraceToken" Type="SyntaxToken">
           <Kind Name="CloseBraceToken"/>
       </Field>
+  </Node>
+
+  <Node Name="EnumDeclarationSyntax" Base="DeclarationSyntax">
+      <Kind Name="EnumDeclaration"/>
+      <Field Name="EnumKeyword" Type="SyntaxToken">
+          <Kind Name="EnumKeyword"/>
+      </Field>
+      <Field Name="Identifier" Type="SyntaxToken">
+          <Kind Name="IdentifierToken"/>
+      </Field>
+      <Field Name="OpenBraceToken" Type="SyntaxToken">
+          <Kind Name="OpenBraceToken"/>
+      </Field>
+      <Field Name="Members" Type="SeparatedSyntaxList&lt;EnumMemberSyntax&gt;"/>
+      <Field Name="CloseBraceToken" Type="SyntaxToken">
+          <Kind Name="CloseBraceToken"/>
+      </Field>
+  </Node>
+
+  <Node Name="EnumMemberSyntax" Base="TypeScriptSyntaxNode">
+      <Kind Name="EnumMember"/>
+      <Field Name="Name" Type="PropertyNameSyntax"/>
+      <Field Name="Initializer" Type="EqualsValueClauseSyntax" Optional="true"/>
+  </Node>
+
+  <Node Name="ModuleDeclarationSyntax" Base="DeclarationSyntax">
+      <Kind Name="ModuleDeclaration"/>
+      <Field Name="Keyword" Type="SyntaxToken">
+          <Kind Name="ModuleKeyword"/>
+          <Kind Name="NamespaceKeyword"/>
+      </Field>
+      <Field Name="Name" Type="ExpressionSyntax"/> <!-- Identifier or StringLiteral -->
+      <Field Name="Body" Type="ModuleBodySyntax"/> <!-- ModuleBlock or NamespaceDeclaration -->
+  </Node>
+
+  <Node Name="ModuleBlockSyntax" Base="ModuleBodySyntax">
+      <Kind Name="ModuleBlock"/>
+      <Field Name="OpenBraceToken" Type="SyntaxToken">
+          <Kind Name="OpenBraceToken"/>
+      </Field>
+      <Field Name="Statements" Type="SyntaxList&lt;StatementSyntax&gt;"/>
+      <Field Name="CloseBraceToken" Type="SyntaxToken">
+          <Kind Name="CloseBraceToken"/>
+      </Field>
+  </Node>
+
+  <Node Name="FunctionDeclarationSyntax" Base="DeclarationSyntax">
+      <Kind Name="FunctionDeclaration"/>
+      <Field Name="FunctionKeyword" Type="SyntaxToken">
+          <Kind Name="FunctionKeyword"/>
+      </Field>
+      <Field Name="AsteriskToken" Type="SyntaxToken" Optional="true">
+          <Kind Name="AsteriskToken"/>
+      </Field>
+      <Field Name="Identifier" Type="SyntaxToken" Optional="true">
+          <Kind Name="IdentifierToken"/>
+      </Field>
+      <Field Name="TypeParameters" Type="TypeParameterListSyntax" Optional="true"/>
+      <Field Name="Parameters" Type="ParameterListSyntax"/>
+      <Field Name="TypeAnnotation" Type="TypeAnnotationSyntax" Optional="true"/>
+      <Field Name="Body" Type="BlockSyntax" Optional="true"/>
+      <Field Name="SemicolonToken" Type="SyntaxToken" Optional="true">
+          <Kind Name="SemicolonToken"/>
+      </Field>
+  </Node>
+
+  <Node Name="ImportDeclarationSyntax" Base="StatementSyntax">
+      <Kind Name="ImportDeclaration"/>
+      <Field Name="ImportKeyword" Type="SyntaxToken">
+          <Kind Name="ImportKeyword"/>
+      </Field>
+      <Field Name="ImportClause" Type="ImportClauseSyntax" Optional="true"/>
+      <Field Name="FromKeyword" Type="SyntaxToken" Optional="true"> <!-- Optional for side-effect imports -->
+          <Kind Name="FromKeyword"/>
+      </Field>
+      <Field Name="ModuleSpecifier" Type="ExpressionSyntax"/> <!-- StringLiteral -->
+      <Field Name="SemicolonToken" Type="SyntaxToken" Optional="true">
+          <Kind Name="SemicolonToken"/>
+      </Field>
+  </Node>
+
+  <Node Name="ImportClauseSyntax" Base="TypeScriptSyntaxNode">
+      <Kind Name="ImportSpecifier"/>
+      <!-- Logic for named imports vs namespace imports vs default is complex, simplified here -->
+      <Field Name="Name" Type="IdentifierNameSyntax" Optional="true"/> <!-- Default import -->
+      <Field Name="NamedImports" Type="NamedImportsSyntax" Optional="true"/>
+      <Field Name="NamespaceImport" Type="NamespaceImportSyntax" Optional="true"/>
+  </Node>
+
+  <Node Name="NamedImportsSyntax" Base="TypeScriptSyntaxNode">
+      <Kind Name="NamedImports"/>
+      <Field Name="OpenBraceToken" Type="SyntaxToken">
+          <Kind Name="OpenBraceToken"/>
+      </Field>
+      <Field Name="Elements" Type="SeparatedSyntaxList&lt;ImportSpecifierSyntax&gt;"/>
+      <Field Name="CloseBraceToken" Type="SyntaxToken">
+          <Kind Name="CloseBraceToken"/>
+      </Field>
+  </Node>
+
+  <Node Name="ImportSpecifierSyntax" Base="TypeScriptSyntaxNode">
+      <Kind Name="ImportSpecifier"/>
+      <Field Name="PropertyName" Type="IdentifierNameSyntax" Optional="true"/>
+      <Field Name="AsKeyword" Type="SyntaxToken" Optional="true">
+          <Kind Name="AsKeyword"/>
+      </Field>
+      <Field Name="Name" Type="IdentifierNameSyntax"/>
+  </Node>
+
+  <Node Name="NamespaceImportSyntax" Base="TypeScriptSyntaxNode">
+      <Kind Name="ExternalModuleReference"/> <!-- Reusing existing kind or need new one -->
+      <Field Name="AsteriskToken" Type="SyntaxToken">
+          <Kind Name="AsteriskToken"/>
+      </Field>
+      <Field Name="AsKeyword" Type="SyntaxToken">
+          <Kind Name="AsKeyword"/>
+      </Field>
+      <Field Name="Name" Type="IdentifierNameSyntax"/>
+  </Node>
+
+  <Node Name="ExportDeclarationSyntax" Base="StatementSyntax">
+      <Kind Name="ExportDeclaration"/>
+      <Field Name="ExportKeyword" Type="SyntaxToken">
+          <Kind Name="ExportKeyword"/>
+      </Field>
+      <Field Name="ExportClause" Type="NamedExportsSyntax" Optional="true"/>
+      <Field Name="FromKeyword" Type="SyntaxToken" Optional="true">
+          <Kind Name="FromKeyword"/>
+      </Field>
+      <Field Name="ModuleSpecifier" Type="ExpressionSyntax" Optional="true"/>
+      <Field Name="SemicolonToken" Type="SyntaxToken" Optional="true">
+          <Kind Name="SemicolonToken"/>
+      </Field>
+  </Node>
+
+  <Node Name="NamedExportsSyntax" Base="TypeScriptSyntaxNode">
+      <Kind Name="NamedExports"/>
+      <Field Name="OpenBraceToken" Type="SyntaxToken">
+          <Kind Name="OpenBraceToken"/>
+      </Field>
+      <Field Name="Elements" Type="SeparatedSyntaxList&lt;ExportSpecifierSyntax&gt;"/>
+      <Field Name="CloseBraceToken" Type="SyntaxToken">
+          <Kind Name="CloseBraceToken"/>
+      </Field>
+  </Node>
+
+  <Node Name="ExportSpecifierSyntax" Base="TypeScriptSyntaxNode">
+      <Kind Name="ExportSpecifier"/>
+      <Field Name="PropertyName" Type="IdentifierNameSyntax" Optional="true"/>
+      <Field Name="AsKeyword" Type="SyntaxToken" Optional="true">
+          <Kind Name="AsKeyword"/>
+      </Field>
+      <Field Name="Name" Type="IdentifierNameSyntax"/>
   </Node>
 
   <Node Name="HeritageClauseSyntax" Base="TypeScriptSyntaxNode">
@@ -124,7 +334,6 @@
 
   <Node Name="VariableStatementSyntax" Base="StatementSyntax">
       <Kind Name="VariableStatement"/>
-      <Field Name="Modifiers" Type="SyntaxTokenList" Optional="true"/>
       <Field Name="DeclarationList" Type="VariableDeclarationListSyntax"/>
       <Field Name="SemicolonToken" Type="SyntaxToken" Optional="true">
            <Kind Name="SemicolonToken"/>
@@ -175,6 +384,9 @@
       <Kind Name="Identifier"/>
       <Field Name="Identifier" Type="SyntaxToken"/>
   </Node>
+
+  <AbstractNode Name="PropertyNameSyntax" Base="TypeScriptSyntaxNode">
+  </AbstractNode>
 
   <!-- Types -->
   <Node Name="UnionTypeSyntax" Base="TypeSyntax">
@@ -261,6 +473,78 @@
       <Field Name="Statement" Type="StatementSyntax"/>
   </Node>
 
+  <Node Name="DoStatementSyntax" Base="StatementSyntax">
+      <Kind Name="DoStatement"/>
+      <Field Name="DoKeyword" Type="SyntaxToken">
+          <Kind Name="DoKeyword"/>
+      </Field>
+      <Field Name="Statement" Type="StatementSyntax"/>
+      <Field Name="WhileKeyword" Type="SyntaxToken">
+          <Kind Name="WhileKeyword"/>
+      </Field>
+      <Field Name="OpenParenToken" Type="SyntaxToken">
+          <Kind Name="OpenParenToken"/>
+      </Field>
+      <Field Name="Condition" Type="ExpressionSyntax"/>
+      <Field Name="CloseParenToken" Type="SyntaxToken">
+          <Kind Name="CloseParenToken"/>
+      </Field>
+      <Field Name="SemicolonToken" Type="SyntaxToken" Optional="true">
+          <Kind Name="SemicolonToken"/>
+      </Field>
+  </Node>
+
+  <Node Name="WhileStatementSyntax" Base="StatementSyntax">
+      <Kind Name="WhileStatement"/>
+      <Field Name="WhileKeyword" Type="SyntaxToken">
+          <Kind Name="WhileKeyword"/>
+      </Field>
+      <Field Name="OpenParenToken" Type="SyntaxToken">
+          <Kind Name="OpenParenToken"/>
+      </Field>
+      <Field Name="Condition" Type="ExpressionSyntax"/>
+      <Field Name="CloseParenToken" Type="SyntaxToken">
+          <Kind Name="CloseParenToken"/>
+      </Field>
+      <Field Name="Statement" Type="StatementSyntax"/>
+  </Node>
+
+  <Node Name="ForStatementSyntax" Base="StatementSyntax">
+      <Kind Name="ForStatement"/>
+      <Field Name="ForKeyword" Type="SyntaxToken">
+          <Kind Name="ForKeyword"/>
+      </Field>
+      <Field Name="OpenParenToken" Type="SyntaxToken">
+          <Kind Name="OpenParenToken"/>
+      </Field>
+      <Field Name="Initializer" Type="ForInitializerSyntax" Optional="true"/>
+      <Field Name="FirstSemicolonToken" Type="SyntaxToken">
+          <Kind Name="SemicolonToken"/>
+      </Field>
+      <Field Name="Condition" Type="ExpressionSyntax" Optional="true"/>
+      <Field Name="SecondSemicolonToken" Type="SyntaxToken">
+          <Kind Name="SemicolonToken"/>
+      </Field>
+      <Field Name="Incrementor" Type="ExpressionSyntax" Optional="true"/>
+      <Field Name="CloseParenToken" Type="SyntaxToken">
+          <Kind Name="CloseParenToken"/>
+      </Field>
+      <Field Name="Statement" Type="StatementSyntax"/>
+  </Node>
+
+  <AbstractNode Name="ForInitializerSyntax" Base="TypeScriptSyntaxNode">
+  </AbstractNode>
+
+  <Node Name="ForStatementVariableDeclarationSyntax" Base="ForInitializerSyntax">
+      <Kind Name="VariableDeclarationList"/>
+      <Field Name="DeclarationList" Type="VariableDeclarationListSyntax"/>
+  </Node>
+
+  <Node Name="ForStatementExpressionSyntax" Base="ForInitializerSyntax">
+      <Kind Name="ExpressionStatement"/> <!-- Simplified -->
+      <Field Name="Expression" Type="ExpressionSyntax"/>
+  </Node>
+
   <!-- Expressions -->
   <Node Name="BinaryExpressionSyntax" Base="ExpressionSyntax">
       <Kind Name="BinaryExpression"/>
@@ -289,6 +573,31 @@
       <Field Name="CloseParenToken" Type="SyntaxToken">
           <Kind Name="CloseParenToken"/>
       </Field>
+  </Node>
+
+  <Node Name="ArrowFunctionSyntax" Base="ExpressionSyntax">
+      <Kind Name="ArrowFunction"/>
+      <Field Name="Modifiers" Type="SyntaxTokenList" Optional="true"/>
+      <Field Name="TypeParameters" Type="TypeParameterListSyntax" Optional="true"/>
+      <Field Name="Parameters" Type="ParameterListSyntax"/>
+      <Field Name="ReturnType" Type="TypeAnnotationSyntax" Optional="true"/>
+      <Field Name="EqualsGreaterThanToken" Type="SyntaxToken">
+          <Kind Name="EqualsGreaterThanToken"/>
+      </Field>
+      <Field Name="Body" Type="ExpressionOrBlockSyntax"/>
+  </Node>
+
+  <AbstractNode Name="ExpressionOrBlockSyntax" Base="TypeScriptSyntaxNode">
+  </AbstractNode>
+
+  <Node Name="ConciseBodyBlockSyntax" Base="ExpressionOrBlockSyntax">
+      <Kind Name="Block"/>
+      <Field Name="Block" Type="BlockSyntax"/>
+  </Node>
+
+  <Node Name="ConciseBodyExpressionSyntax" Base="ExpressionOrBlockSyntax">
+      <Kind Name="ExpressionStatement"/>
+      <Field Name="Expression" Type="ExpressionSyntax"/>
   </Node>
 
   <!-- Compilation Unit -->

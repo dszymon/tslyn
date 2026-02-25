@@ -43,9 +43,9 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
         public override int RawContextualKind => (int)Kind;
 
-        public override bool IsStructuredTrivia => this is StructuredTriviaSyntax;
+        public override bool IsStructuredTrivia => false;
 
-        public override bool IsDirective => this is DirectiveTriviaSyntax;
+        public override bool IsDirective => false;
 
         public override bool IsSkippedTokensTrivia => this.Kind == SyntaxKind.ConflictMarkerTrivia; // Placeholder, adjust as needed
 

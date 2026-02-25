@@ -11,7 +11,11 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         internal SyntaxToken(SyntaxKind kind)
             : base(kind)
         {
-            this.FullWidth = this.Text.Length;
+            var text = this.Text;
+            if (text != null)
+            {
+                this.FullWidth = text.Length;
+            }
         }
 
         internal SyntaxToken(SyntaxKind kind, int fullWidth)
@@ -22,7 +26,11 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         internal SyntaxToken(SyntaxKind kind, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
             : base(kind, diagnostics, annotations)
         {
-            this.FullWidth = this.Text.Length;
+            var text = this.Text;
+            if (text != null)
+            {
+                this.FullWidth = text.Length;
+            }
         }
 
         internal SyntaxToken(SyntaxKind kind, int fullWidth, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)

@@ -22,6 +22,15 @@ The existing `CSharpSyntaxGenerator` is heavily tied to C# specifics (namespaces
     *   Add a new section for TypeScript generation.
     *   Call the new `TypeScriptSyntaxGenerator`.
 
+## Verification
+A verification script (`SyntaxFactoryCheck.cs`) was created and executed to validate the core infrastructure. It verified:
+- Token Caching (Reference equality for keywords)
+- Identifier creation
+- Trivia creation
+- Token with Trivia construction
+
+The test confirmed that the manual `InternalSyntax` implementation works as expected. Future tests should integrate with the Roslyn Test infrastructure once the project is fully wired up in the solution.
+
 ## Immediate Action
 Since I cannot modify the build tools infrastructure (it requires recompiling the generator tools themselves), I have provided the **input** (`Syntax.xml`) and the **infrastructure** (`InternalSyntax` classes) that the generator would produce code *against*.
 

@@ -41,7 +41,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
         public override int GetTrailingTriviaWidth() => 0;
 
-        protected override GreenNode? GetSlot(int index) => null;
+        internal override GreenNode? GetSlot(int index) => null;
 
         internal override SyntaxNode CreateRed(SyntaxNode? parent, int position)
         {

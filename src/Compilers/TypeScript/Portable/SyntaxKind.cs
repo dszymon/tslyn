@@ -330,7 +330,7 @@ namespace Microsoft.CodeAnalysis.TypeScript
         SyntheticExpression,
         ThisExpression,
         SuperExpression,
-        ImportKeyword, // dynamic import()
+// dynamic import()
         Identifier, // simple identifier usage
         QualifiedName,
 
