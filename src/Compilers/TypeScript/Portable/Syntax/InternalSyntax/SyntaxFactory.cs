@@ -18,6 +18,11 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             return new SyntaxTrivia(SyntaxKind.EndOfLineTrivia, text);
         }
 
+        public static PredefinedTypeSyntax PredefinedType(SyntaxKind kind)
+        {
+            return new PredefinedTypeSyntax(SyntaxKind.PredefinedType, Token(kind), null, null);
+        }
+
         public static SyntaxTrivia Comment(string text)
         {
             if (text.StartsWith("//"))

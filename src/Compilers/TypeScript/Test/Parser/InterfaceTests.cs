@@ -37,13 +37,13 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Parser
 
             var p1 = Assert.IsType<PropertySignatureSyntax>(interfaceDecl.Members[0]);
             Assert.Equal("x", p1.Name.Identifier.Text);
-            var t1 = Assert.IsType<IdentifierNameSyntax>(p1.TypeAnnotation.Type);
-            Assert.Equal("number", t1.Identifier.Text);
+            var t1 = Assert.IsType<PredefinedTypeSyntax>(p1.TypeAnnotation.Type);
+            Assert.Equal(SyntaxKind.NumberKeyword, t1.Keyword.Kind());
 
             var p2 = Assert.IsType<PropertySignatureSyntax>(interfaceDecl.Members[1]);
             Assert.Equal("y", p2.Name.Identifier.Text);
-            var t2 = Assert.IsType<IdentifierNameSyntax>(p2.TypeAnnotation.Type);
-            Assert.Equal("number", t2.Identifier.Text);
+            var t2 = Assert.IsType<PredefinedTypeSyntax>(p2.TypeAnnotation.Type);
+            Assert.Equal(SyntaxKind.NumberKeyword, t2.Keyword.Kind());
         }
 
         [Fact]
@@ -60,8 +60,8 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Parser
              Assert.False(p.QuestionToken.IsMissing);
              Assert.Equal("?", p.QuestionToken.Text);
 
-             var type = Assert.IsType<IdentifierNameSyntax>(p.TypeAnnotation.Type);
-             Assert.Equal("string", type.Identifier.Text);
+             var type = Assert.IsType<PredefinedTypeSyntax>(p.TypeAnnotation.Type);
+             Assert.Equal(SyntaxKind.StringKeyword, type.Keyword.Kind());
         }
 
         [Fact]

@@ -159,6 +159,29 @@ namespace Microsoft.CodeAnalysis.TypeScript
         PropertySignature,
         InterfaceDeclaration,
 
+        // Expressions
+        NumericLiteralExpression,
+        StringLiteralExpression,
+        TrueLiteralExpression,
+        FalseLiteralExpression,
+        NullLiteralExpression,
+        AddExpression,
+        SubtractExpression,
+        MultiplyExpression,
+        DivideExpression,
+        EqualsExpression,
+        NotEqualsExpression,
+
+        // Statements
+        Block,
+        ReturnStatement,
+        VariableDeclaration,
+        VariableStatement,
+        EqualsValueClause,
+        FunctionDeclaration,
+        Parameter,
+        ParameterList,
+
         // Structured Trivia
         StructuredTrivia = 9000,
     }

@@ -19,7 +19,35 @@
     </Field>
   </Node>
 
+  <Node Name="LiteralExpressionSyntax" Base="ExpressionSyntax">
+    <Kind Name="NumericLiteralExpression"/>
+    <Kind Name="StringLiteralExpression"/>
+    <Kind Name="TrueLiteralExpression"/>
+    <Kind Name="FalseLiteralExpression"/>
+    <Kind Name="NullLiteralExpression"/>
+    <Field Name="Token" Type="SyntaxToken"/>
+  </Node>
+
+  <Node Name="BinaryExpressionSyntax" Base="ExpressionSyntax">
+    <Kind Name="AddExpression"/>
+    <Kind Name="SubtractExpression"/>
+    <Kind Name="MultiplyExpression"/>
+    <Kind Name="DivideExpression"/>
+    <Kind Name="EqualsExpression"/>
+    <Kind Name="NotEqualsExpression"/>
+    <Field Name="Left" Type="ExpressionSyntax"/>
+    <Field Name="OperatorToken" Type="SyntaxToken"/>
+    <Field Name="Right" Type="ExpressionSyntax"/>
+  </Node>
+
   <!-- Types -->
+  <!-- Re-introduce PredefinedTypeSyntax as it's needed for SyntaxFactory override to compile,
+       but verify if generator creates it. If I commented it out before, the class doesn't exist. -->
+  <Node Name="PredefinedTypeSyntax" Base="TypeSyntax">
+    <Kind Name="PredefinedType"/>
+    <Field Name="Keyword" Type="SyntaxToken"/>
+  </Node>
+
   <Node Name="TypeReferenceSyntax" Base="TypeSyntax">
     <Kind Name="TypeReference"/>
     <Field Name="TypeName" Type="IdentifierNameSyntax"/>
@@ -47,12 +75,92 @@
   </Node>
 
   <!-- Statements -->
+  <Node Name="BlockSyntax" Base="StatementSyntax">
+    <Kind Name="Block"/>
+    <Field Name="OpenBraceToken" Type="SyntaxToken">
+        <Kind Name="OpenBraceToken"/>
+    </Field>
+    <Field Name="Statements" Type="SyntaxList&lt;StatementSyntax&gt;"/>
+    <Field Name="CloseBraceToken" Type="SyntaxToken">
+        <Kind Name="CloseBraceToken"/>
+    </Field>
+  </Node>
+
   <Node Name="ExpressionStatementSyntax" Base="StatementSyntax">
     <Kind Name="ExpressionStatement"/>
     <Field Name="Expression" Type="ExpressionSyntax"/>
     <Field Name="SemicolonToken" Type="SyntaxToken" Optional="true">
         <Kind Name="SemicolonToken"/>
     </Field>
+  </Node>
+
+  <Node Name="ReturnStatementSyntax" Base="StatementSyntax">
+    <Kind Name="ReturnStatement"/>
+    <Field Name="ReturnKeyword" Type="SyntaxToken">
+        <Kind Name="ReturnKeyword"/>
+    </Field>
+    <Field Name="Expression" Type="ExpressionSyntax" Optional="true"/>
+    <Field Name="SemicolonToken" Type="SyntaxToken" Optional="true">
+        <Kind Name="SemicolonToken"/>
+    </Field>
+  </Node>
+
+  <Node Name="VariableDeclarationSyntax" Base="TypeScriptSyntaxNode">
+    <Kind Name="VariableDeclaration"/>
+    <Field Name="Identifier" Type="SyntaxToken">
+        <Kind Name="IdentifierToken"/>
+    </Field>
+    <Field Name="TypeAnnotation" Type="TypeAnnotationSyntax" Optional="true"/>
+    <Field Name="EqualsValueClause" Type="EqualsValueClauseSyntax" Optional="true"/>
+  </Node>
+
+  <Node Name="EqualsValueClauseSyntax" Base="TypeScriptSyntaxNode">
+    <Kind Name="EqualsValueClause"/>
+    <Field Name="EqualsToken" Type="SyntaxToken">
+        <Kind Name="EqualsToken"/>
+    </Field>
+    <Field Name="Value" Type="ExpressionSyntax"/>
+  </Node>
+
+  <Node Name="VariableStatementSyntax" Base="StatementSyntax">
+    <Kind Name="VariableStatement"/>
+    <Field Name="DeclarationKeyword" Type="SyntaxToken"/> <!-- var, let, const -->
+    <Field Name="Declaration" Type="VariableDeclarationSyntax"/> <!-- Simplified: just one for now -->
+    <Field Name="SemicolonToken" Type="SyntaxToken" Optional="true">
+        <Kind Name="SemicolonToken"/>
+    </Field>
+  </Node>
+
+  <Node Name="ParameterSyntax" Base="TypeScriptSyntaxNode">
+    <Kind Name="Parameter"/>
+    <Field Name="Identifier" Type="SyntaxToken">
+        <Kind Name="IdentifierToken"/>
+    </Field>
+    <Field Name="TypeAnnotation" Type="TypeAnnotationSyntax" Optional="true"/>
+  </Node>
+
+  <Node Name="ParameterListSyntax" Base="TypeScriptSyntaxNode">
+    <Kind Name="ParameterList"/>
+    <Field Name="OpenParenToken" Type="SyntaxToken">
+        <Kind Name="OpenParenToken"/>
+    </Field>
+    <Field Name="Parameters" Type="SeparatedSyntaxList&lt;ParameterSyntax&gt;"/>
+    <Field Name="CloseParenToken" Type="SyntaxToken">
+        <Kind Name="CloseParenToken"/>
+    </Field>
+  </Node>
+
+  <Node Name="FunctionDeclarationSyntax" Base="DeclarationStatementSyntax">
+    <Kind Name="FunctionDeclaration"/>
+    <Field Name="FunctionKeyword" Type="SyntaxToken">
+      <Kind Name="FunctionKeyword"/>
+    </Field>
+    <Field Name="Identifier" Type="SyntaxToken" Optional="true">
+      <Kind Name="IdentifierToken"/>
+    </Field>
+    <Field Name="ParameterList" Type="ParameterListSyntax"/>
+    <Field Name="TypeAnnotation" Type="TypeAnnotationSyntax" Optional="true"/>
+    <Field Name="Body" Type="BlockSyntax" Optional="true"/>
   </Node>
 
   <Node Name="InterfaceDeclarationSyntax" Base="DeclarationStatementSyntax">
