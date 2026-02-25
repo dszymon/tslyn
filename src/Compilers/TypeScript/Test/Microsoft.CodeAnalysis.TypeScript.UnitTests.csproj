@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Portable/Microsoft.CodeAnalysis.TypeScript.csproj" />
+    <ProjectReference Include="../../Core/Portable/Microsoft.CodeAnalysis.csproj" />
+    <ProjectReference Include="../../Test/Core/Microsoft.CodeAnalysis.Test.Utilities.csproj" />
+  </ItemGroup>
+
+</Project>
