@@ -386,6 +386,449 @@ internal sealed partial class MemberAccessExpressionSyntax : ExpressionSyntax
         => new MemberAccessExpressionSyntax(this.Kind, this.expression, this.dotToken, this.name, GetDiagnostics(), annotations);
 }
 
+internal sealed partial class PrefixUnaryExpressionSyntax : ExpressionSyntax
+{
+    internal readonly SyntaxToken operatorToken;
+    internal readonly ExpressionSyntax operand;
+
+    internal PrefixUnaryExpressionSyntax(SyntaxKind kind, SyntaxToken operatorToken, ExpressionSyntax operand, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(operatorToken);
+        this.operatorToken = operatorToken;
+        this.AdjustFlagsAndWidth(operand);
+        this.operand = operand;
+    }
+
+    internal PrefixUnaryExpressionSyntax(SyntaxKind kind, SyntaxToken operatorToken, ExpressionSyntax operand, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(operatorToken);
+        this.operatorToken = operatorToken;
+        this.AdjustFlagsAndWidth(operand);
+        this.operand = operand;
+    }
+
+    internal PrefixUnaryExpressionSyntax(SyntaxKind kind, SyntaxToken operatorToken, ExpressionSyntax operand)
+      : base(kind)
+    {
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(operatorToken);
+        this.operatorToken = operatorToken;
+        this.AdjustFlagsAndWidth(operand);
+        this.operand = operand;
+    }
+
+    public SyntaxToken OperatorToken => this.operatorToken;
+    public ExpressionSyntax Operand => this.operand;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.operatorToken,
+            1 => this.operand,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.PrefixUnaryExpressionSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitPrefixUnaryExpression(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitPrefixUnaryExpression(this);
+
+    public PrefixUnaryExpressionSyntax Update(SyntaxToken operatorToken, ExpressionSyntax operand)
+    {
+        if (operatorToken != this.OperatorToken || operand != this.Operand)
+        {
+            var newNode = SyntaxFactory.PrefixUnaryExpression(operatorToken, operand);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new PrefixUnaryExpressionSyntax(this.Kind, this.operatorToken, this.operand, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new PrefixUnaryExpressionSyntax(this.Kind, this.operatorToken, this.operand, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class PostfixUnaryExpressionSyntax : ExpressionSyntax
+{
+    internal readonly ExpressionSyntax operand;
+    internal readonly SyntaxToken operatorToken;
+
+    internal PostfixUnaryExpressionSyntax(SyntaxKind kind, ExpressionSyntax operand, SyntaxToken operatorToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(operand);
+        this.operand = operand;
+        this.AdjustFlagsAndWidth(operatorToken);
+        this.operatorToken = operatorToken;
+    }
+
+    internal PostfixUnaryExpressionSyntax(SyntaxKind kind, ExpressionSyntax operand, SyntaxToken operatorToken, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(operand);
+        this.operand = operand;
+        this.AdjustFlagsAndWidth(operatorToken);
+        this.operatorToken = operatorToken;
+    }
+
+    internal PostfixUnaryExpressionSyntax(SyntaxKind kind, ExpressionSyntax operand, SyntaxToken operatorToken)
+      : base(kind)
+    {
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(operand);
+        this.operand = operand;
+        this.AdjustFlagsAndWidth(operatorToken);
+        this.operatorToken = operatorToken;
+    }
+
+    public ExpressionSyntax Operand => this.operand;
+    public SyntaxToken OperatorToken => this.operatorToken;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.operand,
+            1 => this.operatorToken,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.PostfixUnaryExpressionSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitPostfixUnaryExpression(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitPostfixUnaryExpression(this);
+
+    public PostfixUnaryExpressionSyntax Update(ExpressionSyntax operand, SyntaxToken operatorToken)
+    {
+        if (operand != this.Operand || operatorToken != this.OperatorToken)
+        {
+            var newNode = SyntaxFactory.PostfixUnaryExpression(operand, operatorToken);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new PostfixUnaryExpressionSyntax(this.Kind, this.operand, this.operatorToken, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new PostfixUnaryExpressionSyntax(this.Kind, this.operand, this.operatorToken, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class DeleteExpressionSyntax : ExpressionSyntax
+{
+    internal readonly SyntaxToken deleteKeyword;
+    internal readonly ExpressionSyntax expression;
+
+    internal DeleteExpressionSyntax(SyntaxKind kind, SyntaxToken deleteKeyword, ExpressionSyntax expression, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(deleteKeyword);
+        this.deleteKeyword = deleteKeyword;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+    }
+
+    internal DeleteExpressionSyntax(SyntaxKind kind, SyntaxToken deleteKeyword, ExpressionSyntax expression, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(deleteKeyword);
+        this.deleteKeyword = deleteKeyword;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+    }
+
+    internal DeleteExpressionSyntax(SyntaxKind kind, SyntaxToken deleteKeyword, ExpressionSyntax expression)
+      : base(kind)
+    {
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(deleteKeyword);
+        this.deleteKeyword = deleteKeyword;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+    }
+
+    public SyntaxToken DeleteKeyword => this.deleteKeyword;
+    public ExpressionSyntax Expression => this.expression;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.deleteKeyword,
+            1 => this.expression,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.DeleteExpressionSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitDeleteExpression(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitDeleteExpression(this);
+
+    public DeleteExpressionSyntax Update(SyntaxToken deleteKeyword, ExpressionSyntax expression)
+    {
+        if (deleteKeyword != this.DeleteKeyword || expression != this.Expression)
+        {
+            var newNode = SyntaxFactory.DeleteExpression(deleteKeyword, expression);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new DeleteExpressionSyntax(this.Kind, this.deleteKeyword, this.expression, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new DeleteExpressionSyntax(this.Kind, this.deleteKeyword, this.expression, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class TypeOfExpressionSyntax : ExpressionSyntax
+{
+    internal readonly SyntaxToken typeOfKeyword;
+    internal readonly ExpressionSyntax expression;
+
+    internal TypeOfExpressionSyntax(SyntaxKind kind, SyntaxToken typeOfKeyword, ExpressionSyntax expression, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(typeOfKeyword);
+        this.typeOfKeyword = typeOfKeyword;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+    }
+
+    internal TypeOfExpressionSyntax(SyntaxKind kind, SyntaxToken typeOfKeyword, ExpressionSyntax expression, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(typeOfKeyword);
+        this.typeOfKeyword = typeOfKeyword;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+    }
+
+    internal TypeOfExpressionSyntax(SyntaxKind kind, SyntaxToken typeOfKeyword, ExpressionSyntax expression)
+      : base(kind)
+    {
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(typeOfKeyword);
+        this.typeOfKeyword = typeOfKeyword;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+    }
+
+    public SyntaxToken TypeOfKeyword => this.typeOfKeyword;
+    public ExpressionSyntax Expression => this.expression;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.typeOfKeyword,
+            1 => this.expression,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.TypeOfExpressionSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitTypeOfExpression(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitTypeOfExpression(this);
+
+    public TypeOfExpressionSyntax Update(SyntaxToken typeOfKeyword, ExpressionSyntax expression)
+    {
+        if (typeOfKeyword != this.TypeOfKeyword || expression != this.Expression)
+        {
+            var newNode = SyntaxFactory.TypeOfExpression(typeOfKeyword, expression);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new TypeOfExpressionSyntax(this.Kind, this.typeOfKeyword, this.expression, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new TypeOfExpressionSyntax(this.Kind, this.typeOfKeyword, this.expression, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class VoidExpressionSyntax : ExpressionSyntax
+{
+    internal readonly SyntaxToken voidKeyword;
+    internal readonly ExpressionSyntax expression;
+
+    internal VoidExpressionSyntax(SyntaxKind kind, SyntaxToken voidKeyword, ExpressionSyntax expression, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(voidKeyword);
+        this.voidKeyword = voidKeyword;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+    }
+
+    internal VoidExpressionSyntax(SyntaxKind kind, SyntaxToken voidKeyword, ExpressionSyntax expression, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(voidKeyword);
+        this.voidKeyword = voidKeyword;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+    }
+
+    internal VoidExpressionSyntax(SyntaxKind kind, SyntaxToken voidKeyword, ExpressionSyntax expression)
+      : base(kind)
+    {
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(voidKeyword);
+        this.voidKeyword = voidKeyword;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+    }
+
+    public SyntaxToken VoidKeyword => this.voidKeyword;
+    public ExpressionSyntax Expression => this.expression;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.voidKeyword,
+            1 => this.expression,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.VoidExpressionSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitVoidExpression(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitVoidExpression(this);
+
+    public VoidExpressionSyntax Update(SyntaxToken voidKeyword, ExpressionSyntax expression)
+    {
+        if (voidKeyword != this.VoidKeyword || expression != this.Expression)
+        {
+            var newNode = SyntaxFactory.VoidExpression(voidKeyword, expression);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new VoidExpressionSyntax(this.Kind, this.voidKeyword, this.expression, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new VoidExpressionSyntax(this.Kind, this.voidKeyword, this.expression, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class ThisExpressionSyntax : ExpressionSyntax
+{
+    internal readonly SyntaxToken thisKeyword;
+
+    internal ThisExpressionSyntax(SyntaxKind kind, SyntaxToken thisKeyword, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 1;
+        this.AdjustFlagsAndWidth(thisKeyword);
+        this.thisKeyword = thisKeyword;
+    }
+
+    internal ThisExpressionSyntax(SyntaxKind kind, SyntaxToken thisKeyword, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 1;
+        this.AdjustFlagsAndWidth(thisKeyword);
+        this.thisKeyword = thisKeyword;
+    }
+
+    internal ThisExpressionSyntax(SyntaxKind kind, SyntaxToken thisKeyword)
+      : base(kind)
+    {
+        this.SlotCount = 1;
+        this.AdjustFlagsAndWidth(thisKeyword);
+        this.thisKeyword = thisKeyword;
+    }
+
+    public SyntaxToken ThisKeyword => this.thisKeyword;
+
+    internal override GreenNode? GetSlot(int index)
+        => index == 0 ? this.thisKeyword : null;
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.ThisExpressionSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitThisExpression(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitThisExpression(this);
+
+    public ThisExpressionSyntax Update(SyntaxToken thisKeyword)
+    {
+        if (thisKeyword != this.ThisKeyword)
+        {
+            var newNode = SyntaxFactory.ThisExpression(thisKeyword);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new ThisExpressionSyntax(this.Kind, this.thisKeyword, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new ThisExpressionSyntax(this.Kind, this.thisKeyword, GetDiagnostics(), annotations);
+}
+
 internal sealed partial class ArgumentSyntax : TypeScriptSyntaxNode
 {
     internal readonly ExpressionSyntax expression;
@@ -546,47 +989,65 @@ internal sealed partial class ArgumentListSyntax : TypeScriptSyntaxNode
 internal sealed partial class CallExpressionSyntax : ExpressionSyntax
 {
     internal readonly ExpressionSyntax expression;
+    internal readonly TypeArgumentListSyntax? typeArguments;
     internal readonly ArgumentListSyntax argumentList;
 
-    internal CallExpressionSyntax(SyntaxKind kind, ExpressionSyntax expression, ArgumentListSyntax argumentList, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+    internal CallExpressionSyntax(SyntaxKind kind, ExpressionSyntax expression, TypeArgumentListSyntax? typeArguments, ArgumentListSyntax argumentList, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
       : base(kind, diagnostics, annotations)
     {
-        this.SlotCount = 2;
+        this.SlotCount = 3;
         this.AdjustFlagsAndWidth(expression);
         this.expression = expression;
+        if (typeArguments != null)
+        {
+            this.AdjustFlagsAndWidth(typeArguments);
+            this.typeArguments = typeArguments;
+        }
         this.AdjustFlagsAndWidth(argumentList);
         this.argumentList = argumentList;
     }
 
-    internal CallExpressionSyntax(SyntaxKind kind, ExpressionSyntax expression, ArgumentListSyntax argumentList, SyntaxFactoryContext context)
+    internal CallExpressionSyntax(SyntaxKind kind, ExpressionSyntax expression, TypeArgumentListSyntax? typeArguments, ArgumentListSyntax argumentList, SyntaxFactoryContext context)
       : base(kind)
     {
         this.SetFactoryContext(context);
-        this.SlotCount = 2;
+        this.SlotCount = 3;
         this.AdjustFlagsAndWidth(expression);
         this.expression = expression;
+        if (typeArguments != null)
+        {
+            this.AdjustFlagsAndWidth(typeArguments);
+            this.typeArguments = typeArguments;
+        }
         this.AdjustFlagsAndWidth(argumentList);
         this.argumentList = argumentList;
     }
 
-    internal CallExpressionSyntax(SyntaxKind kind, ExpressionSyntax expression, ArgumentListSyntax argumentList)
+    internal CallExpressionSyntax(SyntaxKind kind, ExpressionSyntax expression, TypeArgumentListSyntax? typeArguments, ArgumentListSyntax argumentList)
       : base(kind)
     {
-        this.SlotCount = 2;
+        this.SlotCount = 3;
         this.AdjustFlagsAndWidth(expression);
         this.expression = expression;
+        if (typeArguments != null)
+        {
+            this.AdjustFlagsAndWidth(typeArguments);
+            this.typeArguments = typeArguments;
+        }
         this.AdjustFlagsAndWidth(argumentList);
         this.argumentList = argumentList;
     }
 
     public ExpressionSyntax Expression => this.expression;
+    public TypeArgumentListSyntax? TypeArguments => this.typeArguments;
     public ArgumentListSyntax ArgumentList => this.argumentList;
 
     internal override GreenNode? GetSlot(int index)
         => index switch
         {
             0 => this.expression,
-            1 => this.argumentList,
+            1 => this.typeArguments,
+            2 => this.argumentList,
             _ => null,
         };
 
@@ -595,11 +1056,11 @@ internal sealed partial class CallExpressionSyntax : ExpressionSyntax
     public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitCallExpression(this);
     public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitCallExpression(this);
 
-    public CallExpressionSyntax Update(ExpressionSyntax expression, ArgumentListSyntax argumentList)
+    public CallExpressionSyntax Update(ExpressionSyntax expression, TypeArgumentListSyntax typeArguments, ArgumentListSyntax argumentList)
     {
-        if (expression != this.Expression || argumentList != this.ArgumentList)
+        if (expression != this.Expression || typeArguments != this.TypeArguments || argumentList != this.ArgumentList)
         {
-            var newNode = SyntaxFactory.CallExpression(expression, argumentList);
+            var newNode = SyntaxFactory.CallExpression(expression, typeArguments, argumentList);
             var diags = GetDiagnostics();
             if (diags?.Length > 0)
                 newNode = newNode.WithDiagnosticsGreen(diags);
@@ -613,10 +1074,377 @@ internal sealed partial class CallExpressionSyntax : ExpressionSyntax
     }
 
     internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
-        => new CallExpressionSyntax(this.Kind, this.expression, this.argumentList, diagnostics, GetAnnotations());
+        => new CallExpressionSyntax(this.Kind, this.expression, this.typeArguments, this.argumentList, diagnostics, GetAnnotations());
 
     internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
-        => new CallExpressionSyntax(this.Kind, this.expression, this.argumentList, GetDiagnostics(), annotations);
+        => new CallExpressionSyntax(this.Kind, this.expression, this.typeArguments, this.argumentList, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class NewExpressionSyntax : ExpressionSyntax
+{
+    internal readonly SyntaxToken newKeyword;
+    internal readonly TypeSyntax type;
+    internal readonly ArgumentListSyntax? argumentList;
+
+    internal NewExpressionSyntax(SyntaxKind kind, SyntaxToken newKeyword, TypeSyntax type, ArgumentListSyntax? argumentList, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(newKeyword);
+        this.newKeyword = newKeyword;
+        this.AdjustFlagsAndWidth(type);
+        this.type = type;
+        if (argumentList != null)
+        {
+            this.AdjustFlagsAndWidth(argumentList);
+            this.argumentList = argumentList;
+        }
+    }
+
+    internal NewExpressionSyntax(SyntaxKind kind, SyntaxToken newKeyword, TypeSyntax type, ArgumentListSyntax? argumentList, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(newKeyword);
+        this.newKeyword = newKeyword;
+        this.AdjustFlagsAndWidth(type);
+        this.type = type;
+        if (argumentList != null)
+        {
+            this.AdjustFlagsAndWidth(argumentList);
+            this.argumentList = argumentList;
+        }
+    }
+
+    internal NewExpressionSyntax(SyntaxKind kind, SyntaxToken newKeyword, TypeSyntax type, ArgumentListSyntax? argumentList)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(newKeyword);
+        this.newKeyword = newKeyword;
+        this.AdjustFlagsAndWidth(type);
+        this.type = type;
+        if (argumentList != null)
+        {
+            this.AdjustFlagsAndWidth(argumentList);
+            this.argumentList = argumentList;
+        }
+    }
+
+    public SyntaxToken NewKeyword => this.newKeyword;
+    public TypeSyntax Type => this.type;
+    public ArgumentListSyntax? ArgumentList => this.argumentList;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.newKeyword,
+            1 => this.type,
+            2 => this.argumentList,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.NewExpressionSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitNewExpression(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitNewExpression(this);
+
+    public NewExpressionSyntax Update(SyntaxToken newKeyword, TypeSyntax type, ArgumentListSyntax argumentList)
+    {
+        if (newKeyword != this.NewKeyword || type != this.Type || argumentList != this.ArgumentList)
+        {
+            var newNode = SyntaxFactory.NewExpression(newKeyword, type, argumentList);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new NewExpressionSyntax(this.Kind, this.newKeyword, this.type, this.argumentList, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new NewExpressionSyntax(this.Kind, this.newKeyword, this.type, this.argumentList, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class ArrayLiteralExpressionSyntax : ExpressionSyntax
+{
+    internal readonly SyntaxToken openBracketToken;
+    internal readonly GreenNode? elements;
+    internal readonly SyntaxToken closeBracketToken;
+
+    internal ArrayLiteralExpressionSyntax(SyntaxKind kind, SyntaxToken openBracketToken, GreenNode? elements, SyntaxToken closeBracketToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(openBracketToken);
+        this.openBracketToken = openBracketToken;
+        if (elements != null)
+        {
+            this.AdjustFlagsAndWidth(elements);
+            this.elements = elements;
+        }
+        this.AdjustFlagsAndWidth(closeBracketToken);
+        this.closeBracketToken = closeBracketToken;
+    }
+
+    internal ArrayLiteralExpressionSyntax(SyntaxKind kind, SyntaxToken openBracketToken, GreenNode? elements, SyntaxToken closeBracketToken, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(openBracketToken);
+        this.openBracketToken = openBracketToken;
+        if (elements != null)
+        {
+            this.AdjustFlagsAndWidth(elements);
+            this.elements = elements;
+        }
+        this.AdjustFlagsAndWidth(closeBracketToken);
+        this.closeBracketToken = closeBracketToken;
+    }
+
+    internal ArrayLiteralExpressionSyntax(SyntaxKind kind, SyntaxToken openBracketToken, GreenNode? elements, SyntaxToken closeBracketToken)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(openBracketToken);
+        this.openBracketToken = openBracketToken;
+        if (elements != null)
+        {
+            this.AdjustFlagsAndWidth(elements);
+            this.elements = elements;
+        }
+        this.AdjustFlagsAndWidth(closeBracketToken);
+        this.closeBracketToken = closeBracketToken;
+    }
+
+    public SyntaxToken OpenBracketToken => this.openBracketToken;
+    public CoreSyntax.SeparatedSyntaxList<ExpressionSyntax> Elements => new CoreSyntax.SeparatedSyntaxList<ExpressionSyntax>(new CoreSyntax.SyntaxList<TypeScriptSyntaxNode>(this.elements));
+    public SyntaxToken CloseBracketToken => this.closeBracketToken;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.openBracketToken,
+            1 => this.elements,
+            2 => this.closeBracketToken,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.ArrayLiteralExpressionSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitArrayLiteralExpression(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitArrayLiteralExpression(this);
+
+    public ArrayLiteralExpressionSyntax Update(SyntaxToken openBracketToken, CoreSyntax.SeparatedSyntaxList<ExpressionSyntax> elements, SyntaxToken closeBracketToken)
+    {
+        if (openBracketToken != this.OpenBracketToken || elements != this.Elements || closeBracketToken != this.CloseBracketToken)
+        {
+            var newNode = SyntaxFactory.ArrayLiteralExpression(openBracketToken, elements, closeBracketToken);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new ArrayLiteralExpressionSyntax(this.Kind, this.openBracketToken, this.elements, this.closeBracketToken, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new ArrayLiteralExpressionSyntax(this.Kind, this.openBracketToken, this.elements, this.closeBracketToken, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class ObjectLiteralExpressionSyntax : ExpressionSyntax
+{
+    internal readonly SyntaxToken openBraceToken;
+    internal readonly GreenNode? properties;
+    internal readonly SyntaxToken closeBraceToken;
+
+    internal ObjectLiteralExpressionSyntax(SyntaxKind kind, SyntaxToken openBraceToken, GreenNode? properties, SyntaxToken closeBraceToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(openBraceToken);
+        this.openBraceToken = openBraceToken;
+        if (properties != null)
+        {
+            this.AdjustFlagsAndWidth(properties);
+            this.properties = properties;
+        }
+        this.AdjustFlagsAndWidth(closeBraceToken);
+        this.closeBraceToken = closeBraceToken;
+    }
+
+    internal ObjectLiteralExpressionSyntax(SyntaxKind kind, SyntaxToken openBraceToken, GreenNode? properties, SyntaxToken closeBraceToken, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(openBraceToken);
+        this.openBraceToken = openBraceToken;
+        if (properties != null)
+        {
+            this.AdjustFlagsAndWidth(properties);
+            this.properties = properties;
+        }
+        this.AdjustFlagsAndWidth(closeBraceToken);
+        this.closeBraceToken = closeBraceToken;
+    }
+
+    internal ObjectLiteralExpressionSyntax(SyntaxKind kind, SyntaxToken openBraceToken, GreenNode? properties, SyntaxToken closeBraceToken)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(openBraceToken);
+        this.openBraceToken = openBraceToken;
+        if (properties != null)
+        {
+            this.AdjustFlagsAndWidth(properties);
+            this.properties = properties;
+        }
+        this.AdjustFlagsAndWidth(closeBraceToken);
+        this.closeBraceToken = closeBraceToken;
+    }
+
+    public SyntaxToken OpenBraceToken => this.openBraceToken;
+    public CoreSyntax.SeparatedSyntaxList<PropertyAssignmentSyntax> Properties => new CoreSyntax.SeparatedSyntaxList<PropertyAssignmentSyntax>(new CoreSyntax.SyntaxList<TypeScriptSyntaxNode>(this.properties));
+    public SyntaxToken CloseBraceToken => this.closeBraceToken;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.openBraceToken,
+            1 => this.properties,
+            2 => this.closeBraceToken,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.ObjectLiteralExpressionSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitObjectLiteralExpression(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitObjectLiteralExpression(this);
+
+    public ObjectLiteralExpressionSyntax Update(SyntaxToken openBraceToken, CoreSyntax.SeparatedSyntaxList<PropertyAssignmentSyntax> properties, SyntaxToken closeBraceToken)
+    {
+        if (openBraceToken != this.OpenBraceToken || properties != this.Properties || closeBraceToken != this.CloseBraceToken)
+        {
+            var newNode = SyntaxFactory.ObjectLiteralExpression(openBraceToken, properties, closeBraceToken);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new ObjectLiteralExpressionSyntax(this.Kind, this.openBraceToken, this.properties, this.closeBraceToken, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new ObjectLiteralExpressionSyntax(this.Kind, this.openBraceToken, this.properties, this.closeBraceToken, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class PropertyAssignmentSyntax : TypeScriptSyntaxNode
+{
+    internal readonly IdentifierNameSyntax name;
+    internal readonly SyntaxToken colonToken;
+    internal readonly ExpressionSyntax expression;
+
+    internal PropertyAssignmentSyntax(SyntaxKind kind, IdentifierNameSyntax name, SyntaxToken colonToken, ExpressionSyntax expression, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(name);
+        this.name = name;
+        this.AdjustFlagsAndWidth(colonToken);
+        this.colonToken = colonToken;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+    }
+
+    internal PropertyAssignmentSyntax(SyntaxKind kind, IdentifierNameSyntax name, SyntaxToken colonToken, ExpressionSyntax expression, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(name);
+        this.name = name;
+        this.AdjustFlagsAndWidth(colonToken);
+        this.colonToken = colonToken;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+    }
+
+    internal PropertyAssignmentSyntax(SyntaxKind kind, IdentifierNameSyntax name, SyntaxToken colonToken, ExpressionSyntax expression)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(name);
+        this.name = name;
+        this.AdjustFlagsAndWidth(colonToken);
+        this.colonToken = colonToken;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+    }
+
+    public IdentifierNameSyntax Name => this.name;
+    public SyntaxToken ColonToken => this.colonToken;
+    public ExpressionSyntax Expression => this.expression;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.name,
+            1 => this.colonToken,
+            2 => this.expression,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.PropertyAssignmentSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitPropertyAssignment(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitPropertyAssignment(this);
+
+    public PropertyAssignmentSyntax Update(IdentifierNameSyntax name, SyntaxToken colonToken, ExpressionSyntax expression)
+    {
+        if (name != this.Name || colonToken != this.ColonToken || expression != this.Expression)
+        {
+            var newNode = SyntaxFactory.PropertyAssignment(name, colonToken, expression);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new PropertyAssignmentSyntax(this.Kind, this.name, this.colonToken, this.expression, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new PropertyAssignmentSyntax(this.Kind, this.name, this.colonToken, this.expression, GetDiagnostics(), annotations);
 }
 
 internal sealed partial class PredefinedTypeSyntax : TypeSyntax
@@ -685,47 +1513,69 @@ internal sealed partial class PredefinedTypeSyntax : TypeSyntax
 internal sealed partial class TypeReferenceSyntax : TypeSyntax
 {
     internal readonly IdentifierNameSyntax typeName;
+    internal readonly TypeArgumentListSyntax? typeArguments;
 
-    internal TypeReferenceSyntax(SyntaxKind kind, IdentifierNameSyntax typeName, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+    internal TypeReferenceSyntax(SyntaxKind kind, IdentifierNameSyntax typeName, TypeArgumentListSyntax? typeArguments, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
       : base(kind, diagnostics, annotations)
     {
-        this.SlotCount = 1;
+        this.SlotCount = 2;
         this.AdjustFlagsAndWidth(typeName);
         this.typeName = typeName;
+        if (typeArguments != null)
+        {
+            this.AdjustFlagsAndWidth(typeArguments);
+            this.typeArguments = typeArguments;
+        }
     }
 
-    internal TypeReferenceSyntax(SyntaxKind kind, IdentifierNameSyntax typeName, SyntaxFactoryContext context)
+    internal TypeReferenceSyntax(SyntaxKind kind, IdentifierNameSyntax typeName, TypeArgumentListSyntax? typeArguments, SyntaxFactoryContext context)
       : base(kind)
     {
         this.SetFactoryContext(context);
-        this.SlotCount = 1;
+        this.SlotCount = 2;
         this.AdjustFlagsAndWidth(typeName);
         this.typeName = typeName;
+        if (typeArguments != null)
+        {
+            this.AdjustFlagsAndWidth(typeArguments);
+            this.typeArguments = typeArguments;
+        }
     }
 
-    internal TypeReferenceSyntax(SyntaxKind kind, IdentifierNameSyntax typeName)
+    internal TypeReferenceSyntax(SyntaxKind kind, IdentifierNameSyntax typeName, TypeArgumentListSyntax? typeArguments)
       : base(kind)
     {
-        this.SlotCount = 1;
+        this.SlotCount = 2;
         this.AdjustFlagsAndWidth(typeName);
         this.typeName = typeName;
+        if (typeArguments != null)
+        {
+            this.AdjustFlagsAndWidth(typeArguments);
+            this.typeArguments = typeArguments;
+        }
     }
 
     public IdentifierNameSyntax TypeName => this.typeName;
+    public TypeArgumentListSyntax? TypeArguments => this.typeArguments;
 
     internal override GreenNode? GetSlot(int index)
-        => index == 0 ? this.typeName : null;
+        => index switch
+        {
+            0 => this.typeName,
+            1 => this.typeArguments,
+            _ => null,
+        };
 
     internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.TypeReferenceSyntax(this, parent, position);
 
     public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitTypeReference(this);
     public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitTypeReference(this);
 
-    public TypeReferenceSyntax Update(IdentifierNameSyntax typeName)
+    public TypeReferenceSyntax Update(IdentifierNameSyntax typeName, TypeArgumentListSyntax typeArguments)
     {
-        if (typeName != this.TypeName)
+        if (typeName != this.TypeName || typeArguments != this.TypeArguments)
         {
-            var newNode = SyntaxFactory.TypeReference(typeName);
+            var newNode = SyntaxFactory.TypeReference(typeName, typeArguments);
             var diags = GetDiagnostics();
             if (diags?.Length > 0)
                 newNode = newNode.WithDiagnosticsGreen(diags);
@@ -739,10 +1589,538 @@ internal sealed partial class TypeReferenceSyntax : TypeSyntax
     }
 
     internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
-        => new TypeReferenceSyntax(this.Kind, this.typeName, diagnostics, GetAnnotations());
+        => new TypeReferenceSyntax(this.Kind, this.typeName, this.typeArguments, diagnostics, GetAnnotations());
 
     internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
-        => new TypeReferenceSyntax(this.Kind, this.typeName, GetDiagnostics(), annotations);
+        => new TypeReferenceSyntax(this.Kind, this.typeName, this.typeArguments, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class ArrayTypeSyntax : TypeSyntax
+{
+    internal readonly TypeSyntax elementType;
+    internal readonly SyntaxToken openBracketToken;
+    internal readonly SyntaxToken closeBracketToken;
+
+    internal ArrayTypeSyntax(SyntaxKind kind, TypeSyntax elementType, SyntaxToken openBracketToken, SyntaxToken closeBracketToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(elementType);
+        this.elementType = elementType;
+        this.AdjustFlagsAndWidth(openBracketToken);
+        this.openBracketToken = openBracketToken;
+        this.AdjustFlagsAndWidth(closeBracketToken);
+        this.closeBracketToken = closeBracketToken;
+    }
+
+    internal ArrayTypeSyntax(SyntaxKind kind, TypeSyntax elementType, SyntaxToken openBracketToken, SyntaxToken closeBracketToken, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(elementType);
+        this.elementType = elementType;
+        this.AdjustFlagsAndWidth(openBracketToken);
+        this.openBracketToken = openBracketToken;
+        this.AdjustFlagsAndWidth(closeBracketToken);
+        this.closeBracketToken = closeBracketToken;
+    }
+
+    internal ArrayTypeSyntax(SyntaxKind kind, TypeSyntax elementType, SyntaxToken openBracketToken, SyntaxToken closeBracketToken)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(elementType);
+        this.elementType = elementType;
+        this.AdjustFlagsAndWidth(openBracketToken);
+        this.openBracketToken = openBracketToken;
+        this.AdjustFlagsAndWidth(closeBracketToken);
+        this.closeBracketToken = closeBracketToken;
+    }
+
+    public TypeSyntax ElementType => this.elementType;
+    public SyntaxToken OpenBracketToken => this.openBracketToken;
+    public SyntaxToken CloseBracketToken => this.closeBracketToken;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.elementType,
+            1 => this.openBracketToken,
+            2 => this.closeBracketToken,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.ArrayTypeSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitArrayType(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitArrayType(this);
+
+    public ArrayTypeSyntax Update(TypeSyntax elementType, SyntaxToken openBracketToken, SyntaxToken closeBracketToken)
+    {
+        if (elementType != this.ElementType || openBracketToken != this.OpenBracketToken || closeBracketToken != this.CloseBracketToken)
+        {
+            var newNode = SyntaxFactory.ArrayType(elementType, openBracketToken, closeBracketToken);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new ArrayTypeSyntax(this.Kind, this.elementType, this.openBracketToken, this.closeBracketToken, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new ArrayTypeSyntax(this.Kind, this.elementType, this.openBracketToken, this.closeBracketToken, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class TypeParameterSyntax : TypeScriptSyntaxNode
+{
+    internal readonly SyntaxToken identifier;
+    internal readonly TypeParameterConstraintClauseSyntax? constraint;
+    internal readonly TypeParameterDefaultClauseSyntax? @default;
+
+    internal TypeParameterSyntax(SyntaxKind kind, SyntaxToken identifier, TypeParameterConstraintClauseSyntax? constraint, TypeParameterDefaultClauseSyntax? @default, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(identifier);
+        this.identifier = identifier;
+        if (constraint != null)
+        {
+            this.AdjustFlagsAndWidth(constraint);
+            this.constraint = constraint;
+        }
+        if (@default != null)
+        {
+            this.AdjustFlagsAndWidth(@default);
+            this.@default = @default;
+        }
+    }
+
+    internal TypeParameterSyntax(SyntaxKind kind, SyntaxToken identifier, TypeParameterConstraintClauseSyntax? constraint, TypeParameterDefaultClauseSyntax? @default, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(identifier);
+        this.identifier = identifier;
+        if (constraint != null)
+        {
+            this.AdjustFlagsAndWidth(constraint);
+            this.constraint = constraint;
+        }
+        if (@default != null)
+        {
+            this.AdjustFlagsAndWidth(@default);
+            this.@default = @default;
+        }
+    }
+
+    internal TypeParameterSyntax(SyntaxKind kind, SyntaxToken identifier, TypeParameterConstraintClauseSyntax? constraint, TypeParameterDefaultClauseSyntax? @default)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(identifier);
+        this.identifier = identifier;
+        if (constraint != null)
+        {
+            this.AdjustFlagsAndWidth(constraint);
+            this.constraint = constraint;
+        }
+        if (@default != null)
+        {
+            this.AdjustFlagsAndWidth(@default);
+            this.@default = @default;
+        }
+    }
+
+    public SyntaxToken Identifier => this.identifier;
+    public TypeParameterConstraintClauseSyntax? Constraint => this.constraint;
+    public TypeParameterDefaultClauseSyntax? Default => this.@default;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.identifier,
+            1 => this.constraint,
+            2 => this.@default,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.TypeParameterSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitTypeParameter(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitTypeParameter(this);
+
+    public TypeParameterSyntax Update(SyntaxToken identifier, TypeParameterConstraintClauseSyntax constraint, TypeParameterDefaultClauseSyntax @default)
+    {
+        if (identifier != this.Identifier || constraint != this.Constraint || @default != this.Default)
+        {
+            var newNode = SyntaxFactory.TypeParameter(identifier, constraint, @default);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new TypeParameterSyntax(this.Kind, this.identifier, this.constraint, this.@default, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new TypeParameterSyntax(this.Kind, this.identifier, this.constraint, this.@default, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class TypeParameterConstraintClauseSyntax : TypeScriptSyntaxNode
+{
+    internal readonly SyntaxToken extendsKeyword;
+    internal readonly TypeSyntax type;
+
+    internal TypeParameterConstraintClauseSyntax(SyntaxKind kind, SyntaxToken extendsKeyword, TypeSyntax type, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(extendsKeyword);
+        this.extendsKeyword = extendsKeyword;
+        this.AdjustFlagsAndWidth(type);
+        this.type = type;
+    }
+
+    internal TypeParameterConstraintClauseSyntax(SyntaxKind kind, SyntaxToken extendsKeyword, TypeSyntax type, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(extendsKeyword);
+        this.extendsKeyword = extendsKeyword;
+        this.AdjustFlagsAndWidth(type);
+        this.type = type;
+    }
+
+    internal TypeParameterConstraintClauseSyntax(SyntaxKind kind, SyntaxToken extendsKeyword, TypeSyntax type)
+      : base(kind)
+    {
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(extendsKeyword);
+        this.extendsKeyword = extendsKeyword;
+        this.AdjustFlagsAndWidth(type);
+        this.type = type;
+    }
+
+    public SyntaxToken ExtendsKeyword => this.extendsKeyword;
+    public TypeSyntax Type => this.type;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.extendsKeyword,
+            1 => this.type,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.TypeParameterConstraintClauseSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitTypeParameterConstraintClause(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitTypeParameterConstraintClause(this);
+
+    public TypeParameterConstraintClauseSyntax Update(SyntaxToken extendsKeyword, TypeSyntax type)
+    {
+        if (extendsKeyword != this.ExtendsKeyword || type != this.Type)
+        {
+            var newNode = SyntaxFactory.TypeParameterConstraintClause(extendsKeyword, type);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new TypeParameterConstraintClauseSyntax(this.Kind, this.extendsKeyword, this.type, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new TypeParameterConstraintClauseSyntax(this.Kind, this.extendsKeyword, this.type, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class TypeParameterDefaultClauseSyntax : TypeScriptSyntaxNode
+{
+    internal readonly SyntaxToken equalsToken;
+    internal readonly TypeSyntax type;
+
+    internal TypeParameterDefaultClauseSyntax(SyntaxKind kind, SyntaxToken equalsToken, TypeSyntax type, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(equalsToken);
+        this.equalsToken = equalsToken;
+        this.AdjustFlagsAndWidth(type);
+        this.type = type;
+    }
+
+    internal TypeParameterDefaultClauseSyntax(SyntaxKind kind, SyntaxToken equalsToken, TypeSyntax type, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(equalsToken);
+        this.equalsToken = equalsToken;
+        this.AdjustFlagsAndWidth(type);
+        this.type = type;
+    }
+
+    internal TypeParameterDefaultClauseSyntax(SyntaxKind kind, SyntaxToken equalsToken, TypeSyntax type)
+      : base(kind)
+    {
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(equalsToken);
+        this.equalsToken = equalsToken;
+        this.AdjustFlagsAndWidth(type);
+        this.type = type;
+    }
+
+    public SyntaxToken EqualsToken => this.equalsToken;
+    public TypeSyntax Type => this.type;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.equalsToken,
+            1 => this.type,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.TypeParameterDefaultClauseSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitTypeParameterDefaultClause(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitTypeParameterDefaultClause(this);
+
+    public TypeParameterDefaultClauseSyntax Update(SyntaxToken equalsToken, TypeSyntax type)
+    {
+        if (equalsToken != this.EqualsToken || type != this.Type)
+        {
+            var newNode = SyntaxFactory.TypeParameterDefaultClause(equalsToken, type);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new TypeParameterDefaultClauseSyntax(this.Kind, this.equalsToken, this.type, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new TypeParameterDefaultClauseSyntax(this.Kind, this.equalsToken, this.type, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class TypeParameterListSyntax : TypeScriptSyntaxNode
+{
+    internal readonly SyntaxToken lessThanToken;
+    internal readonly GreenNode? parameters;
+    internal readonly SyntaxToken greaterThanToken;
+
+    internal TypeParameterListSyntax(SyntaxKind kind, SyntaxToken lessThanToken, GreenNode? parameters, SyntaxToken greaterThanToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(lessThanToken);
+        this.lessThanToken = lessThanToken;
+        if (parameters != null)
+        {
+            this.AdjustFlagsAndWidth(parameters);
+            this.parameters = parameters;
+        }
+        this.AdjustFlagsAndWidth(greaterThanToken);
+        this.greaterThanToken = greaterThanToken;
+    }
+
+    internal TypeParameterListSyntax(SyntaxKind kind, SyntaxToken lessThanToken, GreenNode? parameters, SyntaxToken greaterThanToken, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(lessThanToken);
+        this.lessThanToken = lessThanToken;
+        if (parameters != null)
+        {
+            this.AdjustFlagsAndWidth(parameters);
+            this.parameters = parameters;
+        }
+        this.AdjustFlagsAndWidth(greaterThanToken);
+        this.greaterThanToken = greaterThanToken;
+    }
+
+    internal TypeParameterListSyntax(SyntaxKind kind, SyntaxToken lessThanToken, GreenNode? parameters, SyntaxToken greaterThanToken)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(lessThanToken);
+        this.lessThanToken = lessThanToken;
+        if (parameters != null)
+        {
+            this.AdjustFlagsAndWidth(parameters);
+            this.parameters = parameters;
+        }
+        this.AdjustFlagsAndWidth(greaterThanToken);
+        this.greaterThanToken = greaterThanToken;
+    }
+
+    public SyntaxToken LessThanToken => this.lessThanToken;
+    public CoreSyntax.SeparatedSyntaxList<TypeParameterSyntax> Parameters => new CoreSyntax.SeparatedSyntaxList<TypeParameterSyntax>(new CoreSyntax.SyntaxList<TypeScriptSyntaxNode>(this.parameters));
+    public SyntaxToken GreaterThanToken => this.greaterThanToken;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.lessThanToken,
+            1 => this.parameters,
+            2 => this.greaterThanToken,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.TypeParameterListSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitTypeParameterList(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitTypeParameterList(this);
+
+    public TypeParameterListSyntax Update(SyntaxToken lessThanToken, CoreSyntax.SeparatedSyntaxList<TypeParameterSyntax> parameters, SyntaxToken greaterThanToken)
+    {
+        if (lessThanToken != this.LessThanToken || parameters != this.Parameters || greaterThanToken != this.GreaterThanToken)
+        {
+            var newNode = SyntaxFactory.TypeParameterList(lessThanToken, parameters, greaterThanToken);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new TypeParameterListSyntax(this.Kind, this.lessThanToken, this.parameters, this.greaterThanToken, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new TypeParameterListSyntax(this.Kind, this.lessThanToken, this.parameters, this.greaterThanToken, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class TypeArgumentListSyntax : TypeScriptSyntaxNode
+{
+    internal readonly SyntaxToken lessThanToken;
+    internal readonly GreenNode? arguments;
+    internal readonly SyntaxToken greaterThanToken;
+
+    internal TypeArgumentListSyntax(SyntaxKind kind, SyntaxToken lessThanToken, GreenNode? arguments, SyntaxToken greaterThanToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(lessThanToken);
+        this.lessThanToken = lessThanToken;
+        if (arguments != null)
+        {
+            this.AdjustFlagsAndWidth(arguments);
+            this.arguments = arguments;
+        }
+        this.AdjustFlagsAndWidth(greaterThanToken);
+        this.greaterThanToken = greaterThanToken;
+    }
+
+    internal TypeArgumentListSyntax(SyntaxKind kind, SyntaxToken lessThanToken, GreenNode? arguments, SyntaxToken greaterThanToken, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(lessThanToken);
+        this.lessThanToken = lessThanToken;
+        if (arguments != null)
+        {
+            this.AdjustFlagsAndWidth(arguments);
+            this.arguments = arguments;
+        }
+        this.AdjustFlagsAndWidth(greaterThanToken);
+        this.greaterThanToken = greaterThanToken;
+    }
+
+    internal TypeArgumentListSyntax(SyntaxKind kind, SyntaxToken lessThanToken, GreenNode? arguments, SyntaxToken greaterThanToken)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(lessThanToken);
+        this.lessThanToken = lessThanToken;
+        if (arguments != null)
+        {
+            this.AdjustFlagsAndWidth(arguments);
+            this.arguments = arguments;
+        }
+        this.AdjustFlagsAndWidth(greaterThanToken);
+        this.greaterThanToken = greaterThanToken;
+    }
+
+    public SyntaxToken LessThanToken => this.lessThanToken;
+    public CoreSyntax.SeparatedSyntaxList<TypeSyntax> Arguments => new CoreSyntax.SeparatedSyntaxList<TypeSyntax>(new CoreSyntax.SyntaxList<TypeScriptSyntaxNode>(this.arguments));
+    public SyntaxToken GreaterThanToken => this.greaterThanToken;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.lessThanToken,
+            1 => this.arguments,
+            2 => this.greaterThanToken,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.TypeArgumentListSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitTypeArgumentList(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitTypeArgumentList(this);
+
+    public TypeArgumentListSyntax Update(SyntaxToken lessThanToken, CoreSyntax.SeparatedSyntaxList<TypeSyntax> arguments, SyntaxToken greaterThanToken)
+    {
+        if (lessThanToken != this.LessThanToken || arguments != this.Arguments || greaterThanToken != this.GreaterThanToken)
+        {
+            var newNode = SyntaxFactory.TypeArgumentList(lessThanToken, arguments, greaterThanToken);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new TypeArgumentListSyntax(this.Kind, this.lessThanToken, this.arguments, this.greaterThanToken, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new TypeArgumentListSyntax(this.Kind, this.lessThanToken, this.arguments, this.greaterThanToken, GetDiagnostics(), annotations);
 }
 
 internal sealed partial class TypeAnnotationSyntax : TypeScriptSyntaxNode
@@ -1484,6 +2862,758 @@ internal sealed partial class ElseClauseSyntax : TypeScriptSyntaxNode
         => new ElseClauseSyntax(this.Kind, this.elseKeyword, this.statement, GetDiagnostics(), annotations);
 }
 
+internal sealed partial class SwitchStatementSyntax : StatementSyntax
+{
+    internal readonly SyntaxToken switchKeyword;
+    internal readonly SyntaxToken openParenToken;
+    internal readonly ExpressionSyntax expression;
+    internal readonly SyntaxToken closeParenToken;
+    internal readonly SyntaxToken openBraceToken;
+    internal readonly GreenNode? clauses;
+    internal readonly SyntaxToken closeBraceToken;
+
+    internal SwitchStatementSyntax(SyntaxKind kind, SyntaxToken switchKeyword, SyntaxToken openParenToken, ExpressionSyntax expression, SyntaxToken closeParenToken, SyntaxToken openBraceToken, GreenNode? clauses, SyntaxToken closeBraceToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 7;
+        this.AdjustFlagsAndWidth(switchKeyword);
+        this.switchKeyword = switchKeyword;
+        this.AdjustFlagsAndWidth(openParenToken);
+        this.openParenToken = openParenToken;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+        this.AdjustFlagsAndWidth(closeParenToken);
+        this.closeParenToken = closeParenToken;
+        this.AdjustFlagsAndWidth(openBraceToken);
+        this.openBraceToken = openBraceToken;
+        if (clauses != null)
+        {
+            this.AdjustFlagsAndWidth(clauses);
+            this.clauses = clauses;
+        }
+        this.AdjustFlagsAndWidth(closeBraceToken);
+        this.closeBraceToken = closeBraceToken;
+    }
+
+    internal SwitchStatementSyntax(SyntaxKind kind, SyntaxToken switchKeyword, SyntaxToken openParenToken, ExpressionSyntax expression, SyntaxToken closeParenToken, SyntaxToken openBraceToken, GreenNode? clauses, SyntaxToken closeBraceToken, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 7;
+        this.AdjustFlagsAndWidth(switchKeyword);
+        this.switchKeyword = switchKeyword;
+        this.AdjustFlagsAndWidth(openParenToken);
+        this.openParenToken = openParenToken;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+        this.AdjustFlagsAndWidth(closeParenToken);
+        this.closeParenToken = closeParenToken;
+        this.AdjustFlagsAndWidth(openBraceToken);
+        this.openBraceToken = openBraceToken;
+        if (clauses != null)
+        {
+            this.AdjustFlagsAndWidth(clauses);
+            this.clauses = clauses;
+        }
+        this.AdjustFlagsAndWidth(closeBraceToken);
+        this.closeBraceToken = closeBraceToken;
+    }
+
+    internal SwitchStatementSyntax(SyntaxKind kind, SyntaxToken switchKeyword, SyntaxToken openParenToken, ExpressionSyntax expression, SyntaxToken closeParenToken, SyntaxToken openBraceToken, GreenNode? clauses, SyntaxToken closeBraceToken)
+      : base(kind)
+    {
+        this.SlotCount = 7;
+        this.AdjustFlagsAndWidth(switchKeyword);
+        this.switchKeyword = switchKeyword;
+        this.AdjustFlagsAndWidth(openParenToken);
+        this.openParenToken = openParenToken;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+        this.AdjustFlagsAndWidth(closeParenToken);
+        this.closeParenToken = closeParenToken;
+        this.AdjustFlagsAndWidth(openBraceToken);
+        this.openBraceToken = openBraceToken;
+        if (clauses != null)
+        {
+            this.AdjustFlagsAndWidth(clauses);
+            this.clauses = clauses;
+        }
+        this.AdjustFlagsAndWidth(closeBraceToken);
+        this.closeBraceToken = closeBraceToken;
+    }
+
+    public SyntaxToken SwitchKeyword => this.switchKeyword;
+    public SyntaxToken OpenParenToken => this.openParenToken;
+    public ExpressionSyntax Expression => this.expression;
+    public SyntaxToken CloseParenToken => this.closeParenToken;
+    public SyntaxToken OpenBraceToken => this.openBraceToken;
+    public CoreSyntax.SyntaxList<SwitchLabelSyntax> Clauses => new CoreSyntax.SyntaxList<SwitchLabelSyntax>(this.clauses);
+    public SyntaxToken CloseBraceToken => this.closeBraceToken;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.switchKeyword,
+            1 => this.openParenToken,
+            2 => this.expression,
+            3 => this.closeParenToken,
+            4 => this.openBraceToken,
+            5 => this.clauses,
+            6 => this.closeBraceToken,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.SwitchStatementSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitSwitchStatement(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitSwitchStatement(this);
+
+    public SwitchStatementSyntax Update(SyntaxToken switchKeyword, SyntaxToken openParenToken, ExpressionSyntax expression, SyntaxToken closeParenToken, SyntaxToken openBraceToken, CoreSyntax.SyntaxList<SwitchLabelSyntax> clauses, SyntaxToken closeBraceToken)
+    {
+        if (switchKeyword != this.SwitchKeyword || openParenToken != this.OpenParenToken || expression != this.Expression || closeParenToken != this.CloseParenToken || openBraceToken != this.OpenBraceToken || clauses != this.Clauses || closeBraceToken != this.CloseBraceToken)
+        {
+            var newNode = SyntaxFactory.SwitchStatement(switchKeyword, openParenToken, expression, closeParenToken, openBraceToken, clauses, closeBraceToken);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new SwitchStatementSyntax(this.Kind, this.switchKeyword, this.openParenToken, this.expression, this.closeParenToken, this.openBraceToken, this.clauses, this.closeBraceToken, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new SwitchStatementSyntax(this.Kind, this.switchKeyword, this.openParenToken, this.expression, this.closeParenToken, this.openBraceToken, this.clauses, this.closeBraceToken, GetDiagnostics(), annotations);
+}
+
+internal abstract partial class SwitchLabelSyntax : TypeScriptSyntaxNode
+{
+    internal SwitchLabelSyntax(SyntaxKind kind, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+    }
+
+    internal SwitchLabelSyntax(SyntaxKind kind)
+      : base(kind)
+    {
+    }
+}
+
+internal sealed partial class CaseClauseSyntax : SwitchLabelSyntax
+{
+    internal readonly SyntaxToken caseKeyword;
+    internal readonly ExpressionSyntax expression;
+    internal readonly SyntaxToken colonToken;
+    internal readonly GreenNode? statements;
+
+    internal CaseClauseSyntax(SyntaxKind kind, SyntaxToken caseKeyword, ExpressionSyntax expression, SyntaxToken colonToken, GreenNode? statements, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 4;
+        this.AdjustFlagsAndWidth(caseKeyword);
+        this.caseKeyword = caseKeyword;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+        this.AdjustFlagsAndWidth(colonToken);
+        this.colonToken = colonToken;
+        if (statements != null)
+        {
+            this.AdjustFlagsAndWidth(statements);
+            this.statements = statements;
+        }
+    }
+
+    internal CaseClauseSyntax(SyntaxKind kind, SyntaxToken caseKeyword, ExpressionSyntax expression, SyntaxToken colonToken, GreenNode? statements, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 4;
+        this.AdjustFlagsAndWidth(caseKeyword);
+        this.caseKeyword = caseKeyword;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+        this.AdjustFlagsAndWidth(colonToken);
+        this.colonToken = colonToken;
+        if (statements != null)
+        {
+            this.AdjustFlagsAndWidth(statements);
+            this.statements = statements;
+        }
+    }
+
+    internal CaseClauseSyntax(SyntaxKind kind, SyntaxToken caseKeyword, ExpressionSyntax expression, SyntaxToken colonToken, GreenNode? statements)
+      : base(kind)
+    {
+        this.SlotCount = 4;
+        this.AdjustFlagsAndWidth(caseKeyword);
+        this.caseKeyword = caseKeyword;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+        this.AdjustFlagsAndWidth(colonToken);
+        this.colonToken = colonToken;
+        if (statements != null)
+        {
+            this.AdjustFlagsAndWidth(statements);
+            this.statements = statements;
+        }
+    }
+
+    public SyntaxToken CaseKeyword => this.caseKeyword;
+    public ExpressionSyntax Expression => this.expression;
+    public SyntaxToken ColonToken => this.colonToken;
+    public CoreSyntax.SyntaxList<StatementSyntax> Statements => new CoreSyntax.SyntaxList<StatementSyntax>(this.statements);
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.caseKeyword,
+            1 => this.expression,
+            2 => this.colonToken,
+            3 => this.statements,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.CaseClauseSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitCaseClause(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitCaseClause(this);
+
+    public CaseClauseSyntax Update(SyntaxToken caseKeyword, ExpressionSyntax expression, SyntaxToken colonToken, CoreSyntax.SyntaxList<StatementSyntax> statements)
+    {
+        if (caseKeyword != this.CaseKeyword || expression != this.Expression || colonToken != this.ColonToken || statements != this.Statements)
+        {
+            var newNode = SyntaxFactory.CaseClause(caseKeyword, expression, colonToken, statements);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new CaseClauseSyntax(this.Kind, this.caseKeyword, this.expression, this.colonToken, this.statements, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new CaseClauseSyntax(this.Kind, this.caseKeyword, this.expression, this.colonToken, this.statements, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class DefaultClauseSyntax : SwitchLabelSyntax
+{
+    internal readonly SyntaxToken defaultKeyword;
+    internal readonly SyntaxToken colonToken;
+    internal readonly GreenNode? statements;
+
+    internal DefaultClauseSyntax(SyntaxKind kind, SyntaxToken defaultKeyword, SyntaxToken colonToken, GreenNode? statements, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(defaultKeyword);
+        this.defaultKeyword = defaultKeyword;
+        this.AdjustFlagsAndWidth(colonToken);
+        this.colonToken = colonToken;
+        if (statements != null)
+        {
+            this.AdjustFlagsAndWidth(statements);
+            this.statements = statements;
+        }
+    }
+
+    internal DefaultClauseSyntax(SyntaxKind kind, SyntaxToken defaultKeyword, SyntaxToken colonToken, GreenNode? statements, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(defaultKeyword);
+        this.defaultKeyword = defaultKeyword;
+        this.AdjustFlagsAndWidth(colonToken);
+        this.colonToken = colonToken;
+        if (statements != null)
+        {
+            this.AdjustFlagsAndWidth(statements);
+            this.statements = statements;
+        }
+    }
+
+    internal DefaultClauseSyntax(SyntaxKind kind, SyntaxToken defaultKeyword, SyntaxToken colonToken, GreenNode? statements)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(defaultKeyword);
+        this.defaultKeyword = defaultKeyword;
+        this.AdjustFlagsAndWidth(colonToken);
+        this.colonToken = colonToken;
+        if (statements != null)
+        {
+            this.AdjustFlagsAndWidth(statements);
+            this.statements = statements;
+        }
+    }
+
+    public SyntaxToken DefaultKeyword => this.defaultKeyword;
+    public SyntaxToken ColonToken => this.colonToken;
+    public CoreSyntax.SyntaxList<StatementSyntax> Statements => new CoreSyntax.SyntaxList<StatementSyntax>(this.statements);
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.defaultKeyword,
+            1 => this.colonToken,
+            2 => this.statements,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.DefaultClauseSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitDefaultClause(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitDefaultClause(this);
+
+    public DefaultClauseSyntax Update(SyntaxToken defaultKeyword, SyntaxToken colonToken, CoreSyntax.SyntaxList<StatementSyntax> statements)
+    {
+        if (defaultKeyword != this.DefaultKeyword || colonToken != this.ColonToken || statements != this.Statements)
+        {
+            var newNode = SyntaxFactory.DefaultClause(defaultKeyword, colonToken, statements);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new DefaultClauseSyntax(this.Kind, this.defaultKeyword, this.colonToken, this.statements, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new DefaultClauseSyntax(this.Kind, this.defaultKeyword, this.colonToken, this.statements, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class TryStatementSyntax : StatementSyntax
+{
+    internal readonly SyntaxToken tryKeyword;
+    internal readonly BlockSyntax block;
+    internal readonly CatchClauseSyntax? catchClause;
+    internal readonly FinallyClauseSyntax? finallyClause;
+
+    internal TryStatementSyntax(SyntaxKind kind, SyntaxToken tryKeyword, BlockSyntax block, CatchClauseSyntax? catchClause, FinallyClauseSyntax? finallyClause, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 4;
+        this.AdjustFlagsAndWidth(tryKeyword);
+        this.tryKeyword = tryKeyword;
+        this.AdjustFlagsAndWidth(block);
+        this.block = block;
+        if (catchClause != null)
+        {
+            this.AdjustFlagsAndWidth(catchClause);
+            this.catchClause = catchClause;
+        }
+        if (finallyClause != null)
+        {
+            this.AdjustFlagsAndWidth(finallyClause);
+            this.finallyClause = finallyClause;
+        }
+    }
+
+    internal TryStatementSyntax(SyntaxKind kind, SyntaxToken tryKeyword, BlockSyntax block, CatchClauseSyntax? catchClause, FinallyClauseSyntax? finallyClause, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 4;
+        this.AdjustFlagsAndWidth(tryKeyword);
+        this.tryKeyword = tryKeyword;
+        this.AdjustFlagsAndWidth(block);
+        this.block = block;
+        if (catchClause != null)
+        {
+            this.AdjustFlagsAndWidth(catchClause);
+            this.catchClause = catchClause;
+        }
+        if (finallyClause != null)
+        {
+            this.AdjustFlagsAndWidth(finallyClause);
+            this.finallyClause = finallyClause;
+        }
+    }
+
+    internal TryStatementSyntax(SyntaxKind kind, SyntaxToken tryKeyword, BlockSyntax block, CatchClauseSyntax? catchClause, FinallyClauseSyntax? finallyClause)
+      : base(kind)
+    {
+        this.SlotCount = 4;
+        this.AdjustFlagsAndWidth(tryKeyword);
+        this.tryKeyword = tryKeyword;
+        this.AdjustFlagsAndWidth(block);
+        this.block = block;
+        if (catchClause != null)
+        {
+            this.AdjustFlagsAndWidth(catchClause);
+            this.catchClause = catchClause;
+        }
+        if (finallyClause != null)
+        {
+            this.AdjustFlagsAndWidth(finallyClause);
+            this.finallyClause = finallyClause;
+        }
+    }
+
+    public SyntaxToken TryKeyword => this.tryKeyword;
+    public BlockSyntax Block => this.block;
+    public CatchClauseSyntax? CatchClause => this.catchClause;
+    public FinallyClauseSyntax? FinallyClause => this.finallyClause;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.tryKeyword,
+            1 => this.block,
+            2 => this.catchClause,
+            3 => this.finallyClause,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.TryStatementSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitTryStatement(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitTryStatement(this);
+
+    public TryStatementSyntax Update(SyntaxToken tryKeyword, BlockSyntax block, CatchClauseSyntax catchClause, FinallyClauseSyntax finallyClause)
+    {
+        if (tryKeyword != this.TryKeyword || block != this.Block || catchClause != this.CatchClause || finallyClause != this.FinallyClause)
+        {
+            var newNode = SyntaxFactory.TryStatement(tryKeyword, block, catchClause, finallyClause);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new TryStatementSyntax(this.Kind, this.tryKeyword, this.block, this.catchClause, this.finallyClause, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new TryStatementSyntax(this.Kind, this.tryKeyword, this.block, this.catchClause, this.finallyClause, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class CatchClauseSyntax : TypeScriptSyntaxNode
+{
+    internal readonly SyntaxToken catchKeyword;
+    internal readonly SyntaxToken? openParenToken;
+    internal readonly VariableDeclarationSyntax? declaration;
+    internal readonly SyntaxToken? closeParenToken;
+    internal readonly BlockSyntax block;
+
+    internal CatchClauseSyntax(SyntaxKind kind, SyntaxToken catchKeyword, SyntaxToken? openParenToken, VariableDeclarationSyntax? declaration, SyntaxToken? closeParenToken, BlockSyntax block, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 5;
+        this.AdjustFlagsAndWidth(catchKeyword);
+        this.catchKeyword = catchKeyword;
+        if (openParenToken != null)
+        {
+            this.AdjustFlagsAndWidth(openParenToken);
+            this.openParenToken = openParenToken;
+        }
+        if (declaration != null)
+        {
+            this.AdjustFlagsAndWidth(declaration);
+            this.declaration = declaration;
+        }
+        if (closeParenToken != null)
+        {
+            this.AdjustFlagsAndWidth(closeParenToken);
+            this.closeParenToken = closeParenToken;
+        }
+        this.AdjustFlagsAndWidth(block);
+        this.block = block;
+    }
+
+    internal CatchClauseSyntax(SyntaxKind kind, SyntaxToken catchKeyword, SyntaxToken? openParenToken, VariableDeclarationSyntax? declaration, SyntaxToken? closeParenToken, BlockSyntax block, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 5;
+        this.AdjustFlagsAndWidth(catchKeyword);
+        this.catchKeyword = catchKeyword;
+        if (openParenToken != null)
+        {
+            this.AdjustFlagsAndWidth(openParenToken);
+            this.openParenToken = openParenToken;
+        }
+        if (declaration != null)
+        {
+            this.AdjustFlagsAndWidth(declaration);
+            this.declaration = declaration;
+        }
+        if (closeParenToken != null)
+        {
+            this.AdjustFlagsAndWidth(closeParenToken);
+            this.closeParenToken = closeParenToken;
+        }
+        this.AdjustFlagsAndWidth(block);
+        this.block = block;
+    }
+
+    internal CatchClauseSyntax(SyntaxKind kind, SyntaxToken catchKeyword, SyntaxToken? openParenToken, VariableDeclarationSyntax? declaration, SyntaxToken? closeParenToken, BlockSyntax block)
+      : base(kind)
+    {
+        this.SlotCount = 5;
+        this.AdjustFlagsAndWidth(catchKeyword);
+        this.catchKeyword = catchKeyword;
+        if (openParenToken != null)
+        {
+            this.AdjustFlagsAndWidth(openParenToken);
+            this.openParenToken = openParenToken;
+        }
+        if (declaration != null)
+        {
+            this.AdjustFlagsAndWidth(declaration);
+            this.declaration = declaration;
+        }
+        if (closeParenToken != null)
+        {
+            this.AdjustFlagsAndWidth(closeParenToken);
+            this.closeParenToken = closeParenToken;
+        }
+        this.AdjustFlagsAndWidth(block);
+        this.block = block;
+    }
+
+    public SyntaxToken CatchKeyword => this.catchKeyword;
+    public SyntaxToken? OpenParenToken => this.openParenToken;
+    public VariableDeclarationSyntax? Declaration => this.declaration;
+    public SyntaxToken? CloseParenToken => this.closeParenToken;
+    public BlockSyntax Block => this.block;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.catchKeyword,
+            1 => this.openParenToken,
+            2 => this.declaration,
+            3 => this.closeParenToken,
+            4 => this.block,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.CatchClauseSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitCatchClause(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitCatchClause(this);
+
+    public CatchClauseSyntax Update(SyntaxToken catchKeyword, SyntaxToken openParenToken, VariableDeclarationSyntax declaration, SyntaxToken closeParenToken, BlockSyntax block)
+    {
+        if (catchKeyword != this.CatchKeyword || openParenToken != this.OpenParenToken || declaration != this.Declaration || closeParenToken != this.CloseParenToken || block != this.Block)
+        {
+            var newNode = SyntaxFactory.CatchClause(catchKeyword, openParenToken, declaration, closeParenToken, block);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new CatchClauseSyntax(this.Kind, this.catchKeyword, this.openParenToken, this.declaration, this.closeParenToken, this.block, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new CatchClauseSyntax(this.Kind, this.catchKeyword, this.openParenToken, this.declaration, this.closeParenToken, this.block, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class FinallyClauseSyntax : TypeScriptSyntaxNode
+{
+    internal readonly SyntaxToken finallyKeyword;
+    internal readonly BlockSyntax block;
+
+    internal FinallyClauseSyntax(SyntaxKind kind, SyntaxToken finallyKeyword, BlockSyntax block, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(finallyKeyword);
+        this.finallyKeyword = finallyKeyword;
+        this.AdjustFlagsAndWidth(block);
+        this.block = block;
+    }
+
+    internal FinallyClauseSyntax(SyntaxKind kind, SyntaxToken finallyKeyword, BlockSyntax block, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(finallyKeyword);
+        this.finallyKeyword = finallyKeyword;
+        this.AdjustFlagsAndWidth(block);
+        this.block = block;
+    }
+
+    internal FinallyClauseSyntax(SyntaxKind kind, SyntaxToken finallyKeyword, BlockSyntax block)
+      : base(kind)
+    {
+        this.SlotCount = 2;
+        this.AdjustFlagsAndWidth(finallyKeyword);
+        this.finallyKeyword = finallyKeyword;
+        this.AdjustFlagsAndWidth(block);
+        this.block = block;
+    }
+
+    public SyntaxToken FinallyKeyword => this.finallyKeyword;
+    public BlockSyntax Block => this.block;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.finallyKeyword,
+            1 => this.block,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.FinallyClauseSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitFinallyClause(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitFinallyClause(this);
+
+    public FinallyClauseSyntax Update(SyntaxToken finallyKeyword, BlockSyntax block)
+    {
+        if (finallyKeyword != this.FinallyKeyword || block != this.Block)
+        {
+            var newNode = SyntaxFactory.FinallyClause(finallyKeyword, block);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new FinallyClauseSyntax(this.Kind, this.finallyKeyword, this.block, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new FinallyClauseSyntax(this.Kind, this.finallyKeyword, this.block, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class ThrowStatementSyntax : StatementSyntax
+{
+    internal readonly SyntaxToken throwKeyword;
+    internal readonly ExpressionSyntax expression;
+    internal readonly SyntaxToken? semicolonToken;
+
+    internal ThrowStatementSyntax(SyntaxKind kind, SyntaxToken throwKeyword, ExpressionSyntax expression, SyntaxToken? semicolonToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(throwKeyword);
+        this.throwKeyword = throwKeyword;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+        if (semicolonToken != null)
+        {
+            this.AdjustFlagsAndWidth(semicolonToken);
+            this.semicolonToken = semicolonToken;
+        }
+    }
+
+    internal ThrowStatementSyntax(SyntaxKind kind, SyntaxToken throwKeyword, ExpressionSyntax expression, SyntaxToken? semicolonToken, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(throwKeyword);
+        this.throwKeyword = throwKeyword;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+        if (semicolonToken != null)
+        {
+            this.AdjustFlagsAndWidth(semicolonToken);
+            this.semicolonToken = semicolonToken;
+        }
+    }
+
+    internal ThrowStatementSyntax(SyntaxKind kind, SyntaxToken throwKeyword, ExpressionSyntax expression, SyntaxToken? semicolonToken)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(throwKeyword);
+        this.throwKeyword = throwKeyword;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+        if (semicolonToken != null)
+        {
+            this.AdjustFlagsAndWidth(semicolonToken);
+            this.semicolonToken = semicolonToken;
+        }
+    }
+
+    public SyntaxToken ThrowKeyword => this.throwKeyword;
+    public ExpressionSyntax Expression => this.expression;
+    public SyntaxToken? SemicolonToken => this.semicolonToken;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.throwKeyword,
+            1 => this.expression,
+            2 => this.semicolonToken,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.ThrowStatementSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitThrowStatement(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitThrowStatement(this);
+
+    public ThrowStatementSyntax Update(SyntaxToken throwKeyword, ExpressionSyntax expression, SyntaxToken semicolonToken)
+    {
+        if (throwKeyword != this.ThrowKeyword || expression != this.Expression || semicolonToken != this.SemicolonToken)
+        {
+            var newNode = SyntaxFactory.ThrowStatement(throwKeyword, expression, semicolonToken);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new ThrowStatementSyntax(this.Kind, this.throwKeyword, this.expression, this.semicolonToken, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new ThrowStatementSyntax(this.Kind, this.throwKeyword, this.expression, this.semicolonToken, GetDiagnostics(), annotations);
+}
+
 internal sealed partial class WhileStatementSyntax : StatementSyntax
 {
     internal readonly SyntaxToken whileKeyword;
@@ -2200,20 +4330,26 @@ internal sealed partial class FunctionDeclarationSyntax : DeclarationStatementSy
 {
     internal readonly SyntaxToken functionKeyword;
     internal readonly SyntaxToken? identifier;
+    internal readonly TypeParameterListSyntax? typeParameters;
     internal readonly ParameterListSyntax parameterList;
     internal readonly TypeAnnotationSyntax? typeAnnotation;
     internal readonly BlockSyntax? body;
 
-    internal FunctionDeclarationSyntax(SyntaxKind kind, SyntaxToken functionKeyword, SyntaxToken? identifier, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+    internal FunctionDeclarationSyntax(SyntaxKind kind, SyntaxToken functionKeyword, SyntaxToken? identifier, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
       : base(kind, diagnostics, annotations)
     {
-        this.SlotCount = 5;
+        this.SlotCount = 6;
         this.AdjustFlagsAndWidth(functionKeyword);
         this.functionKeyword = functionKeyword;
         if (identifier != null)
         {
             this.AdjustFlagsAndWidth(identifier);
             this.identifier = identifier;
+        }
+        if (typeParameters != null)
+        {
+            this.AdjustFlagsAndWidth(typeParameters);
+            this.typeParameters = typeParameters;
         }
         this.AdjustFlagsAndWidth(parameterList);
         this.parameterList = parameterList;
@@ -2229,17 +4365,22 @@ internal sealed partial class FunctionDeclarationSyntax : DeclarationStatementSy
         }
     }
 
-    internal FunctionDeclarationSyntax(SyntaxKind kind, SyntaxToken functionKeyword, SyntaxToken? identifier, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body, SyntaxFactoryContext context)
+    internal FunctionDeclarationSyntax(SyntaxKind kind, SyntaxToken functionKeyword, SyntaxToken? identifier, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body, SyntaxFactoryContext context)
       : base(kind)
     {
         this.SetFactoryContext(context);
-        this.SlotCount = 5;
+        this.SlotCount = 6;
         this.AdjustFlagsAndWidth(functionKeyword);
         this.functionKeyword = functionKeyword;
         if (identifier != null)
         {
             this.AdjustFlagsAndWidth(identifier);
             this.identifier = identifier;
+        }
+        if (typeParameters != null)
+        {
+            this.AdjustFlagsAndWidth(typeParameters);
+            this.typeParameters = typeParameters;
         }
         this.AdjustFlagsAndWidth(parameterList);
         this.parameterList = parameterList;
@@ -2255,16 +4396,21 @@ internal sealed partial class FunctionDeclarationSyntax : DeclarationStatementSy
         }
     }
 
-    internal FunctionDeclarationSyntax(SyntaxKind kind, SyntaxToken functionKeyword, SyntaxToken? identifier, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
+    internal FunctionDeclarationSyntax(SyntaxKind kind, SyntaxToken functionKeyword, SyntaxToken? identifier, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
       : base(kind)
     {
-        this.SlotCount = 5;
+        this.SlotCount = 6;
         this.AdjustFlagsAndWidth(functionKeyword);
         this.functionKeyword = functionKeyword;
         if (identifier != null)
         {
             this.AdjustFlagsAndWidth(identifier);
             this.identifier = identifier;
+        }
+        if (typeParameters != null)
+        {
+            this.AdjustFlagsAndWidth(typeParameters);
+            this.typeParameters = typeParameters;
         }
         this.AdjustFlagsAndWidth(parameterList);
         this.parameterList = parameterList;
@@ -2282,6 +4428,7 @@ internal sealed partial class FunctionDeclarationSyntax : DeclarationStatementSy
 
     public SyntaxToken FunctionKeyword => this.functionKeyword;
     public SyntaxToken? Identifier => this.identifier;
+    public TypeParameterListSyntax? TypeParameters => this.typeParameters;
     public ParameterListSyntax ParameterList => this.parameterList;
     public TypeAnnotationSyntax? TypeAnnotation => this.typeAnnotation;
     public BlockSyntax? Body => this.body;
@@ -2291,9 +4438,10 @@ internal sealed partial class FunctionDeclarationSyntax : DeclarationStatementSy
         {
             0 => this.functionKeyword,
             1 => this.identifier,
-            2 => this.parameterList,
-            3 => this.typeAnnotation,
-            4 => this.body,
+            2 => this.typeParameters,
+            3 => this.parameterList,
+            4 => this.typeAnnotation,
+            5 => this.body,
             _ => null,
         };
 
@@ -2302,11 +4450,11 @@ internal sealed partial class FunctionDeclarationSyntax : DeclarationStatementSy
     public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitFunctionDeclaration(this);
     public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitFunctionDeclaration(this);
 
-    public FunctionDeclarationSyntax Update(SyntaxToken functionKeyword, SyntaxToken identifier, ParameterListSyntax parameterList, TypeAnnotationSyntax typeAnnotation, BlockSyntax body)
+    public FunctionDeclarationSyntax Update(SyntaxToken functionKeyword, SyntaxToken identifier, TypeParameterListSyntax typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax typeAnnotation, BlockSyntax body)
     {
-        if (functionKeyword != this.FunctionKeyword || identifier != this.Identifier || parameterList != this.ParameterList || typeAnnotation != this.TypeAnnotation || body != this.Body)
+        if (functionKeyword != this.FunctionKeyword || identifier != this.Identifier || typeParameters != this.TypeParameters || parameterList != this.ParameterList || typeAnnotation != this.TypeAnnotation || body != this.Body)
         {
-            var newNode = SyntaxFactory.FunctionDeclaration(functionKeyword, identifier, parameterList, typeAnnotation, body);
+            var newNode = SyntaxFactory.FunctionDeclaration(functionKeyword, identifier, typeParameters, parameterList, typeAnnotation, body);
             var diags = GetDiagnostics();
             if (diags?.Length > 0)
                 newNode = newNode.WithDiagnosticsGreen(diags);
@@ -2320,28 +4468,34 @@ internal sealed partial class FunctionDeclarationSyntax : DeclarationStatementSy
     }
 
     internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
-        => new FunctionDeclarationSyntax(this.Kind, this.functionKeyword, this.identifier, this.parameterList, this.typeAnnotation, this.body, diagnostics, GetAnnotations());
+        => new FunctionDeclarationSyntax(this.Kind, this.functionKeyword, this.identifier, this.typeParameters, this.parameterList, this.typeAnnotation, this.body, diagnostics, GetAnnotations());
 
     internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
-        => new FunctionDeclarationSyntax(this.Kind, this.functionKeyword, this.identifier, this.parameterList, this.typeAnnotation, this.body, GetDiagnostics(), annotations);
+        => new FunctionDeclarationSyntax(this.Kind, this.functionKeyword, this.identifier, this.typeParameters, this.parameterList, this.typeAnnotation, this.body, GetDiagnostics(), annotations);
 }
 
 internal sealed partial class InterfaceDeclarationSyntax : DeclarationStatementSyntax
 {
     internal readonly SyntaxToken interfaceKeyword;
     internal readonly SyntaxToken identifier;
+    internal readonly TypeParameterListSyntax? typeParameters;
     internal readonly SyntaxToken openBraceToken;
     internal readonly GreenNode? members;
     internal readonly SyntaxToken closeBraceToken;
 
-    internal InterfaceDeclarationSyntax(SyntaxKind kind, SyntaxToken interfaceKeyword, SyntaxToken identifier, SyntaxToken openBraceToken, GreenNode? members, SyntaxToken closeBraceToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+    internal InterfaceDeclarationSyntax(SyntaxKind kind, SyntaxToken interfaceKeyword, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, SyntaxToken openBraceToken, GreenNode? members, SyntaxToken closeBraceToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
       : base(kind, diagnostics, annotations)
     {
-        this.SlotCount = 5;
+        this.SlotCount = 6;
         this.AdjustFlagsAndWidth(interfaceKeyword);
         this.interfaceKeyword = interfaceKeyword;
         this.AdjustFlagsAndWidth(identifier);
         this.identifier = identifier;
+        if (typeParameters != null)
+        {
+            this.AdjustFlagsAndWidth(typeParameters);
+            this.typeParameters = typeParameters;
+        }
         this.AdjustFlagsAndWidth(openBraceToken);
         this.openBraceToken = openBraceToken;
         if (members != null)
@@ -2353,15 +4507,20 @@ internal sealed partial class InterfaceDeclarationSyntax : DeclarationStatementS
         this.closeBraceToken = closeBraceToken;
     }
 
-    internal InterfaceDeclarationSyntax(SyntaxKind kind, SyntaxToken interfaceKeyword, SyntaxToken identifier, SyntaxToken openBraceToken, GreenNode? members, SyntaxToken closeBraceToken, SyntaxFactoryContext context)
+    internal InterfaceDeclarationSyntax(SyntaxKind kind, SyntaxToken interfaceKeyword, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, SyntaxToken openBraceToken, GreenNode? members, SyntaxToken closeBraceToken, SyntaxFactoryContext context)
       : base(kind)
     {
         this.SetFactoryContext(context);
-        this.SlotCount = 5;
+        this.SlotCount = 6;
         this.AdjustFlagsAndWidth(interfaceKeyword);
         this.interfaceKeyword = interfaceKeyword;
         this.AdjustFlagsAndWidth(identifier);
         this.identifier = identifier;
+        if (typeParameters != null)
+        {
+            this.AdjustFlagsAndWidth(typeParameters);
+            this.typeParameters = typeParameters;
+        }
         this.AdjustFlagsAndWidth(openBraceToken);
         this.openBraceToken = openBraceToken;
         if (members != null)
@@ -2373,14 +4532,19 @@ internal sealed partial class InterfaceDeclarationSyntax : DeclarationStatementS
         this.closeBraceToken = closeBraceToken;
     }
 
-    internal InterfaceDeclarationSyntax(SyntaxKind kind, SyntaxToken interfaceKeyword, SyntaxToken identifier, SyntaxToken openBraceToken, GreenNode? members, SyntaxToken closeBraceToken)
+    internal InterfaceDeclarationSyntax(SyntaxKind kind, SyntaxToken interfaceKeyword, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, SyntaxToken openBraceToken, GreenNode? members, SyntaxToken closeBraceToken)
       : base(kind)
     {
-        this.SlotCount = 5;
+        this.SlotCount = 6;
         this.AdjustFlagsAndWidth(interfaceKeyword);
         this.interfaceKeyword = interfaceKeyword;
         this.AdjustFlagsAndWidth(identifier);
         this.identifier = identifier;
+        if (typeParameters != null)
+        {
+            this.AdjustFlagsAndWidth(typeParameters);
+            this.typeParameters = typeParameters;
+        }
         this.AdjustFlagsAndWidth(openBraceToken);
         this.openBraceToken = openBraceToken;
         if (members != null)
@@ -2394,6 +4558,7 @@ internal sealed partial class InterfaceDeclarationSyntax : DeclarationStatementS
 
     public SyntaxToken InterfaceKeyword => this.interfaceKeyword;
     public SyntaxToken Identifier => this.identifier;
+    public TypeParameterListSyntax? TypeParameters => this.typeParameters;
     public SyntaxToken OpenBraceToken => this.openBraceToken;
     public CoreSyntax.SyntaxList<TypeElementSyntax> Members => new CoreSyntax.SyntaxList<TypeElementSyntax>(this.members);
     public SyntaxToken CloseBraceToken => this.closeBraceToken;
@@ -2403,9 +4568,10 @@ internal sealed partial class InterfaceDeclarationSyntax : DeclarationStatementS
         {
             0 => this.interfaceKeyword,
             1 => this.identifier,
-            2 => this.openBraceToken,
-            3 => this.members,
-            4 => this.closeBraceToken,
+            2 => this.typeParameters,
+            3 => this.openBraceToken,
+            4 => this.members,
+            5 => this.closeBraceToken,
             _ => null,
         };
 
@@ -2414,11 +4580,11 @@ internal sealed partial class InterfaceDeclarationSyntax : DeclarationStatementS
     public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitInterfaceDeclaration(this);
     public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitInterfaceDeclaration(this);
 
-    public InterfaceDeclarationSyntax Update(SyntaxToken interfaceKeyword, SyntaxToken identifier, SyntaxToken openBraceToken, CoreSyntax.SyntaxList<TypeElementSyntax> members, SyntaxToken closeBraceToken)
+    public InterfaceDeclarationSyntax Update(SyntaxToken interfaceKeyword, SyntaxToken identifier, TypeParameterListSyntax typeParameters, SyntaxToken openBraceToken, CoreSyntax.SyntaxList<TypeElementSyntax> members, SyntaxToken closeBraceToken)
     {
-        if (interfaceKeyword != this.InterfaceKeyword || identifier != this.Identifier || openBraceToken != this.OpenBraceToken || members != this.Members || closeBraceToken != this.CloseBraceToken)
+        if (interfaceKeyword != this.InterfaceKeyword || identifier != this.Identifier || typeParameters != this.TypeParameters || openBraceToken != this.OpenBraceToken || members != this.Members || closeBraceToken != this.CloseBraceToken)
         {
-            var newNode = SyntaxFactory.InterfaceDeclaration(interfaceKeyword, identifier, openBraceToken, members, closeBraceToken);
+            var newNode = SyntaxFactory.InterfaceDeclaration(interfaceKeyword, identifier, typeParameters, openBraceToken, members, closeBraceToken);
             var diags = GetDiagnostics();
             if (diags?.Length > 0)
                 newNode = newNode.WithDiagnosticsGreen(diags);
@@ -2432,30 +4598,36 @@ internal sealed partial class InterfaceDeclarationSyntax : DeclarationStatementS
     }
 
     internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
-        => new InterfaceDeclarationSyntax(this.Kind, this.interfaceKeyword, this.identifier, this.openBraceToken, this.members, this.closeBraceToken, diagnostics, GetAnnotations());
+        => new InterfaceDeclarationSyntax(this.Kind, this.interfaceKeyword, this.identifier, this.typeParameters, this.openBraceToken, this.members, this.closeBraceToken, diagnostics, GetAnnotations());
 
     internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
-        => new InterfaceDeclarationSyntax(this.Kind, this.interfaceKeyword, this.identifier, this.openBraceToken, this.members, this.closeBraceToken, GetDiagnostics(), annotations);
+        => new InterfaceDeclarationSyntax(this.Kind, this.interfaceKeyword, this.identifier, this.typeParameters, this.openBraceToken, this.members, this.closeBraceToken, GetDiagnostics(), annotations);
 }
 
 internal sealed partial class ClassDeclarationSyntax : DeclarationStatementSyntax
 {
     internal readonly SyntaxToken classKeyword;
     internal readonly SyntaxToken? identifier;
+    internal readonly TypeParameterListSyntax? typeParameters;
     internal readonly SyntaxToken openBraceToken;
     internal readonly GreenNode? members;
     internal readonly SyntaxToken closeBraceToken;
 
-    internal ClassDeclarationSyntax(SyntaxKind kind, SyntaxToken classKeyword, SyntaxToken? identifier, SyntaxToken openBraceToken, GreenNode? members, SyntaxToken closeBraceToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+    internal ClassDeclarationSyntax(SyntaxKind kind, SyntaxToken classKeyword, SyntaxToken? identifier, TypeParameterListSyntax? typeParameters, SyntaxToken openBraceToken, GreenNode? members, SyntaxToken closeBraceToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
       : base(kind, diagnostics, annotations)
     {
-        this.SlotCount = 5;
+        this.SlotCount = 6;
         this.AdjustFlagsAndWidth(classKeyword);
         this.classKeyword = classKeyword;
         if (identifier != null)
         {
             this.AdjustFlagsAndWidth(identifier);
             this.identifier = identifier;
+        }
+        if (typeParameters != null)
+        {
+            this.AdjustFlagsAndWidth(typeParameters);
+            this.typeParameters = typeParameters;
         }
         this.AdjustFlagsAndWidth(openBraceToken);
         this.openBraceToken = openBraceToken;
@@ -2468,17 +4640,22 @@ internal sealed partial class ClassDeclarationSyntax : DeclarationStatementSynta
         this.closeBraceToken = closeBraceToken;
     }
 
-    internal ClassDeclarationSyntax(SyntaxKind kind, SyntaxToken classKeyword, SyntaxToken? identifier, SyntaxToken openBraceToken, GreenNode? members, SyntaxToken closeBraceToken, SyntaxFactoryContext context)
+    internal ClassDeclarationSyntax(SyntaxKind kind, SyntaxToken classKeyword, SyntaxToken? identifier, TypeParameterListSyntax? typeParameters, SyntaxToken openBraceToken, GreenNode? members, SyntaxToken closeBraceToken, SyntaxFactoryContext context)
       : base(kind)
     {
         this.SetFactoryContext(context);
-        this.SlotCount = 5;
+        this.SlotCount = 6;
         this.AdjustFlagsAndWidth(classKeyword);
         this.classKeyword = classKeyword;
         if (identifier != null)
         {
             this.AdjustFlagsAndWidth(identifier);
             this.identifier = identifier;
+        }
+        if (typeParameters != null)
+        {
+            this.AdjustFlagsAndWidth(typeParameters);
+            this.typeParameters = typeParameters;
         }
         this.AdjustFlagsAndWidth(openBraceToken);
         this.openBraceToken = openBraceToken;
@@ -2491,16 +4668,21 @@ internal sealed partial class ClassDeclarationSyntax : DeclarationStatementSynta
         this.closeBraceToken = closeBraceToken;
     }
 
-    internal ClassDeclarationSyntax(SyntaxKind kind, SyntaxToken classKeyword, SyntaxToken? identifier, SyntaxToken openBraceToken, GreenNode? members, SyntaxToken closeBraceToken)
+    internal ClassDeclarationSyntax(SyntaxKind kind, SyntaxToken classKeyword, SyntaxToken? identifier, TypeParameterListSyntax? typeParameters, SyntaxToken openBraceToken, GreenNode? members, SyntaxToken closeBraceToken)
       : base(kind)
     {
-        this.SlotCount = 5;
+        this.SlotCount = 6;
         this.AdjustFlagsAndWidth(classKeyword);
         this.classKeyword = classKeyword;
         if (identifier != null)
         {
             this.AdjustFlagsAndWidth(identifier);
             this.identifier = identifier;
+        }
+        if (typeParameters != null)
+        {
+            this.AdjustFlagsAndWidth(typeParameters);
+            this.typeParameters = typeParameters;
         }
         this.AdjustFlagsAndWidth(openBraceToken);
         this.openBraceToken = openBraceToken;
@@ -2515,6 +4697,7 @@ internal sealed partial class ClassDeclarationSyntax : DeclarationStatementSynta
 
     public SyntaxToken ClassKeyword => this.classKeyword;
     public SyntaxToken? Identifier => this.identifier;
+    public TypeParameterListSyntax? TypeParameters => this.typeParameters;
     public SyntaxToken OpenBraceToken => this.openBraceToken;
     public CoreSyntax.SyntaxList<ClassElementSyntax> Members => new CoreSyntax.SyntaxList<ClassElementSyntax>(this.members);
     public SyntaxToken CloseBraceToken => this.closeBraceToken;
@@ -2524,9 +4707,10 @@ internal sealed partial class ClassDeclarationSyntax : DeclarationStatementSynta
         {
             0 => this.classKeyword,
             1 => this.identifier,
-            2 => this.openBraceToken,
-            3 => this.members,
-            4 => this.closeBraceToken,
+            2 => this.typeParameters,
+            3 => this.openBraceToken,
+            4 => this.members,
+            5 => this.closeBraceToken,
             _ => null,
         };
 
@@ -2535,11 +4719,11 @@ internal sealed partial class ClassDeclarationSyntax : DeclarationStatementSynta
     public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitClassDeclaration(this);
     public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitClassDeclaration(this);
 
-    public ClassDeclarationSyntax Update(SyntaxToken classKeyword, SyntaxToken identifier, SyntaxToken openBraceToken, CoreSyntax.SyntaxList<ClassElementSyntax> members, SyntaxToken closeBraceToken)
+    public ClassDeclarationSyntax Update(SyntaxToken classKeyword, SyntaxToken identifier, TypeParameterListSyntax typeParameters, SyntaxToken openBraceToken, CoreSyntax.SyntaxList<ClassElementSyntax> members, SyntaxToken closeBraceToken)
     {
-        if (classKeyword != this.ClassKeyword || identifier != this.Identifier || openBraceToken != this.OpenBraceToken || members != this.Members || closeBraceToken != this.CloseBraceToken)
+        if (classKeyword != this.ClassKeyword || identifier != this.Identifier || typeParameters != this.TypeParameters || openBraceToken != this.OpenBraceToken || members != this.Members || closeBraceToken != this.CloseBraceToken)
         {
-            var newNode = SyntaxFactory.ClassDeclaration(classKeyword, identifier, openBraceToken, members, closeBraceToken);
+            var newNode = SyntaxFactory.ClassDeclaration(classKeyword, identifier, typeParameters, openBraceToken, members, closeBraceToken);
             var diags = GetDiagnostics();
             if (diags?.Length > 0)
                 newNode = newNode.WithDiagnosticsGreen(diags);
@@ -2553,25 +4737,31 @@ internal sealed partial class ClassDeclarationSyntax : DeclarationStatementSynta
     }
 
     internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
-        => new ClassDeclarationSyntax(this.Kind, this.classKeyword, this.identifier, this.openBraceToken, this.members, this.closeBraceToken, diagnostics, GetAnnotations());
+        => new ClassDeclarationSyntax(this.Kind, this.classKeyword, this.identifier, this.typeParameters, this.openBraceToken, this.members, this.closeBraceToken, diagnostics, GetAnnotations());
 
     internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
-        => new ClassDeclarationSyntax(this.Kind, this.classKeyword, this.identifier, this.openBraceToken, this.members, this.closeBraceToken, GetDiagnostics(), annotations);
+        => new ClassDeclarationSyntax(this.Kind, this.classKeyword, this.identifier, this.typeParameters, this.openBraceToken, this.members, this.closeBraceToken, GetDiagnostics(), annotations);
 }
 
 internal sealed partial class MethodDeclarationSyntax : ClassElementSyntax
 {
     internal readonly IdentifierNameSyntax name;
+    internal readonly TypeParameterListSyntax? typeParameters;
     internal readonly ParameterListSyntax parameterList;
     internal readonly TypeAnnotationSyntax? typeAnnotation;
     internal readonly BlockSyntax? body;
 
-    internal MethodDeclarationSyntax(SyntaxKind kind, IdentifierNameSyntax name, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+    internal MethodDeclarationSyntax(SyntaxKind kind, IdentifierNameSyntax name, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
       : base(kind, diagnostics, annotations)
     {
-        this.SlotCount = 4;
+        this.SlotCount = 5;
         this.AdjustFlagsAndWidth(name);
         this.name = name;
+        if (typeParameters != null)
+        {
+            this.AdjustFlagsAndWidth(typeParameters);
+            this.typeParameters = typeParameters;
+        }
         this.AdjustFlagsAndWidth(parameterList);
         this.parameterList = parameterList;
         if (typeAnnotation != null)
@@ -2586,13 +4776,18 @@ internal sealed partial class MethodDeclarationSyntax : ClassElementSyntax
         }
     }
 
-    internal MethodDeclarationSyntax(SyntaxKind kind, IdentifierNameSyntax name, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body, SyntaxFactoryContext context)
+    internal MethodDeclarationSyntax(SyntaxKind kind, IdentifierNameSyntax name, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body, SyntaxFactoryContext context)
       : base(kind)
     {
         this.SetFactoryContext(context);
-        this.SlotCount = 4;
+        this.SlotCount = 5;
         this.AdjustFlagsAndWidth(name);
         this.name = name;
+        if (typeParameters != null)
+        {
+            this.AdjustFlagsAndWidth(typeParameters);
+            this.typeParameters = typeParameters;
+        }
         this.AdjustFlagsAndWidth(parameterList);
         this.parameterList = parameterList;
         if (typeAnnotation != null)
@@ -2607,12 +4802,17 @@ internal sealed partial class MethodDeclarationSyntax : ClassElementSyntax
         }
     }
 
-    internal MethodDeclarationSyntax(SyntaxKind kind, IdentifierNameSyntax name, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
+    internal MethodDeclarationSyntax(SyntaxKind kind, IdentifierNameSyntax name, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
       : base(kind)
     {
-        this.SlotCount = 4;
+        this.SlotCount = 5;
         this.AdjustFlagsAndWidth(name);
         this.name = name;
+        if (typeParameters != null)
+        {
+            this.AdjustFlagsAndWidth(typeParameters);
+            this.typeParameters = typeParameters;
+        }
         this.AdjustFlagsAndWidth(parameterList);
         this.parameterList = parameterList;
         if (typeAnnotation != null)
@@ -2628,6 +4828,7 @@ internal sealed partial class MethodDeclarationSyntax : ClassElementSyntax
     }
 
     public IdentifierNameSyntax Name => this.name;
+    public TypeParameterListSyntax? TypeParameters => this.typeParameters;
     public ParameterListSyntax ParameterList => this.parameterList;
     public TypeAnnotationSyntax? TypeAnnotation => this.typeAnnotation;
     public BlockSyntax? Body => this.body;
@@ -2636,9 +4837,10 @@ internal sealed partial class MethodDeclarationSyntax : ClassElementSyntax
         => index switch
         {
             0 => this.name,
-            1 => this.parameterList,
-            2 => this.typeAnnotation,
-            3 => this.body,
+            1 => this.typeParameters,
+            2 => this.parameterList,
+            3 => this.typeAnnotation,
+            4 => this.body,
             _ => null,
         };
 
@@ -2647,11 +4849,11 @@ internal sealed partial class MethodDeclarationSyntax : ClassElementSyntax
     public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitMethodDeclaration(this);
     public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitMethodDeclaration(this);
 
-    public MethodDeclarationSyntax Update(IdentifierNameSyntax name, ParameterListSyntax parameterList, TypeAnnotationSyntax typeAnnotation, BlockSyntax body)
+    public MethodDeclarationSyntax Update(IdentifierNameSyntax name, TypeParameterListSyntax typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax typeAnnotation, BlockSyntax body)
     {
-        if (name != this.Name || parameterList != this.ParameterList || typeAnnotation != this.TypeAnnotation || body != this.Body)
+        if (name != this.Name || typeParameters != this.TypeParameters || parameterList != this.ParameterList || typeAnnotation != this.TypeAnnotation || body != this.Body)
         {
-            var newNode = SyntaxFactory.MethodDeclaration(name, parameterList, typeAnnotation, body);
+            var newNode = SyntaxFactory.MethodDeclaration(name, typeParameters, parameterList, typeAnnotation, body);
             var diags = GetDiagnostics();
             if (diags?.Length > 0)
                 newNode = newNode.WithDiagnosticsGreen(diags);
@@ -2665,10 +4867,10 @@ internal sealed partial class MethodDeclarationSyntax : ClassElementSyntax
     }
 
     internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
-        => new MethodDeclarationSyntax(this.Kind, this.name, this.parameterList, this.typeAnnotation, this.body, diagnostics, GetAnnotations());
+        => new MethodDeclarationSyntax(this.Kind, this.name, this.typeParameters, this.parameterList, this.typeAnnotation, this.body, diagnostics, GetAnnotations());
 
     internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
-        => new MethodDeclarationSyntax(this.Kind, this.name, this.parameterList, this.typeAnnotation, this.body, GetDiagnostics(), annotations);
+        => new MethodDeclarationSyntax(this.Kind, this.name, this.typeParameters, this.parameterList, this.typeAnnotation, this.body, GetDiagnostics(), annotations);
 }
 
 internal sealed partial class PropertyDeclarationSyntax : ClassElementSyntax
@@ -2977,11 +5179,27 @@ internal partial class TypeScriptSyntaxVisitor<TResult>
     public virtual TResult VisitLiteralExpression(LiteralExpressionSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitBinaryExpression(BinaryExpressionSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitMemberAccessExpression(MemberAccessExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitPrefixUnaryExpression(PrefixUnaryExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitPostfixUnaryExpression(PostfixUnaryExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitDeleteExpression(DeleteExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitTypeOfExpression(TypeOfExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitVoidExpression(VoidExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitThisExpression(ThisExpressionSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitArgument(ArgumentSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitArgumentList(ArgumentListSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitCallExpression(CallExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitNewExpression(NewExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitArrayLiteralExpression(ArrayLiteralExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitObjectLiteralExpression(ObjectLiteralExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitPropertyAssignment(PropertyAssignmentSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitPredefinedType(PredefinedTypeSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitTypeReference(TypeReferenceSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitArrayType(ArrayTypeSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitTypeParameter(TypeParameterSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitTypeParameterConstraintClause(TypeParameterConstraintClauseSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitTypeParameterDefaultClause(TypeParameterDefaultClauseSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitTypeParameterList(TypeParameterListSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitTypeArgumentList(TypeArgumentListSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitTypeAnnotation(TypeAnnotationSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitPropertySignature(PropertySignatureSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitBlock(BlockSyntax node) => this.DefaultVisit(node);
@@ -2990,6 +5208,13 @@ internal partial class TypeScriptSyntaxVisitor<TResult>
     public virtual TResult VisitEmptyStatement(EmptyStatementSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitIfStatement(IfStatementSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitElseClause(ElseClauseSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitSwitchStatement(SwitchStatementSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitCaseClause(CaseClauseSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitDefaultClause(DefaultClauseSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitTryStatement(TryStatementSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitCatchClause(CatchClauseSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitFinallyClause(FinallyClauseSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitThrowStatement(ThrowStatementSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitWhileStatement(WhileStatementSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitForStatement(ForStatementSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitVariableDeclaration(VariableDeclarationSyntax node) => this.DefaultVisit(node);
@@ -3012,11 +5237,27 @@ internal partial class TypeScriptSyntaxVisitor
     public virtual void VisitLiteralExpression(LiteralExpressionSyntax node) => this.DefaultVisit(node);
     public virtual void VisitBinaryExpression(BinaryExpressionSyntax node) => this.DefaultVisit(node);
     public virtual void VisitMemberAccessExpression(MemberAccessExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitPrefixUnaryExpression(PrefixUnaryExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitPostfixUnaryExpression(PostfixUnaryExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitDeleteExpression(DeleteExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitTypeOfExpression(TypeOfExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitVoidExpression(VoidExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitThisExpression(ThisExpressionSyntax node) => this.DefaultVisit(node);
     public virtual void VisitArgument(ArgumentSyntax node) => this.DefaultVisit(node);
     public virtual void VisitArgumentList(ArgumentListSyntax node) => this.DefaultVisit(node);
     public virtual void VisitCallExpression(CallExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitNewExpression(NewExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitArrayLiteralExpression(ArrayLiteralExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitObjectLiteralExpression(ObjectLiteralExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitPropertyAssignment(PropertyAssignmentSyntax node) => this.DefaultVisit(node);
     public virtual void VisitPredefinedType(PredefinedTypeSyntax node) => this.DefaultVisit(node);
     public virtual void VisitTypeReference(TypeReferenceSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitArrayType(ArrayTypeSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitTypeParameter(TypeParameterSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitTypeParameterConstraintClause(TypeParameterConstraintClauseSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitTypeParameterDefaultClause(TypeParameterDefaultClauseSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitTypeParameterList(TypeParameterListSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitTypeArgumentList(TypeArgumentListSyntax node) => this.DefaultVisit(node);
     public virtual void VisitTypeAnnotation(TypeAnnotationSyntax node) => this.DefaultVisit(node);
     public virtual void VisitPropertySignature(PropertySignatureSyntax node) => this.DefaultVisit(node);
     public virtual void VisitBlock(BlockSyntax node) => this.DefaultVisit(node);
@@ -3025,6 +5266,13 @@ internal partial class TypeScriptSyntaxVisitor
     public virtual void VisitEmptyStatement(EmptyStatementSyntax node) => this.DefaultVisit(node);
     public virtual void VisitIfStatement(IfStatementSyntax node) => this.DefaultVisit(node);
     public virtual void VisitElseClause(ElseClauseSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitSwitchStatement(SwitchStatementSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitCaseClause(CaseClauseSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitDefaultClause(DefaultClauseSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitTryStatement(TryStatementSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitCatchClause(CatchClauseSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitFinallyClause(FinallyClauseSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitThrowStatement(ThrowStatementSyntax node) => this.DefaultVisit(node);
     public virtual void VisitWhileStatement(WhileStatementSyntax node) => this.DefaultVisit(node);
     public virtual void VisitForStatement(ForStatementSyntax node) => this.DefaultVisit(node);
     public virtual void VisitVariableDeclaration(VariableDeclarationSyntax node) => this.DefaultVisit(node);
@@ -3055,6 +5303,24 @@ internal partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<TypeSc
     public override TypeScriptSyntaxNode VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
         => node.Update((ExpressionSyntax)Visit(node.Expression), (SyntaxToken)Visit(node.DotToken), (IdentifierNameSyntax)Visit(node.Name));
 
+    public override TypeScriptSyntaxNode VisitPrefixUnaryExpression(PrefixUnaryExpressionSyntax node)
+        => node.Update((SyntaxToken)Visit(node.OperatorToken), (ExpressionSyntax)Visit(node.Operand));
+
+    public override TypeScriptSyntaxNode VisitPostfixUnaryExpression(PostfixUnaryExpressionSyntax node)
+        => node.Update((ExpressionSyntax)Visit(node.Operand), (SyntaxToken)Visit(node.OperatorToken));
+
+    public override TypeScriptSyntaxNode VisitDeleteExpression(DeleteExpressionSyntax node)
+        => node.Update((SyntaxToken)Visit(node.DeleteKeyword), (ExpressionSyntax)Visit(node.Expression));
+
+    public override TypeScriptSyntaxNode VisitTypeOfExpression(TypeOfExpressionSyntax node)
+        => node.Update((SyntaxToken)Visit(node.TypeOfKeyword), (ExpressionSyntax)Visit(node.Expression));
+
+    public override TypeScriptSyntaxNode VisitVoidExpression(VoidExpressionSyntax node)
+        => node.Update((SyntaxToken)Visit(node.VoidKeyword), (ExpressionSyntax)Visit(node.Expression));
+
+    public override TypeScriptSyntaxNode VisitThisExpression(ThisExpressionSyntax node)
+        => node.Update((SyntaxToken)Visit(node.ThisKeyword));
+
     public override TypeScriptSyntaxNode VisitArgument(ArgumentSyntax node)
         => node.Update((ExpressionSyntax)Visit(node.Expression));
 
@@ -3062,13 +5328,43 @@ internal partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<TypeSc
         => node.Update((SyntaxToken)Visit(node.OpenParenToken), VisitList(node.Arguments), (SyntaxToken)Visit(node.CloseParenToken));
 
     public override TypeScriptSyntaxNode VisitCallExpression(CallExpressionSyntax node)
-        => node.Update((ExpressionSyntax)Visit(node.Expression), (ArgumentListSyntax)Visit(node.ArgumentList));
+        => node.Update((ExpressionSyntax)Visit(node.Expression), (TypeArgumentListSyntax)Visit(node.TypeArguments), (ArgumentListSyntax)Visit(node.ArgumentList));
+
+    public override TypeScriptSyntaxNode VisitNewExpression(NewExpressionSyntax node)
+        => node.Update((SyntaxToken)Visit(node.NewKeyword), (TypeSyntax)Visit(node.Type), (ArgumentListSyntax)Visit(node.ArgumentList));
+
+    public override TypeScriptSyntaxNode VisitArrayLiteralExpression(ArrayLiteralExpressionSyntax node)
+        => node.Update((SyntaxToken)Visit(node.OpenBracketToken), VisitList(node.Elements), (SyntaxToken)Visit(node.CloseBracketToken));
+
+    public override TypeScriptSyntaxNode VisitObjectLiteralExpression(ObjectLiteralExpressionSyntax node)
+        => node.Update((SyntaxToken)Visit(node.OpenBraceToken), VisitList(node.Properties), (SyntaxToken)Visit(node.CloseBraceToken));
+
+    public override TypeScriptSyntaxNode VisitPropertyAssignment(PropertyAssignmentSyntax node)
+        => node.Update((IdentifierNameSyntax)Visit(node.Name), (SyntaxToken)Visit(node.ColonToken), (ExpressionSyntax)Visit(node.Expression));
 
     public override TypeScriptSyntaxNode VisitPredefinedType(PredefinedTypeSyntax node)
         => node.Update((SyntaxToken)Visit(node.Keyword));
 
     public override TypeScriptSyntaxNode VisitTypeReference(TypeReferenceSyntax node)
-        => node.Update((IdentifierNameSyntax)Visit(node.TypeName));
+        => node.Update((IdentifierNameSyntax)Visit(node.TypeName), (TypeArgumentListSyntax)Visit(node.TypeArguments));
+
+    public override TypeScriptSyntaxNode VisitArrayType(ArrayTypeSyntax node)
+        => node.Update((TypeSyntax)Visit(node.ElementType), (SyntaxToken)Visit(node.OpenBracketToken), (SyntaxToken)Visit(node.CloseBracketToken));
+
+    public override TypeScriptSyntaxNode VisitTypeParameter(TypeParameterSyntax node)
+        => node.Update((SyntaxToken)Visit(node.Identifier), (TypeParameterConstraintClauseSyntax)Visit(node.Constraint), (TypeParameterDefaultClauseSyntax)Visit(node.Default));
+
+    public override TypeScriptSyntaxNode VisitTypeParameterConstraintClause(TypeParameterConstraintClauseSyntax node)
+        => node.Update((SyntaxToken)Visit(node.ExtendsKeyword), (TypeSyntax)Visit(node.Type));
+
+    public override TypeScriptSyntaxNode VisitTypeParameterDefaultClause(TypeParameterDefaultClauseSyntax node)
+        => node.Update((SyntaxToken)Visit(node.EqualsToken), (TypeSyntax)Visit(node.Type));
+
+    public override TypeScriptSyntaxNode VisitTypeParameterList(TypeParameterListSyntax node)
+        => node.Update((SyntaxToken)Visit(node.LessThanToken), VisitList(node.Parameters), (SyntaxToken)Visit(node.GreaterThanToken));
+
+    public override TypeScriptSyntaxNode VisitTypeArgumentList(TypeArgumentListSyntax node)
+        => node.Update((SyntaxToken)Visit(node.LessThanToken), VisitList(node.Arguments), (SyntaxToken)Visit(node.GreaterThanToken));
 
     public override TypeScriptSyntaxNode VisitTypeAnnotation(TypeAnnotationSyntax node)
         => node.Update((SyntaxToken)Visit(node.ColonToken), (TypeSyntax)Visit(node.Type));
@@ -3094,6 +5390,27 @@ internal partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<TypeSc
     public override TypeScriptSyntaxNode VisitElseClause(ElseClauseSyntax node)
         => node.Update((SyntaxToken)Visit(node.ElseKeyword), (StatementSyntax)Visit(node.Statement));
 
+    public override TypeScriptSyntaxNode VisitSwitchStatement(SwitchStatementSyntax node)
+        => node.Update((SyntaxToken)Visit(node.SwitchKeyword), (SyntaxToken)Visit(node.OpenParenToken), (ExpressionSyntax)Visit(node.Expression), (SyntaxToken)Visit(node.CloseParenToken), (SyntaxToken)Visit(node.OpenBraceToken), VisitList(node.Clauses), (SyntaxToken)Visit(node.CloseBraceToken));
+
+    public override TypeScriptSyntaxNode VisitCaseClause(CaseClauseSyntax node)
+        => node.Update((SyntaxToken)Visit(node.CaseKeyword), (ExpressionSyntax)Visit(node.Expression), (SyntaxToken)Visit(node.ColonToken), VisitList(node.Statements));
+
+    public override TypeScriptSyntaxNode VisitDefaultClause(DefaultClauseSyntax node)
+        => node.Update((SyntaxToken)Visit(node.DefaultKeyword), (SyntaxToken)Visit(node.ColonToken), VisitList(node.Statements));
+
+    public override TypeScriptSyntaxNode VisitTryStatement(TryStatementSyntax node)
+        => node.Update((SyntaxToken)Visit(node.TryKeyword), (BlockSyntax)Visit(node.Block), (CatchClauseSyntax)Visit(node.CatchClause), (FinallyClauseSyntax)Visit(node.FinallyClause));
+
+    public override TypeScriptSyntaxNode VisitCatchClause(CatchClauseSyntax node)
+        => node.Update((SyntaxToken)Visit(node.CatchKeyword), (SyntaxToken)Visit(node.OpenParenToken), (VariableDeclarationSyntax)Visit(node.Declaration), (SyntaxToken)Visit(node.CloseParenToken), (BlockSyntax)Visit(node.Block));
+
+    public override TypeScriptSyntaxNode VisitFinallyClause(FinallyClauseSyntax node)
+        => node.Update((SyntaxToken)Visit(node.FinallyKeyword), (BlockSyntax)Visit(node.Block));
+
+    public override TypeScriptSyntaxNode VisitThrowStatement(ThrowStatementSyntax node)
+        => node.Update((SyntaxToken)Visit(node.ThrowKeyword), (ExpressionSyntax)Visit(node.Expression), (SyntaxToken)Visit(node.SemicolonToken));
+
     public override TypeScriptSyntaxNode VisitWhileStatement(WhileStatementSyntax node)
         => node.Update((SyntaxToken)Visit(node.WhileKeyword), (SyntaxToken)Visit(node.OpenParenToken), (ExpressionSyntax)Visit(node.Condition), (SyntaxToken)Visit(node.CloseParenToken), (StatementSyntax)Visit(node.Statement));
 
@@ -3116,16 +5433,16 @@ internal partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<TypeSc
         => node.Update((SyntaxToken)Visit(node.OpenParenToken), VisitList(node.Parameters), (SyntaxToken)Visit(node.CloseParenToken));
 
     public override TypeScriptSyntaxNode VisitFunctionDeclaration(FunctionDeclarationSyntax node)
-        => node.Update((SyntaxToken)Visit(node.FunctionKeyword), (SyntaxToken)Visit(node.Identifier), (ParameterListSyntax)Visit(node.ParameterList), (TypeAnnotationSyntax)Visit(node.TypeAnnotation), (BlockSyntax)Visit(node.Body));
+        => node.Update((SyntaxToken)Visit(node.FunctionKeyword), (SyntaxToken)Visit(node.Identifier), (TypeParameterListSyntax)Visit(node.TypeParameters), (ParameterListSyntax)Visit(node.ParameterList), (TypeAnnotationSyntax)Visit(node.TypeAnnotation), (BlockSyntax)Visit(node.Body));
 
     public override TypeScriptSyntaxNode VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
-        => node.Update((SyntaxToken)Visit(node.InterfaceKeyword), (SyntaxToken)Visit(node.Identifier), (SyntaxToken)Visit(node.OpenBraceToken), VisitList(node.Members), (SyntaxToken)Visit(node.CloseBraceToken));
+        => node.Update((SyntaxToken)Visit(node.InterfaceKeyword), (SyntaxToken)Visit(node.Identifier), (TypeParameterListSyntax)Visit(node.TypeParameters), (SyntaxToken)Visit(node.OpenBraceToken), VisitList(node.Members), (SyntaxToken)Visit(node.CloseBraceToken));
 
     public override TypeScriptSyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
-        => node.Update((SyntaxToken)Visit(node.ClassKeyword), (SyntaxToken)Visit(node.Identifier), (SyntaxToken)Visit(node.OpenBraceToken), VisitList(node.Members), (SyntaxToken)Visit(node.CloseBraceToken));
+        => node.Update((SyntaxToken)Visit(node.ClassKeyword), (SyntaxToken)Visit(node.Identifier), (TypeParameterListSyntax)Visit(node.TypeParameters), (SyntaxToken)Visit(node.OpenBraceToken), VisitList(node.Members), (SyntaxToken)Visit(node.CloseBraceToken));
 
     public override TypeScriptSyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax node)
-        => node.Update((IdentifierNameSyntax)Visit(node.Name), (ParameterListSyntax)Visit(node.ParameterList), (TypeAnnotationSyntax)Visit(node.TypeAnnotation), (BlockSyntax)Visit(node.Body));
+        => node.Update((IdentifierNameSyntax)Visit(node.Name), (TypeParameterListSyntax)Visit(node.TypeParameters), (ParameterListSyntax)Visit(node.ParameterList), (TypeAnnotationSyntax)Visit(node.TypeAnnotation), (BlockSyntax)Visit(node.Body));
 
     public override TypeScriptSyntaxNode VisitPropertyDeclaration(PropertyDeclarationSyntax node)
         => node.Update((IdentifierNameSyntax)Visit(node.Name), (TypeAnnotationSyntax)Visit(node.TypeAnnotation), (EqualsValueClauseSyntax)Visit(node.EqualsValueClause), (SyntaxToken)Visit(node.SemicolonToken));
@@ -3253,6 +5570,129 @@ internal partial class ContextAwareSyntax
         return result;
     }
 
+    public PrefixUnaryExpressionSyntax PrefixUnaryExpression(SyntaxToken operatorToken, ExpressionSyntax operand)
+    {
+#if DEBUG
+        if (operatorToken == null) throw new ArgumentNullException(nameof(operatorToken));
+        if (operand == null) throw new ArgumentNullException(nameof(operand));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.PrefixUnaryExpression, operatorToken, operand, this.context, out hash);
+        if (cached != null) return (PrefixUnaryExpressionSyntax)cached;
+
+        var result = new PrefixUnaryExpressionSyntax(SyntaxKind.PrefixUnaryExpression, operatorToken, operand, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public PostfixUnaryExpressionSyntax PostfixUnaryExpression(ExpressionSyntax operand, SyntaxToken operatorToken)
+    {
+#if DEBUG
+        if (operand == null) throw new ArgumentNullException(nameof(operand));
+        if (operatorToken == null) throw new ArgumentNullException(nameof(operatorToken));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.PostfixUnaryExpression, operand, operatorToken, this.context, out hash);
+        if (cached != null) return (PostfixUnaryExpressionSyntax)cached;
+
+        var result = new PostfixUnaryExpressionSyntax(SyntaxKind.PostfixUnaryExpression, operand, operatorToken, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public DeleteExpressionSyntax DeleteExpression(SyntaxToken deleteKeyword, ExpressionSyntax expression)
+    {
+#if DEBUG
+        if (deleteKeyword == null) throw new ArgumentNullException(nameof(deleteKeyword));
+        if (deleteKeyword.Kind != SyntaxKind.DeleteKeyword) throw new ArgumentException(nameof(deleteKeyword));
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.DeleteExpression, deleteKeyword, expression, this.context, out hash);
+        if (cached != null) return (DeleteExpressionSyntax)cached;
+
+        var result = new DeleteExpressionSyntax(SyntaxKind.DeleteExpression, deleteKeyword, expression, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public TypeOfExpressionSyntax TypeOfExpression(SyntaxToken typeOfKeyword, ExpressionSyntax expression)
+    {
+#if DEBUG
+        if (typeOfKeyword == null) throw new ArgumentNullException(nameof(typeOfKeyword));
+        if (typeOfKeyword.Kind != SyntaxKind.TypeOfKeyword) throw new ArgumentException(nameof(typeOfKeyword));
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.TypeOfExpression, typeOfKeyword, expression, this.context, out hash);
+        if (cached != null) return (TypeOfExpressionSyntax)cached;
+
+        var result = new TypeOfExpressionSyntax(SyntaxKind.TypeOfExpression, typeOfKeyword, expression, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public VoidExpressionSyntax VoidExpression(SyntaxToken voidKeyword, ExpressionSyntax expression)
+    {
+#if DEBUG
+        if (voidKeyword == null) throw new ArgumentNullException(nameof(voidKeyword));
+        if (voidKeyword.Kind != SyntaxKind.VoidKeyword) throw new ArgumentException(nameof(voidKeyword));
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.VoidExpression, voidKeyword, expression, this.context, out hash);
+        if (cached != null) return (VoidExpressionSyntax)cached;
+
+        var result = new VoidExpressionSyntax(SyntaxKind.VoidExpression, voidKeyword, expression, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public ThisExpressionSyntax ThisExpression(SyntaxToken thisKeyword)
+    {
+#if DEBUG
+        if (thisKeyword == null) throw new ArgumentNullException(nameof(thisKeyword));
+        if (thisKeyword.Kind != SyntaxKind.ThisKeyword) throw new ArgumentException(nameof(thisKeyword));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.ThisExpression, thisKeyword, this.context, out hash);
+        if (cached != null) return (ThisExpressionSyntax)cached;
+
+        var result = new ThisExpressionSyntax(SyntaxKind.ThisExpression, thisKeyword, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
     public ArgumentSyntax Argument(ExpressionSyntax expression)
     {
 #if DEBUG
@@ -3294,7 +5734,7 @@ internal partial class ContextAwareSyntax
         return result;
     }
 
-    public CallExpressionSyntax CallExpression(ExpressionSyntax expression, ArgumentListSyntax argumentList)
+    public CallExpressionSyntax CallExpression(ExpressionSyntax expression, TypeArgumentListSyntax? typeArguments, ArgumentListSyntax argumentList)
     {
 #if DEBUG
         if (expression == null) throw new ArgumentNullException(nameof(expression));
@@ -3302,10 +5742,97 @@ internal partial class ContextAwareSyntax
 #endif
 
         int hash;
-        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.CallExpression, expression, argumentList, this.context, out hash);
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.CallExpression, expression, typeArguments, argumentList, this.context, out hash);
         if (cached != null) return (CallExpressionSyntax)cached;
 
-        var result = new CallExpressionSyntax(SyntaxKind.CallExpression, expression, argumentList, this.context);
+        var result = new CallExpressionSyntax(SyntaxKind.CallExpression, expression, typeArguments, argumentList, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public NewExpressionSyntax NewExpression(SyntaxToken newKeyword, TypeSyntax type, ArgumentListSyntax? argumentList)
+    {
+#if DEBUG
+        if (newKeyword == null) throw new ArgumentNullException(nameof(newKeyword));
+        if (newKeyword.Kind != SyntaxKind.NewKeyword) throw new ArgumentException(nameof(newKeyword));
+        if (type == null) throw new ArgumentNullException(nameof(type));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.NewExpression, newKeyword, type, argumentList, this.context, out hash);
+        if (cached != null) return (NewExpressionSyntax)cached;
+
+        var result = new NewExpressionSyntax(SyntaxKind.NewExpression, newKeyword, type, argumentList, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public ArrayLiteralExpressionSyntax ArrayLiteralExpression(SyntaxToken openBracketToken, CoreSyntax.SeparatedSyntaxList<ExpressionSyntax> elements, SyntaxToken closeBracketToken)
+    {
+#if DEBUG
+        if (openBracketToken == null) throw new ArgumentNullException(nameof(openBracketToken));
+        if (openBracketToken.Kind != SyntaxKind.OpenBracketToken) throw new ArgumentException(nameof(openBracketToken));
+        if (closeBracketToken == null) throw new ArgumentNullException(nameof(closeBracketToken));
+        if (closeBracketToken.Kind != SyntaxKind.CloseBracketToken) throw new ArgumentException(nameof(closeBracketToken));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.ArrayLiteralExpression, openBracketToken, elements.Node, closeBracketToken, this.context, out hash);
+        if (cached != null) return (ArrayLiteralExpressionSyntax)cached;
+
+        var result = new ArrayLiteralExpressionSyntax(SyntaxKind.ArrayLiteralExpression, openBracketToken, elements.Node, closeBracketToken, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public ObjectLiteralExpressionSyntax ObjectLiteralExpression(SyntaxToken openBraceToken, CoreSyntax.SeparatedSyntaxList<PropertyAssignmentSyntax> properties, SyntaxToken closeBraceToken)
+    {
+#if DEBUG
+        if (openBraceToken == null) throw new ArgumentNullException(nameof(openBraceToken));
+        if (openBraceToken.Kind != SyntaxKind.OpenBraceToken) throw new ArgumentException(nameof(openBraceToken));
+        if (closeBraceToken == null) throw new ArgumentNullException(nameof(closeBraceToken));
+        if (closeBraceToken.Kind != SyntaxKind.CloseBraceToken) throw new ArgumentException(nameof(closeBraceToken));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.ObjectLiteralExpression, openBraceToken, properties.Node, closeBraceToken, this.context, out hash);
+        if (cached != null) return (ObjectLiteralExpressionSyntax)cached;
+
+        var result = new ObjectLiteralExpressionSyntax(SyntaxKind.ObjectLiteralExpression, openBraceToken, properties.Node, closeBraceToken, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public PropertyAssignmentSyntax PropertyAssignment(IdentifierNameSyntax name, SyntaxToken colonToken, ExpressionSyntax expression)
+    {
+#if DEBUG
+        if (name == null) throw new ArgumentNullException(nameof(name));
+        if (colonToken == null) throw new ArgumentNullException(nameof(colonToken));
+        if (colonToken.Kind != SyntaxKind.ColonToken) throw new ArgumentException(nameof(colonToken));
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.PropertyAssignment, name, colonToken, expression, this.context, out hash);
+        if (cached != null) return (PropertyAssignmentSyntax)cached;
+
+        var result = new PropertyAssignmentSyntax(SyntaxKind.PropertyAssignment, name, colonToken, expression, this.context);
         if (hash >= 0)
         {
             SyntaxNodeCache.AddNode(result, hash);
@@ -3333,17 +5860,146 @@ internal partial class ContextAwareSyntax
         return result;
     }
 
-    public TypeReferenceSyntax TypeReference(IdentifierNameSyntax typeName)
+    public TypeReferenceSyntax TypeReference(IdentifierNameSyntax typeName, TypeArgumentListSyntax? typeArguments)
     {
 #if DEBUG
         if (typeName == null) throw new ArgumentNullException(nameof(typeName));
 #endif
 
         int hash;
-        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.TypeReference, typeName, this.context, out hash);
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.TypeReference, typeName, typeArguments, this.context, out hash);
         if (cached != null) return (TypeReferenceSyntax)cached;
 
-        var result = new TypeReferenceSyntax(SyntaxKind.TypeReference, typeName, this.context);
+        var result = new TypeReferenceSyntax(SyntaxKind.TypeReference, typeName, typeArguments, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public ArrayTypeSyntax ArrayType(TypeSyntax elementType, SyntaxToken openBracketToken, SyntaxToken closeBracketToken)
+    {
+#if DEBUG
+        if (elementType == null) throw new ArgumentNullException(nameof(elementType));
+        if (openBracketToken == null) throw new ArgumentNullException(nameof(openBracketToken));
+        if (openBracketToken.Kind != SyntaxKind.OpenBracketToken) throw new ArgumentException(nameof(openBracketToken));
+        if (closeBracketToken == null) throw new ArgumentNullException(nameof(closeBracketToken));
+        if (closeBracketToken.Kind != SyntaxKind.CloseBracketToken) throw new ArgumentException(nameof(closeBracketToken));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.ArrayType, elementType, openBracketToken, closeBracketToken, this.context, out hash);
+        if (cached != null) return (ArrayTypeSyntax)cached;
+
+        var result = new ArrayTypeSyntax(SyntaxKind.ArrayType, elementType, openBracketToken, closeBracketToken, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public TypeParameterSyntax TypeParameter(SyntaxToken identifier, TypeParameterConstraintClauseSyntax? constraint, TypeParameterDefaultClauseSyntax? @default)
+    {
+#if DEBUG
+        if (identifier == null) throw new ArgumentNullException(nameof(identifier));
+        if (identifier.Kind != SyntaxKind.IdentifierToken) throw new ArgumentException(nameof(identifier));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.TypeParameter, identifier, constraint, @default, this.context, out hash);
+        if (cached != null) return (TypeParameterSyntax)cached;
+
+        var result = new TypeParameterSyntax(SyntaxKind.TypeParameter, identifier, constraint, @default, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public TypeParameterConstraintClauseSyntax TypeParameterConstraintClause(SyntaxToken extendsKeyword, TypeSyntax type)
+    {
+#if DEBUG
+        if (extendsKeyword == null) throw new ArgumentNullException(nameof(extendsKeyword));
+        if (extendsKeyword.Kind != SyntaxKind.ExtendsKeyword) throw new ArgumentException(nameof(extendsKeyword));
+        if (type == null) throw new ArgumentNullException(nameof(type));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.TypeParameterConstraintClause, extendsKeyword, type, this.context, out hash);
+        if (cached != null) return (TypeParameterConstraintClauseSyntax)cached;
+
+        var result = new TypeParameterConstraintClauseSyntax(SyntaxKind.TypeParameterConstraintClause, extendsKeyword, type, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public TypeParameterDefaultClauseSyntax TypeParameterDefaultClause(SyntaxToken equalsToken, TypeSyntax type)
+    {
+#if DEBUG
+        if (equalsToken == null) throw new ArgumentNullException(nameof(equalsToken));
+        if (equalsToken.Kind != SyntaxKind.EqualsToken) throw new ArgumentException(nameof(equalsToken));
+        if (type == null) throw new ArgumentNullException(nameof(type));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.TypeParameterDefaultClause, equalsToken, type, this.context, out hash);
+        if (cached != null) return (TypeParameterDefaultClauseSyntax)cached;
+
+        var result = new TypeParameterDefaultClauseSyntax(SyntaxKind.TypeParameterDefaultClause, equalsToken, type, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public TypeParameterListSyntax TypeParameterList(SyntaxToken lessThanToken, CoreSyntax.SeparatedSyntaxList<TypeParameterSyntax> parameters, SyntaxToken greaterThanToken)
+    {
+#if DEBUG
+        if (lessThanToken == null) throw new ArgumentNullException(nameof(lessThanToken));
+        if (lessThanToken.Kind != SyntaxKind.LessThanToken) throw new ArgumentException(nameof(lessThanToken));
+        if (greaterThanToken == null) throw new ArgumentNullException(nameof(greaterThanToken));
+        if (greaterThanToken.Kind != SyntaxKind.GreaterThanToken) throw new ArgumentException(nameof(greaterThanToken));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.TypeParameterList, lessThanToken, parameters.Node, greaterThanToken, this.context, out hash);
+        if (cached != null) return (TypeParameterListSyntax)cached;
+
+        var result = new TypeParameterListSyntax(SyntaxKind.TypeParameterList, lessThanToken, parameters.Node, greaterThanToken, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public TypeArgumentListSyntax TypeArgumentList(SyntaxToken lessThanToken, CoreSyntax.SeparatedSyntaxList<TypeSyntax> arguments, SyntaxToken greaterThanToken)
+    {
+#if DEBUG
+        if (lessThanToken == null) throw new ArgumentNullException(nameof(lessThanToken));
+        if (lessThanToken.Kind != SyntaxKind.LessThanToken) throw new ArgumentException(nameof(lessThanToken));
+        if (greaterThanToken == null) throw new ArgumentNullException(nameof(greaterThanToken));
+        if (greaterThanToken.Kind != SyntaxKind.GreaterThanToken) throw new ArgumentException(nameof(greaterThanToken));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.TypeArgumentList, lessThanToken, arguments.Node, greaterThanToken, this.context, out hash);
+        if (cached != null) return (TypeArgumentListSyntax)cached;
+
+        var result = new TypeArgumentListSyntax(SyntaxKind.TypeArgumentList, lessThanToken, arguments.Node, greaterThanToken, this.context);
         if (hash >= 0)
         {
             SyntaxNodeCache.AddNode(result, hash);
@@ -3536,6 +6192,151 @@ internal partial class ContextAwareSyntax
         return result;
     }
 
+    public SwitchStatementSyntax SwitchStatement(SyntaxToken switchKeyword, SyntaxToken openParenToken, ExpressionSyntax expression, SyntaxToken closeParenToken, SyntaxToken openBraceToken, CoreSyntax.SyntaxList<SwitchLabelSyntax> clauses, SyntaxToken closeBraceToken)
+    {
+#if DEBUG
+        if (switchKeyword == null) throw new ArgumentNullException(nameof(switchKeyword));
+        if (switchKeyword.Kind != SyntaxKind.SwitchKeyword) throw new ArgumentException(nameof(switchKeyword));
+        if (openParenToken == null) throw new ArgumentNullException(nameof(openParenToken));
+        if (openParenToken.Kind != SyntaxKind.OpenParenToken) throw new ArgumentException(nameof(openParenToken));
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+        if (closeParenToken == null) throw new ArgumentNullException(nameof(closeParenToken));
+        if (closeParenToken.Kind != SyntaxKind.CloseParenToken) throw new ArgumentException(nameof(closeParenToken));
+        if (openBraceToken == null) throw new ArgumentNullException(nameof(openBraceToken));
+        if (openBraceToken.Kind != SyntaxKind.OpenBraceToken) throw new ArgumentException(nameof(openBraceToken));
+        if (closeBraceToken == null) throw new ArgumentNullException(nameof(closeBraceToken));
+        if (closeBraceToken.Kind != SyntaxKind.CloseBraceToken) throw new ArgumentException(nameof(closeBraceToken));
+#endif
+
+        return new SwitchStatementSyntax(SyntaxKind.SwitchStatement, switchKeyword, openParenToken, expression, closeParenToken, openBraceToken, clauses.Node, closeBraceToken, this.context);
+    }
+
+    public CaseClauseSyntax CaseClause(SyntaxToken caseKeyword, ExpressionSyntax expression, SyntaxToken colonToken, CoreSyntax.SyntaxList<StatementSyntax> statements)
+    {
+#if DEBUG
+        if (caseKeyword == null) throw new ArgumentNullException(nameof(caseKeyword));
+        if (caseKeyword.Kind != SyntaxKind.CaseKeyword) throw new ArgumentException(nameof(caseKeyword));
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+        if (colonToken == null) throw new ArgumentNullException(nameof(colonToken));
+        if (colonToken.Kind != SyntaxKind.ColonToken) throw new ArgumentException(nameof(colonToken));
+#endif
+
+        return new CaseClauseSyntax(SyntaxKind.CaseClause, caseKeyword, expression, colonToken, statements.Node, this.context);
+    }
+
+    public DefaultClauseSyntax DefaultClause(SyntaxToken defaultKeyword, SyntaxToken colonToken, CoreSyntax.SyntaxList<StatementSyntax> statements)
+    {
+#if DEBUG
+        if (defaultKeyword == null) throw new ArgumentNullException(nameof(defaultKeyword));
+        if (defaultKeyword.Kind != SyntaxKind.DefaultKeyword) throw new ArgumentException(nameof(defaultKeyword));
+        if (colonToken == null) throw new ArgumentNullException(nameof(colonToken));
+        if (colonToken.Kind != SyntaxKind.ColonToken) throw new ArgumentException(nameof(colonToken));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.DefaultClause, defaultKeyword, colonToken, statements.Node, this.context, out hash);
+        if (cached != null) return (DefaultClauseSyntax)cached;
+
+        var result = new DefaultClauseSyntax(SyntaxKind.DefaultClause, defaultKeyword, colonToken, statements.Node, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public TryStatementSyntax TryStatement(SyntaxToken tryKeyword, BlockSyntax block, CatchClauseSyntax? catchClause, FinallyClauseSyntax? finallyClause)
+    {
+#if DEBUG
+        if (tryKeyword == null) throw new ArgumentNullException(nameof(tryKeyword));
+        if (tryKeyword.Kind != SyntaxKind.TryKeyword) throw new ArgumentException(nameof(tryKeyword));
+        if (block == null) throw new ArgumentNullException(nameof(block));
+#endif
+
+        return new TryStatementSyntax(SyntaxKind.TryStatement, tryKeyword, block, catchClause, finallyClause, this.context);
+    }
+
+    public CatchClauseSyntax CatchClause(SyntaxToken catchKeyword, SyntaxToken? openParenToken, VariableDeclarationSyntax? declaration, SyntaxToken? closeParenToken, BlockSyntax block)
+    {
+#if DEBUG
+        if (catchKeyword == null) throw new ArgumentNullException(nameof(catchKeyword));
+        if (catchKeyword.Kind != SyntaxKind.CatchKeyword) throw new ArgumentException(nameof(catchKeyword));
+        if (openParenToken != null)
+        {
+            switch (openParenToken.Kind)
+            {
+                case SyntaxKind.OpenParenToken:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(openParenToken));
+            }
+        }
+        if (closeParenToken != null)
+        {
+            switch (closeParenToken.Kind)
+            {
+                case SyntaxKind.CloseParenToken:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(closeParenToken));
+            }
+        }
+        if (block == null) throw new ArgumentNullException(nameof(block));
+#endif
+
+        return new CatchClauseSyntax(SyntaxKind.CatchClause, catchKeyword, openParenToken, declaration, closeParenToken, block, this.context);
+    }
+
+    public FinallyClauseSyntax FinallyClause(SyntaxToken finallyKeyword, BlockSyntax block)
+    {
+#if DEBUG
+        if (finallyKeyword == null) throw new ArgumentNullException(nameof(finallyKeyword));
+        if (finallyKeyword.Kind != SyntaxKind.FinallyKeyword) throw new ArgumentException(nameof(finallyKeyword));
+        if (block == null) throw new ArgumentNullException(nameof(block));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.FinallyClause, finallyKeyword, block, this.context, out hash);
+        if (cached != null) return (FinallyClauseSyntax)cached;
+
+        var result = new FinallyClauseSyntax(SyntaxKind.FinallyClause, finallyKeyword, block, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public ThrowStatementSyntax ThrowStatement(SyntaxToken throwKeyword, ExpressionSyntax expression, SyntaxToken? semicolonToken)
+    {
+#if DEBUG
+        if (throwKeyword == null) throw new ArgumentNullException(nameof(throwKeyword));
+        if (throwKeyword.Kind != SyntaxKind.ThrowKeyword) throw new ArgumentException(nameof(throwKeyword));
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+        if (semicolonToken != null)
+        {
+            switch (semicolonToken.Kind)
+            {
+                case SyntaxKind.SemicolonToken:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(semicolonToken));
+            }
+        }
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.ThrowStatement, throwKeyword, expression, semicolonToken, this.context, out hash);
+        if (cached != null) return (ThrowStatementSyntax)cached;
+
+        var result = new ThrowStatementSyntax(SyntaxKind.ThrowStatement, throwKeyword, expression, semicolonToken, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
     public WhileStatementSyntax WhileStatement(SyntaxToken whileKeyword, SyntaxToken openParenToken, ExpressionSyntax condition, SyntaxToken closeParenToken, StatementSyntax statement)
     {
 #if DEBUG
@@ -3681,7 +6482,7 @@ internal partial class ContextAwareSyntax
         return result;
     }
 
-    public FunctionDeclarationSyntax FunctionDeclaration(SyntaxToken functionKeyword, SyntaxToken? identifier, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
+    public FunctionDeclarationSyntax FunctionDeclaration(SyntaxToken functionKeyword, SyntaxToken? identifier, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
     {
 #if DEBUG
         if (functionKeyword == null) throw new ArgumentNullException(nameof(functionKeyword));
@@ -3698,10 +6499,10 @@ internal partial class ContextAwareSyntax
         if (parameterList == null) throw new ArgumentNullException(nameof(parameterList));
 #endif
 
-        return new FunctionDeclarationSyntax(SyntaxKind.FunctionDeclaration, functionKeyword, identifier, parameterList, typeAnnotation, body, this.context);
+        return new FunctionDeclarationSyntax(SyntaxKind.FunctionDeclaration, functionKeyword, identifier, typeParameters, parameterList, typeAnnotation, body, this.context);
     }
 
-    public InterfaceDeclarationSyntax InterfaceDeclaration(SyntaxToken interfaceKeyword, SyntaxToken identifier, SyntaxToken openBraceToken, CoreSyntax.SyntaxList<TypeElementSyntax> members, SyntaxToken closeBraceToken)
+    public InterfaceDeclarationSyntax InterfaceDeclaration(SyntaxToken interfaceKeyword, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, SyntaxToken openBraceToken, CoreSyntax.SyntaxList<TypeElementSyntax> members, SyntaxToken closeBraceToken)
     {
 #if DEBUG
         if (interfaceKeyword == null) throw new ArgumentNullException(nameof(interfaceKeyword));
@@ -3714,10 +6515,10 @@ internal partial class ContextAwareSyntax
         if (closeBraceToken.Kind != SyntaxKind.CloseBraceToken) throw new ArgumentException(nameof(closeBraceToken));
 #endif
 
-        return new InterfaceDeclarationSyntax(SyntaxKind.InterfaceDeclaration, interfaceKeyword, identifier, openBraceToken, members.Node, closeBraceToken, this.context);
+        return new InterfaceDeclarationSyntax(SyntaxKind.InterfaceDeclaration, interfaceKeyword, identifier, typeParameters, openBraceToken, members.Node, closeBraceToken, this.context);
     }
 
-    public ClassDeclarationSyntax ClassDeclaration(SyntaxToken classKeyword, SyntaxToken? identifier, SyntaxToken openBraceToken, CoreSyntax.SyntaxList<ClassElementSyntax> members, SyntaxToken closeBraceToken)
+    public ClassDeclarationSyntax ClassDeclaration(SyntaxToken classKeyword, SyntaxToken? identifier, TypeParameterListSyntax? typeParameters, SyntaxToken openBraceToken, CoreSyntax.SyntaxList<ClassElementSyntax> members, SyntaxToken closeBraceToken)
     {
 #if DEBUG
         if (classKeyword == null) throw new ArgumentNullException(nameof(classKeyword));
@@ -3737,17 +6538,17 @@ internal partial class ContextAwareSyntax
         if (closeBraceToken.Kind != SyntaxKind.CloseBraceToken) throw new ArgumentException(nameof(closeBraceToken));
 #endif
 
-        return new ClassDeclarationSyntax(SyntaxKind.ClassDeclaration, classKeyword, identifier, openBraceToken, members.Node, closeBraceToken, this.context);
+        return new ClassDeclarationSyntax(SyntaxKind.ClassDeclaration, classKeyword, identifier, typeParameters, openBraceToken, members.Node, closeBraceToken, this.context);
     }
 
-    public MethodDeclarationSyntax MethodDeclaration(IdentifierNameSyntax name, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
+    public MethodDeclarationSyntax MethodDeclaration(IdentifierNameSyntax name, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
     {
 #if DEBUG
         if (name == null) throw new ArgumentNullException(nameof(name));
         if (parameterList == null) throw new ArgumentNullException(nameof(parameterList));
 #endif
 
-        return new MethodDeclarationSyntax(SyntaxKind.MethodDeclaration, name, parameterList, typeAnnotation, body, this.context);
+        return new MethodDeclarationSyntax(SyntaxKind.MethodDeclaration, name, typeParameters, parameterList, typeAnnotation, body, this.context);
     }
 
     public PropertyDeclarationSyntax PropertyDeclaration(IdentifierNameSyntax name, TypeAnnotationSyntax? typeAnnotation, EqualsValueClauseSyntax? equalsValueClause, SyntaxToken? semicolonToken)
@@ -3921,6 +6722,129 @@ internal static partial class SyntaxFactory
         return result;
     }
 
+    public static PrefixUnaryExpressionSyntax PrefixUnaryExpression(SyntaxToken operatorToken, ExpressionSyntax operand)
+    {
+#if DEBUG
+        if (operatorToken == null) throw new ArgumentNullException(nameof(operatorToken));
+        if (operand == null) throw new ArgumentNullException(nameof(operand));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.PrefixUnaryExpression, operatorToken, operand, out hash);
+        if (cached != null) return (PrefixUnaryExpressionSyntax)cached;
+
+        var result = new PrefixUnaryExpressionSyntax(SyntaxKind.PrefixUnaryExpression, operatorToken, operand);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static PostfixUnaryExpressionSyntax PostfixUnaryExpression(ExpressionSyntax operand, SyntaxToken operatorToken)
+    {
+#if DEBUG
+        if (operand == null) throw new ArgumentNullException(nameof(operand));
+        if (operatorToken == null) throw new ArgumentNullException(nameof(operatorToken));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.PostfixUnaryExpression, operand, operatorToken, out hash);
+        if (cached != null) return (PostfixUnaryExpressionSyntax)cached;
+
+        var result = new PostfixUnaryExpressionSyntax(SyntaxKind.PostfixUnaryExpression, operand, operatorToken);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static DeleteExpressionSyntax DeleteExpression(SyntaxToken deleteKeyword, ExpressionSyntax expression)
+    {
+#if DEBUG
+        if (deleteKeyword == null) throw new ArgumentNullException(nameof(deleteKeyword));
+        if (deleteKeyword.Kind != SyntaxKind.DeleteKeyword) throw new ArgumentException(nameof(deleteKeyword));
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.DeleteExpression, deleteKeyword, expression, out hash);
+        if (cached != null) return (DeleteExpressionSyntax)cached;
+
+        var result = new DeleteExpressionSyntax(SyntaxKind.DeleteExpression, deleteKeyword, expression);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static TypeOfExpressionSyntax TypeOfExpression(SyntaxToken typeOfKeyword, ExpressionSyntax expression)
+    {
+#if DEBUG
+        if (typeOfKeyword == null) throw new ArgumentNullException(nameof(typeOfKeyword));
+        if (typeOfKeyword.Kind != SyntaxKind.TypeOfKeyword) throw new ArgumentException(nameof(typeOfKeyword));
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.TypeOfExpression, typeOfKeyword, expression, out hash);
+        if (cached != null) return (TypeOfExpressionSyntax)cached;
+
+        var result = new TypeOfExpressionSyntax(SyntaxKind.TypeOfExpression, typeOfKeyword, expression);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static VoidExpressionSyntax VoidExpression(SyntaxToken voidKeyword, ExpressionSyntax expression)
+    {
+#if DEBUG
+        if (voidKeyword == null) throw new ArgumentNullException(nameof(voidKeyword));
+        if (voidKeyword.Kind != SyntaxKind.VoidKeyword) throw new ArgumentException(nameof(voidKeyword));
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.VoidExpression, voidKeyword, expression, out hash);
+        if (cached != null) return (VoidExpressionSyntax)cached;
+
+        var result = new VoidExpressionSyntax(SyntaxKind.VoidExpression, voidKeyword, expression);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static ThisExpressionSyntax ThisExpression(SyntaxToken thisKeyword)
+    {
+#if DEBUG
+        if (thisKeyword == null) throw new ArgumentNullException(nameof(thisKeyword));
+        if (thisKeyword.Kind != SyntaxKind.ThisKeyword) throw new ArgumentException(nameof(thisKeyword));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.ThisExpression, thisKeyword, out hash);
+        if (cached != null) return (ThisExpressionSyntax)cached;
+
+        var result = new ThisExpressionSyntax(SyntaxKind.ThisExpression, thisKeyword);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
     public static ArgumentSyntax Argument(ExpressionSyntax expression)
     {
 #if DEBUG
@@ -3962,7 +6886,7 @@ internal static partial class SyntaxFactory
         return result;
     }
 
-    public static CallExpressionSyntax CallExpression(ExpressionSyntax expression, ArgumentListSyntax argumentList)
+    public static CallExpressionSyntax CallExpression(ExpressionSyntax expression, TypeArgumentListSyntax? typeArguments, ArgumentListSyntax argumentList)
     {
 #if DEBUG
         if (expression == null) throw new ArgumentNullException(nameof(expression));
@@ -3970,10 +6894,97 @@ internal static partial class SyntaxFactory
 #endif
 
         int hash;
-        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.CallExpression, expression, argumentList, out hash);
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.CallExpression, expression, typeArguments, argumentList, out hash);
         if (cached != null) return (CallExpressionSyntax)cached;
 
-        var result = new CallExpressionSyntax(SyntaxKind.CallExpression, expression, argumentList);
+        var result = new CallExpressionSyntax(SyntaxKind.CallExpression, expression, typeArguments, argumentList);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static NewExpressionSyntax NewExpression(SyntaxToken newKeyword, TypeSyntax type, ArgumentListSyntax? argumentList)
+    {
+#if DEBUG
+        if (newKeyword == null) throw new ArgumentNullException(nameof(newKeyword));
+        if (newKeyword.Kind != SyntaxKind.NewKeyword) throw new ArgumentException(nameof(newKeyword));
+        if (type == null) throw new ArgumentNullException(nameof(type));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.NewExpression, newKeyword, type, argumentList, out hash);
+        if (cached != null) return (NewExpressionSyntax)cached;
+
+        var result = new NewExpressionSyntax(SyntaxKind.NewExpression, newKeyword, type, argumentList);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static ArrayLiteralExpressionSyntax ArrayLiteralExpression(SyntaxToken openBracketToken, CoreSyntax.SeparatedSyntaxList<ExpressionSyntax> elements, SyntaxToken closeBracketToken)
+    {
+#if DEBUG
+        if (openBracketToken == null) throw new ArgumentNullException(nameof(openBracketToken));
+        if (openBracketToken.Kind != SyntaxKind.OpenBracketToken) throw new ArgumentException(nameof(openBracketToken));
+        if (closeBracketToken == null) throw new ArgumentNullException(nameof(closeBracketToken));
+        if (closeBracketToken.Kind != SyntaxKind.CloseBracketToken) throw new ArgumentException(nameof(closeBracketToken));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.ArrayLiteralExpression, openBracketToken, elements.Node, closeBracketToken, out hash);
+        if (cached != null) return (ArrayLiteralExpressionSyntax)cached;
+
+        var result = new ArrayLiteralExpressionSyntax(SyntaxKind.ArrayLiteralExpression, openBracketToken, elements.Node, closeBracketToken);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static ObjectLiteralExpressionSyntax ObjectLiteralExpression(SyntaxToken openBraceToken, CoreSyntax.SeparatedSyntaxList<PropertyAssignmentSyntax> properties, SyntaxToken closeBraceToken)
+    {
+#if DEBUG
+        if (openBraceToken == null) throw new ArgumentNullException(nameof(openBraceToken));
+        if (openBraceToken.Kind != SyntaxKind.OpenBraceToken) throw new ArgumentException(nameof(openBraceToken));
+        if (closeBraceToken == null) throw new ArgumentNullException(nameof(closeBraceToken));
+        if (closeBraceToken.Kind != SyntaxKind.CloseBraceToken) throw new ArgumentException(nameof(closeBraceToken));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.ObjectLiteralExpression, openBraceToken, properties.Node, closeBraceToken, out hash);
+        if (cached != null) return (ObjectLiteralExpressionSyntax)cached;
+
+        var result = new ObjectLiteralExpressionSyntax(SyntaxKind.ObjectLiteralExpression, openBraceToken, properties.Node, closeBraceToken);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static PropertyAssignmentSyntax PropertyAssignment(IdentifierNameSyntax name, SyntaxToken colonToken, ExpressionSyntax expression)
+    {
+#if DEBUG
+        if (name == null) throw new ArgumentNullException(nameof(name));
+        if (colonToken == null) throw new ArgumentNullException(nameof(colonToken));
+        if (colonToken.Kind != SyntaxKind.ColonToken) throw new ArgumentException(nameof(colonToken));
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.PropertyAssignment, name, colonToken, expression, out hash);
+        if (cached != null) return (PropertyAssignmentSyntax)cached;
+
+        var result = new PropertyAssignmentSyntax(SyntaxKind.PropertyAssignment, name, colonToken, expression);
         if (hash >= 0)
         {
             SyntaxNodeCache.AddNode(result, hash);
@@ -4001,17 +7012,146 @@ internal static partial class SyntaxFactory
         return result;
     }
 
-    public static TypeReferenceSyntax TypeReference(IdentifierNameSyntax typeName)
+    public static TypeReferenceSyntax TypeReference(IdentifierNameSyntax typeName, TypeArgumentListSyntax? typeArguments)
     {
 #if DEBUG
         if (typeName == null) throw new ArgumentNullException(nameof(typeName));
 #endif
 
         int hash;
-        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.TypeReference, typeName, out hash);
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.TypeReference, typeName, typeArguments, out hash);
         if (cached != null) return (TypeReferenceSyntax)cached;
 
-        var result = new TypeReferenceSyntax(SyntaxKind.TypeReference, typeName);
+        var result = new TypeReferenceSyntax(SyntaxKind.TypeReference, typeName, typeArguments);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static ArrayTypeSyntax ArrayType(TypeSyntax elementType, SyntaxToken openBracketToken, SyntaxToken closeBracketToken)
+    {
+#if DEBUG
+        if (elementType == null) throw new ArgumentNullException(nameof(elementType));
+        if (openBracketToken == null) throw new ArgumentNullException(nameof(openBracketToken));
+        if (openBracketToken.Kind != SyntaxKind.OpenBracketToken) throw new ArgumentException(nameof(openBracketToken));
+        if (closeBracketToken == null) throw new ArgumentNullException(nameof(closeBracketToken));
+        if (closeBracketToken.Kind != SyntaxKind.CloseBracketToken) throw new ArgumentException(nameof(closeBracketToken));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.ArrayType, elementType, openBracketToken, closeBracketToken, out hash);
+        if (cached != null) return (ArrayTypeSyntax)cached;
+
+        var result = new ArrayTypeSyntax(SyntaxKind.ArrayType, elementType, openBracketToken, closeBracketToken);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static TypeParameterSyntax TypeParameter(SyntaxToken identifier, TypeParameterConstraintClauseSyntax? constraint, TypeParameterDefaultClauseSyntax? @default)
+    {
+#if DEBUG
+        if (identifier == null) throw new ArgumentNullException(nameof(identifier));
+        if (identifier.Kind != SyntaxKind.IdentifierToken) throw new ArgumentException(nameof(identifier));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.TypeParameter, identifier, constraint, @default, out hash);
+        if (cached != null) return (TypeParameterSyntax)cached;
+
+        var result = new TypeParameterSyntax(SyntaxKind.TypeParameter, identifier, constraint, @default);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static TypeParameterConstraintClauseSyntax TypeParameterConstraintClause(SyntaxToken extendsKeyword, TypeSyntax type)
+    {
+#if DEBUG
+        if (extendsKeyword == null) throw new ArgumentNullException(nameof(extendsKeyword));
+        if (extendsKeyword.Kind != SyntaxKind.ExtendsKeyword) throw new ArgumentException(nameof(extendsKeyword));
+        if (type == null) throw new ArgumentNullException(nameof(type));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.TypeParameterConstraintClause, extendsKeyword, type, out hash);
+        if (cached != null) return (TypeParameterConstraintClauseSyntax)cached;
+
+        var result = new TypeParameterConstraintClauseSyntax(SyntaxKind.TypeParameterConstraintClause, extendsKeyword, type);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static TypeParameterDefaultClauseSyntax TypeParameterDefaultClause(SyntaxToken equalsToken, TypeSyntax type)
+    {
+#if DEBUG
+        if (equalsToken == null) throw new ArgumentNullException(nameof(equalsToken));
+        if (equalsToken.Kind != SyntaxKind.EqualsToken) throw new ArgumentException(nameof(equalsToken));
+        if (type == null) throw new ArgumentNullException(nameof(type));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.TypeParameterDefaultClause, equalsToken, type, out hash);
+        if (cached != null) return (TypeParameterDefaultClauseSyntax)cached;
+
+        var result = new TypeParameterDefaultClauseSyntax(SyntaxKind.TypeParameterDefaultClause, equalsToken, type);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static TypeParameterListSyntax TypeParameterList(SyntaxToken lessThanToken, CoreSyntax.SeparatedSyntaxList<TypeParameterSyntax> parameters, SyntaxToken greaterThanToken)
+    {
+#if DEBUG
+        if (lessThanToken == null) throw new ArgumentNullException(nameof(lessThanToken));
+        if (lessThanToken.Kind != SyntaxKind.LessThanToken) throw new ArgumentException(nameof(lessThanToken));
+        if (greaterThanToken == null) throw new ArgumentNullException(nameof(greaterThanToken));
+        if (greaterThanToken.Kind != SyntaxKind.GreaterThanToken) throw new ArgumentException(nameof(greaterThanToken));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.TypeParameterList, lessThanToken, parameters.Node, greaterThanToken, out hash);
+        if (cached != null) return (TypeParameterListSyntax)cached;
+
+        var result = new TypeParameterListSyntax(SyntaxKind.TypeParameterList, lessThanToken, parameters.Node, greaterThanToken);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static TypeArgumentListSyntax TypeArgumentList(SyntaxToken lessThanToken, CoreSyntax.SeparatedSyntaxList<TypeSyntax> arguments, SyntaxToken greaterThanToken)
+    {
+#if DEBUG
+        if (lessThanToken == null) throw new ArgumentNullException(nameof(lessThanToken));
+        if (lessThanToken.Kind != SyntaxKind.LessThanToken) throw new ArgumentException(nameof(lessThanToken));
+        if (greaterThanToken == null) throw new ArgumentNullException(nameof(greaterThanToken));
+        if (greaterThanToken.Kind != SyntaxKind.GreaterThanToken) throw new ArgumentException(nameof(greaterThanToken));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.TypeArgumentList, lessThanToken, arguments.Node, greaterThanToken, out hash);
+        if (cached != null) return (TypeArgumentListSyntax)cached;
+
+        var result = new TypeArgumentListSyntax(SyntaxKind.TypeArgumentList, lessThanToken, arguments.Node, greaterThanToken);
         if (hash >= 0)
         {
             SyntaxNodeCache.AddNode(result, hash);
@@ -4204,6 +7344,151 @@ internal static partial class SyntaxFactory
         return result;
     }
 
+    public static SwitchStatementSyntax SwitchStatement(SyntaxToken switchKeyword, SyntaxToken openParenToken, ExpressionSyntax expression, SyntaxToken closeParenToken, SyntaxToken openBraceToken, CoreSyntax.SyntaxList<SwitchLabelSyntax> clauses, SyntaxToken closeBraceToken)
+    {
+#if DEBUG
+        if (switchKeyword == null) throw new ArgumentNullException(nameof(switchKeyword));
+        if (switchKeyword.Kind != SyntaxKind.SwitchKeyword) throw new ArgumentException(nameof(switchKeyword));
+        if (openParenToken == null) throw new ArgumentNullException(nameof(openParenToken));
+        if (openParenToken.Kind != SyntaxKind.OpenParenToken) throw new ArgumentException(nameof(openParenToken));
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+        if (closeParenToken == null) throw new ArgumentNullException(nameof(closeParenToken));
+        if (closeParenToken.Kind != SyntaxKind.CloseParenToken) throw new ArgumentException(nameof(closeParenToken));
+        if (openBraceToken == null) throw new ArgumentNullException(nameof(openBraceToken));
+        if (openBraceToken.Kind != SyntaxKind.OpenBraceToken) throw new ArgumentException(nameof(openBraceToken));
+        if (closeBraceToken == null) throw new ArgumentNullException(nameof(closeBraceToken));
+        if (closeBraceToken.Kind != SyntaxKind.CloseBraceToken) throw new ArgumentException(nameof(closeBraceToken));
+#endif
+
+        return new SwitchStatementSyntax(SyntaxKind.SwitchStatement, switchKeyword, openParenToken, expression, closeParenToken, openBraceToken, clauses.Node, closeBraceToken);
+    }
+
+    public static CaseClauseSyntax CaseClause(SyntaxToken caseKeyword, ExpressionSyntax expression, SyntaxToken colonToken, CoreSyntax.SyntaxList<StatementSyntax> statements)
+    {
+#if DEBUG
+        if (caseKeyword == null) throw new ArgumentNullException(nameof(caseKeyword));
+        if (caseKeyword.Kind != SyntaxKind.CaseKeyword) throw new ArgumentException(nameof(caseKeyword));
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+        if (colonToken == null) throw new ArgumentNullException(nameof(colonToken));
+        if (colonToken.Kind != SyntaxKind.ColonToken) throw new ArgumentException(nameof(colonToken));
+#endif
+
+        return new CaseClauseSyntax(SyntaxKind.CaseClause, caseKeyword, expression, colonToken, statements.Node);
+    }
+
+    public static DefaultClauseSyntax DefaultClause(SyntaxToken defaultKeyword, SyntaxToken colonToken, CoreSyntax.SyntaxList<StatementSyntax> statements)
+    {
+#if DEBUG
+        if (defaultKeyword == null) throw new ArgumentNullException(nameof(defaultKeyword));
+        if (defaultKeyword.Kind != SyntaxKind.DefaultKeyword) throw new ArgumentException(nameof(defaultKeyword));
+        if (colonToken == null) throw new ArgumentNullException(nameof(colonToken));
+        if (colonToken.Kind != SyntaxKind.ColonToken) throw new ArgumentException(nameof(colonToken));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.DefaultClause, defaultKeyword, colonToken, statements.Node, out hash);
+        if (cached != null) return (DefaultClauseSyntax)cached;
+
+        var result = new DefaultClauseSyntax(SyntaxKind.DefaultClause, defaultKeyword, colonToken, statements.Node);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static TryStatementSyntax TryStatement(SyntaxToken tryKeyword, BlockSyntax block, CatchClauseSyntax? catchClause, FinallyClauseSyntax? finallyClause)
+    {
+#if DEBUG
+        if (tryKeyword == null) throw new ArgumentNullException(nameof(tryKeyword));
+        if (tryKeyword.Kind != SyntaxKind.TryKeyword) throw new ArgumentException(nameof(tryKeyword));
+        if (block == null) throw new ArgumentNullException(nameof(block));
+#endif
+
+        return new TryStatementSyntax(SyntaxKind.TryStatement, tryKeyword, block, catchClause, finallyClause);
+    }
+
+    public static CatchClauseSyntax CatchClause(SyntaxToken catchKeyword, SyntaxToken? openParenToken, VariableDeclarationSyntax? declaration, SyntaxToken? closeParenToken, BlockSyntax block)
+    {
+#if DEBUG
+        if (catchKeyword == null) throw new ArgumentNullException(nameof(catchKeyword));
+        if (catchKeyword.Kind != SyntaxKind.CatchKeyword) throw new ArgumentException(nameof(catchKeyword));
+        if (openParenToken != null)
+        {
+            switch (openParenToken.Kind)
+            {
+                case SyntaxKind.OpenParenToken:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(openParenToken));
+            }
+        }
+        if (closeParenToken != null)
+        {
+            switch (closeParenToken.Kind)
+            {
+                case SyntaxKind.CloseParenToken:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(closeParenToken));
+            }
+        }
+        if (block == null) throw new ArgumentNullException(nameof(block));
+#endif
+
+        return new CatchClauseSyntax(SyntaxKind.CatchClause, catchKeyword, openParenToken, declaration, closeParenToken, block);
+    }
+
+    public static FinallyClauseSyntax FinallyClause(SyntaxToken finallyKeyword, BlockSyntax block)
+    {
+#if DEBUG
+        if (finallyKeyword == null) throw new ArgumentNullException(nameof(finallyKeyword));
+        if (finallyKeyword.Kind != SyntaxKind.FinallyKeyword) throw new ArgumentException(nameof(finallyKeyword));
+        if (block == null) throw new ArgumentNullException(nameof(block));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.FinallyClause, finallyKeyword, block, out hash);
+        if (cached != null) return (FinallyClauseSyntax)cached;
+
+        var result = new FinallyClauseSyntax(SyntaxKind.FinallyClause, finallyKeyword, block);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static ThrowStatementSyntax ThrowStatement(SyntaxToken throwKeyword, ExpressionSyntax expression, SyntaxToken? semicolonToken)
+    {
+#if DEBUG
+        if (throwKeyword == null) throw new ArgumentNullException(nameof(throwKeyword));
+        if (throwKeyword.Kind != SyntaxKind.ThrowKeyword) throw new ArgumentException(nameof(throwKeyword));
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+        if (semicolonToken != null)
+        {
+            switch (semicolonToken.Kind)
+            {
+                case SyntaxKind.SemicolonToken:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(semicolonToken));
+            }
+        }
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.ThrowStatement, throwKeyword, expression, semicolonToken, out hash);
+        if (cached != null) return (ThrowStatementSyntax)cached;
+
+        var result = new ThrowStatementSyntax(SyntaxKind.ThrowStatement, throwKeyword, expression, semicolonToken);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
     public static WhileStatementSyntax WhileStatement(SyntaxToken whileKeyword, SyntaxToken openParenToken, ExpressionSyntax condition, SyntaxToken closeParenToken, StatementSyntax statement)
     {
 #if DEBUG
@@ -4349,7 +7634,7 @@ internal static partial class SyntaxFactory
         return result;
     }
 
-    public static FunctionDeclarationSyntax FunctionDeclaration(SyntaxToken functionKeyword, SyntaxToken? identifier, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
+    public static FunctionDeclarationSyntax FunctionDeclaration(SyntaxToken functionKeyword, SyntaxToken? identifier, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
     {
 #if DEBUG
         if (functionKeyword == null) throw new ArgumentNullException(nameof(functionKeyword));
@@ -4366,10 +7651,10 @@ internal static partial class SyntaxFactory
         if (parameterList == null) throw new ArgumentNullException(nameof(parameterList));
 #endif
 
-        return new FunctionDeclarationSyntax(SyntaxKind.FunctionDeclaration, functionKeyword, identifier, parameterList, typeAnnotation, body);
+        return new FunctionDeclarationSyntax(SyntaxKind.FunctionDeclaration, functionKeyword, identifier, typeParameters, parameterList, typeAnnotation, body);
     }
 
-    public static InterfaceDeclarationSyntax InterfaceDeclaration(SyntaxToken interfaceKeyword, SyntaxToken identifier, SyntaxToken openBraceToken, CoreSyntax.SyntaxList<TypeElementSyntax> members, SyntaxToken closeBraceToken)
+    public static InterfaceDeclarationSyntax InterfaceDeclaration(SyntaxToken interfaceKeyword, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, SyntaxToken openBraceToken, CoreSyntax.SyntaxList<TypeElementSyntax> members, SyntaxToken closeBraceToken)
     {
 #if DEBUG
         if (interfaceKeyword == null) throw new ArgumentNullException(nameof(interfaceKeyword));
@@ -4382,10 +7667,10 @@ internal static partial class SyntaxFactory
         if (closeBraceToken.Kind != SyntaxKind.CloseBraceToken) throw new ArgumentException(nameof(closeBraceToken));
 #endif
 
-        return new InterfaceDeclarationSyntax(SyntaxKind.InterfaceDeclaration, interfaceKeyword, identifier, openBraceToken, members.Node, closeBraceToken);
+        return new InterfaceDeclarationSyntax(SyntaxKind.InterfaceDeclaration, interfaceKeyword, identifier, typeParameters, openBraceToken, members.Node, closeBraceToken);
     }
 
-    public static ClassDeclarationSyntax ClassDeclaration(SyntaxToken classKeyword, SyntaxToken? identifier, SyntaxToken openBraceToken, CoreSyntax.SyntaxList<ClassElementSyntax> members, SyntaxToken closeBraceToken)
+    public static ClassDeclarationSyntax ClassDeclaration(SyntaxToken classKeyword, SyntaxToken? identifier, TypeParameterListSyntax? typeParameters, SyntaxToken openBraceToken, CoreSyntax.SyntaxList<ClassElementSyntax> members, SyntaxToken closeBraceToken)
     {
 #if DEBUG
         if (classKeyword == null) throw new ArgumentNullException(nameof(classKeyword));
@@ -4405,17 +7690,17 @@ internal static partial class SyntaxFactory
         if (closeBraceToken.Kind != SyntaxKind.CloseBraceToken) throw new ArgumentException(nameof(closeBraceToken));
 #endif
 
-        return new ClassDeclarationSyntax(SyntaxKind.ClassDeclaration, classKeyword, identifier, openBraceToken, members.Node, closeBraceToken);
+        return new ClassDeclarationSyntax(SyntaxKind.ClassDeclaration, classKeyword, identifier, typeParameters, openBraceToken, members.Node, closeBraceToken);
     }
 
-    public static MethodDeclarationSyntax MethodDeclaration(IdentifierNameSyntax name, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
+    public static MethodDeclarationSyntax MethodDeclaration(IdentifierNameSyntax name, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
     {
 #if DEBUG
         if (name == null) throw new ArgumentNullException(nameof(name));
         if (parameterList == null) throw new ArgumentNullException(nameof(parameterList));
 #endif
 
-        return new MethodDeclarationSyntax(SyntaxKind.MethodDeclaration, name, parameterList, typeAnnotation, body);
+        return new MethodDeclarationSyntax(SyntaxKind.MethodDeclaration, name, typeParameters, parameterList, typeAnnotation, body);
     }
 
     public static PropertyDeclarationSyntax PropertyDeclaration(IdentifierNameSyntax name, TypeAnnotationSyntax? typeAnnotation, EqualsValueClauseSyntax? equalsValueClause, SyntaxToken? semicolonToken)

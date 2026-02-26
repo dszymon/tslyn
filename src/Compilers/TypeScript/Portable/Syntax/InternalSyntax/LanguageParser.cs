@@ -288,6 +288,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         {
             var interfaceKeyword = EatToken(SyntaxKind.InterfaceKeyword);
             var identifier = EatToken(SyntaxKind.IdentifierToken);
+            var typeParameters = ParseOptionalTypeParameters();
             var openBrace = EatToken(SyntaxKind.OpenBraceToken);
 
             var members = new SyntaxListBuilder<TypeElementSyntax>(8);
@@ -298,13 +299,14 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
             var closeBrace = EatToken(SyntaxKind.CloseBraceToken);
 
-            return SyntaxFactory.InterfaceDeclaration(interfaceKeyword, identifier, openBrace, members.ToList(), closeBrace);
+            return SyntaxFactory.InterfaceDeclaration(interfaceKeyword, identifier, typeParameters, openBrace, members.ToList(), closeBrace);
         }
 
         internal ClassDeclarationSyntax ParseClassDeclaration()
         {
             var classKeyword = EatToken(SyntaxKind.ClassKeyword);
             var identifier = EatOptionalToken(SyntaxKind.IdentifierToken);
+            var typeParameters = ParseOptionalTypeParameters();
             var openBrace = EatToken(SyntaxKind.OpenBraceToken);
 
             var members = new SyntaxListBuilder<ClassElementSyntax>(8);
@@ -315,7 +317,48 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
             var closeBrace = EatToken(SyntaxKind.CloseBraceToken);
 
-            return SyntaxFactory.ClassDeclaration(classKeyword, identifier, openBrace, members.ToList(), closeBrace);
+            return SyntaxFactory.ClassDeclaration(classKeyword, identifier, typeParameters, openBrace, members.ToList(), closeBrace);
+        }
+
+        internal TypeParameterListSyntax? ParseOptionalTypeParameters()
+        {
+            if (_currentToken.Kind == SyntaxKind.LessThanToken)
+            {
+                var lessThanToken = EatToken();
+                var parameters = new SeparatedSyntaxListBuilder<TypeParameterSyntax>(8);
+
+                parameters.Add(ParseTypeParameter());
+                while (_currentToken.Kind == SyntaxKind.CommaToken)
+                {
+                    parameters.AddSeparator(EatToken());
+                    parameters.Add(ParseTypeParameter());
+                }
+
+                var greaterThanToken = EatToken(SyntaxKind.GreaterThanToken);
+                return SyntaxFactory.TypeParameterList(lessThanToken, parameters.ToList(), greaterThanToken);
+            }
+            return null;
+        }
+
+        internal TypeParameterSyntax ParseTypeParameter()
+        {
+            var identifier = EatToken(SyntaxKind.IdentifierToken);
+            TypeParameterConstraintClauseSyntax? constraint = null;
+            if (_currentToken.Kind == SyntaxKind.ExtendsKeyword)
+            {
+                var extendsKeyword = EatToken();
+                var type = ParseType();
+                constraint = SyntaxFactory.TypeParameterConstraintClause(extendsKeyword, type);
+            }
+
+            TypeParameterDefaultClauseSyntax? defaultClause = null;
+            if (_currentToken.Kind == SyntaxKind.EqualsToken)
+            {
+                var equalsToken = EatToken();
+                var type = ParseType();
+                defaultClause = SyntaxFactory.TypeParameterDefaultClause(equalsToken, type);
+            }
+            return SyntaxFactory.TypeParameter(identifier, constraint, defaultClause);
         }
 
         internal ClassElementSyntax ParseClassElement()
@@ -356,6 +399,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
         internal MethodDeclarationSyntax ParseMethodDeclaration(IdentifierNameSyntax name)
         {
+            var typeParameters = ParseOptionalTypeParameters();
             var parameterList = ParseParameterList();
             var typeAnnotation = ParseOptionalTypeAnnotation();
             BlockSyntax? body = null;
@@ -363,7 +407,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             {
                 body = ParseBlock();
             }
-            return SyntaxFactory.MethodDeclaration(name, parameterList, typeAnnotation, body);
+            return SyntaxFactory.MethodDeclaration(name, typeParameters, parameterList, typeAnnotation, body);
         }
 
         internal PropertyDeclarationSyntax ParsePropertyDeclaration(IdentifierNameSyntax name)
@@ -382,6 +426,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         {
             var functionKeyword = EatToken(SyntaxKind.FunctionKeyword);
             var identifier = EatOptionalToken(SyntaxKind.IdentifierToken);
+            var typeParameters = ParseOptionalTypeParameters();
             var parameterList = ParseParameterList();
             var typeAnnotation = ParseOptionalTypeAnnotation();
 
@@ -392,7 +437,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             }
             // else semicolon? or ambient?
 
-            return SyntaxFactory.FunctionDeclaration(functionKeyword, identifier, parameterList, typeAnnotation, body);
+            return SyntaxFactory.FunctionDeclaration(functionKeyword, identifier, typeParameters, parameterList, typeAnnotation, body);
         }
 
         internal ParameterListSyntax ParseParameterList()
@@ -503,15 +548,28 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
         internal TypeSyntax ParseType()
         {
+            TypeSyntax type;
             if (IsPredefinedType(_currentToken.Kind))
             {
-                return ParsePredefinedType();
+                type = ParsePredefinedType();
             }
-            if (_currentToken.Kind == SyntaxKind.IdentifierToken)
+            else if (_currentToken.Kind == SyntaxKind.IdentifierToken)
             {
-                return ParseTypeReference();
+                type = ParseTypeReference();
             }
-            return ParseTypeReference();
+            else
+            {
+                type = ParseTypeReference();
+            }
+
+            while (_currentToken.Kind == SyntaxKind.OpenBracketToken)
+            {
+                var openBracket = EatToken();
+                var closeBracket = EatToken(SyntaxKind.CloseBracketToken);
+                type = SyntaxFactory.ArrayType(type, openBracket, closeBracket);
+            }
+
+            return type;
         }
 
         private bool IsPredefinedType(SyntaxKind kind)
@@ -538,7 +596,26 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         internal TypeReferenceSyntax ParseTypeReference()
         {
             var name = ParseIdentifierName();
-            return SyntaxFactory.TypeReference(name);
+            var typeArguments = ParseOptionalTypeArguments();
+            return SyntaxFactory.TypeReference(name, typeArguments);
+        }
+
+        internal TypeArgumentListSyntax? ParseOptionalTypeArguments()
+        {
+            if (_currentToken.Kind == SyntaxKind.LessThanToken)
+            {
+                 var lessThan = EatToken();
+                 var args = new SeparatedSyntaxListBuilder<TypeSyntax>(8);
+                 args.Add(ParseType());
+                 while (_currentToken.Kind == SyntaxKind.CommaToken)
+                 {
+                     args.AddSeparator(EatToken());
+                     args.Add(ParseType());
+                 }
+                 var greaterThan = EatToken(SyntaxKind.GreaterThanToken);
+                 return SyntaxFactory.TypeArgumentList(lessThan, args.ToList(), greaterThan);
+            }
+            return null;
         }
 
         internal ExpressionStatementSyntax ParseExpressionStatement()
@@ -697,10 +774,65 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             var expr = ParseMemberExpression();
             while (true)
             {
+                 if (_currentToken.Kind == SyntaxKind.LessThanToken)
+                 {
+                    // Ambiguity: Is it LessThan operator or TypeArguments for Call?
+                    // Simplified: Assume if followed by Type, Comma or GreaterThan, it's type args.
+                    // But for now, we only support CallExpression generic if it's explicitly called.
+                    // Actually, CallExpression in Syntax.xml now has TypeArguments.
+                    // But in TS, `func<T>()` - the `<` is after the member expression.
+                    // This is complex in TS because `f<T>(x)` vs `a < b > (c)`.
+                    // We need lookahead.
+                    // For this task, let's implement simple check: if we parse type args successfully, use them.
+
+                    // TODO: Proper lookahead to disambiguate.
+                    // For now, if we see < and next is Identifier/Type, we assume Call Generic.
+                    // Or we just parse OptionalTypeArguments. If it fails (returns null), backtrack?
+                    // Since we don't have backtracking here easily, let's try a simple heuristic or skip for now if it's too risky.
+                    // User asked for Generics. So `foo<string>()` must work.
+
+                    // We'll optimistically try to parse type arguments.
+                    // But wait, ParseOptionalTypeArguments consumes tokens.
+                    // For this exercise, let's assume if it looks like type args, it is.
+                 }
+
                  if (_currentToken.Kind == SyntaxKind.OpenParenToken)
                  {
                      var args = ParseArgumentList();
-                     expr = SyntaxFactory.CallExpression(expr, args);
+                     expr = SyntaxFactory.CallExpression(expr, null, args);
+                 }
+                 else if (_currentToken.Kind == SyntaxKind.LessThanToken)
+                 {
+                     // Attempt to handle `func<T>(...)`
+                     // This is tricky without backtracking.
+                     // Let's implement a simplified version: if followed by OpenParen, it's definitely a call.
+                     // But we need to parse the type args first.
+
+                     // We will parse type args, then expect OpenParen.
+                     // If OpenParen doesn't follow, we might have messed up `a < b`.
+                     // But `a < b` is BinaryExpression, which has lower precedence than Call (MemberAccess).
+                     // Actually, Call is LeftHandSide. Binary is lower.
+                     // `a < b` is parsed in ParseBinaryExpression.
+                     // So here we are in ParseMember/Call loop.
+                     // If we encounter `<` here, it MUST be type arguments for a call, OR it's end of this expression and start of binary `<`.
+                     // If it's `a < b`, then `a` is the LHS. The loop should break, and `ParseBinaryExpression` will consume `<`.
+                     // BUT, `f<T>()` binds tighter.
+
+                     // So, if we see `<`, how do we know if it's `f<T>` or `f < T`?
+                     // In TS: `f<T>(` is call. `f<T>` alone is ... comparison? No, `f<T>` is not valid expression statement unless comparison.
+
+                     // Let's defer generic call parsing for a moment or implement a safe check.
+                     // If I implement `ParseOptionalTypeArguments` inside `ParseMemberExpression` loop?
+
+                     // For now, let's just update `CallExpression` creation to pass `null` for type args where we don't support them yet,
+                     // OR handle explicit request. The plan said "Update CallExpressionSyntax ... to include optional TypeArguments".
+                     // Let's try to support it.
+
+                     // If I verify the next token after `<` is an identifier or strict type start, and eventually `>` then `(`, it's a call.
+                     // Given current rudimentary parser, let's stick to: if we see `(` it's a call.
+                     // If we want `foo<T>()`, we need to handle `<`.
+
+                     break; // Placeholder: Generics on call not fully implemented in this loop yet to avoid regression on `a < b`
                  }
                  else
                  {
