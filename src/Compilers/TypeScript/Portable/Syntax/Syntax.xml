@@ -10,6 +10,7 @@
   <AbstractNode Name="TypeSyntax" Base="ExpressionSyntax"/>
   <AbstractNode Name="DeclarationStatementSyntax" Base="StatementSyntax"/>
   <AbstractNode Name="TypeElementSyntax" Base="TypeScriptSyntaxNode"/>
+  <AbstractNode Name="ClassElementSyntax" Base="TypeScriptSyntaxNode"/>
 
   <!-- Expressions -->
   <Node Name="IdentifierNameSyntax" Base="TypeSyntax">
@@ -282,6 +283,50 @@
     <Field Name="CloseBraceToken" Type="SyntaxToken">
       <Kind Name="CloseBraceToken"/>
     </Field>
+  </Node>
+
+  <Node Name="ClassDeclarationSyntax" Base="DeclarationStatementSyntax">
+    <Kind Name="ClassDeclaration"/>
+    <Field Name="ClassKeyword" Type="SyntaxToken">
+      <Kind Name="ClassKeyword"/>
+    </Field>
+    <Field Name="Identifier" Type="SyntaxToken" Optional="true">
+      <Kind Name="IdentifierToken"/>
+    </Field>
+    <Field Name="OpenBraceToken" Type="SyntaxToken">
+      <Kind Name="OpenBraceToken"/>
+    </Field>
+    <Field Name="Members" Type="SyntaxList&lt;ClassElementSyntax&gt;"/>
+    <Field Name="CloseBraceToken" Type="SyntaxToken">
+      <Kind Name="CloseBraceToken"/>
+    </Field>
+  </Node>
+
+  <Node Name="MethodDeclarationSyntax" Base="ClassElementSyntax">
+    <Kind Name="MethodDeclaration"/>
+    <Field Name="Name" Type="IdentifierNameSyntax"/>
+    <Field Name="ParameterList" Type="ParameterListSyntax"/>
+    <Field Name="TypeAnnotation" Type="TypeAnnotationSyntax" Optional="true"/>
+    <Field Name="Body" Type="BlockSyntax" Optional="true"/>
+  </Node>
+
+  <Node Name="PropertyDeclarationSyntax" Base="ClassElementSyntax">
+    <Kind Name="PropertyDeclaration"/>
+    <Field Name="Name" Type="IdentifierNameSyntax"/>
+    <Field Name="TypeAnnotation" Type="TypeAnnotationSyntax" Optional="true"/>
+    <Field Name="EqualsValueClause" Type="EqualsValueClauseSyntax" Optional="true"/>
+    <Field Name="SemicolonToken" Type="SyntaxToken" Optional="true">
+        <Kind Name="SemicolonToken"/>
+    </Field>
+  </Node>
+
+  <Node Name="ConstructorDeclarationSyntax" Base="ClassElementSyntax">
+    <Kind Name="ConstructorDeclaration"/>
+    <Field Name="ConstructorKeyword" Type="SyntaxToken">
+        <Kind Name="ConstructorKeyword"/>
+    </Field>
+    <Field Name="ParameterList" Type="ParameterListSyntax"/>
+    <Field Name="Body" Type="BlockSyntax" Optional="true"/>
   </Node>
 
   <!-- Compilation Unit -->

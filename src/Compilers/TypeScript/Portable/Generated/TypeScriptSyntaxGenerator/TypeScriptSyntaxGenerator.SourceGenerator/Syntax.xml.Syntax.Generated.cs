@@ -52,6 +52,14 @@ public abstract partial class TypeElementSyntax : TypeScriptSyntaxNode
     }
 }
 
+public abstract partial class ClassElementSyntax : TypeScriptSyntaxNode
+{
+    internal ClassElementSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+}
+
 /// <remarks>
 /// <para>This node is associated with the following syntax kinds:</para>
 /// <list type="bullet">
@@ -1425,6 +1433,276 @@ public sealed partial class InterfaceDeclarationSyntax : DeclarationStatementSyn
     public InterfaceDeclarationSyntax WithCloseBraceToken(SyntaxToken closeBraceToken) => Update(this.InterfaceKeyword, this.Identifier, this.OpenBraceToken, this.Members, closeBraceToken);
 
     public InterfaceDeclarationSyntax AddMembers(params TypeElementSyntax[] items) => WithMembers(this.Members.AddRange(items));
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.ClassDeclaration"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ClassDeclarationSyntax : DeclarationStatementSyntax
+{
+    private SyntaxNode? members;
+
+    internal ClassDeclarationSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken ClassKeyword => new SyntaxToken(this, ((InternalSyntax.ClassDeclarationSyntax)this.Green).classKeyword, Position, 0);
+
+    public SyntaxToken Identifier
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.ClassDeclarationSyntax)this.Green).identifier;
+            return slot != null ? new SyntaxToken(this, slot, GetChildPosition(1), GetChildIndex(1)) : default;
+        }
+    }
+
+    public SyntaxToken OpenBraceToken => new SyntaxToken(this, ((InternalSyntax.ClassDeclarationSyntax)this.Green).openBraceToken, GetChildPosition(2), GetChildIndex(2));
+
+    public SyntaxList<ClassElementSyntax> Members => new SyntaxList<ClassElementSyntax>(GetRed(ref this.members, 3));
+
+    public SyntaxToken CloseBraceToken => new SyntaxToken(this, ((InternalSyntax.ClassDeclarationSyntax)this.Green).closeBraceToken, GetChildPosition(4), GetChildIndex(4));
+
+    internal override SyntaxNode? GetNodeSlot(int index) => index == 3 ? GetRed(ref this.members, 3)! : null;
+
+    internal override SyntaxNode? GetCachedSlot(int index) => index == 3 ? this.members : null;
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitClassDeclaration(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitClassDeclaration(this);
+
+    public ClassDeclarationSyntax Update(SyntaxToken classKeyword, SyntaxToken identifier, SyntaxToken openBraceToken, SyntaxList<ClassElementSyntax> members, SyntaxToken closeBraceToken)
+    {
+        if (classKeyword != this.ClassKeyword || identifier != this.Identifier || openBraceToken != this.OpenBraceToken || members != this.Members || closeBraceToken != this.CloseBraceToken)
+        {
+            var newNode = SyntaxFactory.ClassDeclaration(classKeyword, identifier, openBraceToken, members, closeBraceToken);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ClassDeclarationSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ClassDeclarationSyntax WithClassKeyword(SyntaxToken classKeyword) => Update(classKeyword, this.Identifier, this.OpenBraceToken, this.Members, this.CloseBraceToken);
+    public ClassDeclarationSyntax WithIdentifier(SyntaxToken identifier) => Update(this.ClassKeyword, identifier, this.OpenBraceToken, this.Members, this.CloseBraceToken);
+    public ClassDeclarationSyntax WithOpenBraceToken(SyntaxToken openBraceToken) => Update(this.ClassKeyword, this.Identifier, openBraceToken, this.Members, this.CloseBraceToken);
+    public ClassDeclarationSyntax WithMembers(SyntaxList<ClassElementSyntax> members) => Update(this.ClassKeyword, this.Identifier, this.OpenBraceToken, members, this.CloseBraceToken);
+    public ClassDeclarationSyntax WithCloseBraceToken(SyntaxToken closeBraceToken) => Update(this.ClassKeyword, this.Identifier, this.OpenBraceToken, this.Members, closeBraceToken);
+
+    public ClassDeclarationSyntax AddMembers(params ClassElementSyntax[] items) => WithMembers(this.Members.AddRange(items));
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.MethodDeclaration"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class MethodDeclarationSyntax : ClassElementSyntax
+{
+    private IdentifierNameSyntax? name;
+    private ParameterListSyntax? parameterList;
+    private TypeAnnotationSyntax? typeAnnotation;
+    private BlockSyntax? body;
+
+    internal MethodDeclarationSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public IdentifierNameSyntax Name => GetRedAtZero(ref this.name)!;
+
+    public ParameterListSyntax ParameterList => GetRed(ref this.parameterList, 1)!;
+
+    public TypeAnnotationSyntax? TypeAnnotation => GetRed(ref this.typeAnnotation, 2);
+
+    public BlockSyntax? Body => GetRed(ref this.body, 3);
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            0 => GetRedAtZero(ref this.name)!,
+            1 => GetRed(ref this.parameterList, 1)!,
+            2 => GetRed(ref this.typeAnnotation, 2),
+            3 => GetRed(ref this.body, 3),
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            0 => this.name,
+            1 => this.parameterList,
+            2 => this.typeAnnotation,
+            3 => this.body,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitMethodDeclaration(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitMethodDeclaration(this);
+
+    public MethodDeclarationSyntax Update(IdentifierNameSyntax name, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
+    {
+        if (name != this.Name || parameterList != this.ParameterList || typeAnnotation != this.TypeAnnotation || body != this.Body)
+        {
+            var newNode = SyntaxFactory.MethodDeclaration(name, parameterList, typeAnnotation, body);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (MethodDeclarationSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public MethodDeclarationSyntax WithName(IdentifierNameSyntax name) => Update(name, this.ParameterList, this.TypeAnnotation, this.Body);
+    public MethodDeclarationSyntax WithParameterList(ParameterListSyntax parameterList) => Update(this.Name, parameterList, this.TypeAnnotation, this.Body);
+    public MethodDeclarationSyntax WithTypeAnnotation(TypeAnnotationSyntax? typeAnnotation) => Update(this.Name, this.ParameterList, typeAnnotation, this.Body);
+    public MethodDeclarationSyntax WithBody(BlockSyntax? body) => Update(this.Name, this.ParameterList, this.TypeAnnotation, body);
+
+    public MethodDeclarationSyntax AddParameterListParameters(params ParameterSyntax[] items) => WithParameterList(this.ParameterList.WithParameters(this.ParameterList.Parameters.AddRange(items)));
+    public MethodDeclarationSyntax AddBodyStatements(params StatementSyntax[] items)
+    {
+        var body = this.Body ?? SyntaxFactory.Block();
+        return WithBody(body.WithStatements(body.Statements.AddRange(items)));
+    }
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.PropertyDeclaration"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class PropertyDeclarationSyntax : ClassElementSyntax
+{
+    private IdentifierNameSyntax? name;
+    private TypeAnnotationSyntax? typeAnnotation;
+    private EqualsValueClauseSyntax? equalsValueClause;
+
+    internal PropertyDeclarationSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public IdentifierNameSyntax Name => GetRedAtZero(ref this.name)!;
+
+    public TypeAnnotationSyntax? TypeAnnotation => GetRed(ref this.typeAnnotation, 1);
+
+    public EqualsValueClauseSyntax? EqualsValueClause => GetRed(ref this.equalsValueClause, 2);
+
+    public SyntaxToken SemicolonToken
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.PropertyDeclarationSyntax)this.Green).semicolonToken;
+            return slot != null ? new SyntaxToken(this, slot, GetChildPosition(3), GetChildIndex(3)) : default;
+        }
+    }
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            0 => GetRedAtZero(ref this.name)!,
+            1 => GetRed(ref this.typeAnnotation, 1),
+            2 => GetRed(ref this.equalsValueClause, 2),
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            0 => this.name,
+            1 => this.typeAnnotation,
+            2 => this.equalsValueClause,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitPropertyDeclaration(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitPropertyDeclaration(this);
+
+    public PropertyDeclarationSyntax Update(IdentifierNameSyntax name, TypeAnnotationSyntax? typeAnnotation, EqualsValueClauseSyntax? equalsValueClause, SyntaxToken semicolonToken)
+    {
+        if (name != this.Name || typeAnnotation != this.TypeAnnotation || equalsValueClause != this.EqualsValueClause || semicolonToken != this.SemicolonToken)
+        {
+            var newNode = SyntaxFactory.PropertyDeclaration(name, typeAnnotation, equalsValueClause, semicolonToken);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (PropertyDeclarationSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public PropertyDeclarationSyntax WithName(IdentifierNameSyntax name) => Update(name, this.TypeAnnotation, this.EqualsValueClause, this.SemicolonToken);
+    public PropertyDeclarationSyntax WithTypeAnnotation(TypeAnnotationSyntax? typeAnnotation) => Update(this.Name, typeAnnotation, this.EqualsValueClause, this.SemicolonToken);
+    public PropertyDeclarationSyntax WithEqualsValueClause(EqualsValueClauseSyntax? equalsValueClause) => Update(this.Name, this.TypeAnnotation, equalsValueClause, this.SemicolonToken);
+    public PropertyDeclarationSyntax WithSemicolonToken(SyntaxToken semicolonToken) => Update(this.Name, this.TypeAnnotation, this.EqualsValueClause, semicolonToken);
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.ConstructorDeclaration"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ConstructorDeclarationSyntax : ClassElementSyntax
+{
+    private ParameterListSyntax? parameterList;
+    private BlockSyntax? body;
+
+    internal ConstructorDeclarationSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken ConstructorKeyword => new SyntaxToken(this, ((InternalSyntax.ConstructorDeclarationSyntax)this.Green).constructorKeyword, Position, 0);
+
+    public ParameterListSyntax ParameterList => GetRed(ref this.parameterList, 1)!;
+
+    public BlockSyntax? Body => GetRed(ref this.body, 2);
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            1 => GetRed(ref this.parameterList, 1)!,
+            2 => GetRed(ref this.body, 2),
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            1 => this.parameterList,
+            2 => this.body,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitConstructorDeclaration(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitConstructorDeclaration(this);
+
+    public ConstructorDeclarationSyntax Update(SyntaxToken constructorKeyword, ParameterListSyntax parameterList, BlockSyntax? body)
+    {
+        if (constructorKeyword != this.ConstructorKeyword || parameterList != this.ParameterList || body != this.Body)
+        {
+            var newNode = SyntaxFactory.ConstructorDeclaration(constructorKeyword, parameterList, body);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ConstructorDeclarationSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ConstructorDeclarationSyntax WithConstructorKeyword(SyntaxToken constructorKeyword) => Update(constructorKeyword, this.ParameterList, this.Body);
+    public ConstructorDeclarationSyntax WithParameterList(ParameterListSyntax parameterList) => Update(this.ConstructorKeyword, parameterList, this.Body);
+    public ConstructorDeclarationSyntax WithBody(BlockSyntax? body) => Update(this.ConstructorKeyword, this.ParameterList, body);
+
+    public ConstructorDeclarationSyntax AddParameterListParameters(params ParameterSyntax[] items) => WithParameterList(this.ParameterList.WithParameters(this.ParameterList.Parameters.AddRange(items)));
+    public ConstructorDeclarationSyntax AddBodyStatements(params StatementSyntax[] items)
+    {
+        var body = this.Body ?? SyntaxFactory.Block();
+        return WithBody(body.WithStatements(body.Statements.AddRange(items)));
+    }
 }
 
 /// <remarks>

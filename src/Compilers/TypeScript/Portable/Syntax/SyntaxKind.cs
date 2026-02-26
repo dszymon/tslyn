@@ -158,6 +158,10 @@ namespace Microsoft.CodeAnalysis.TypeScript
         TypeAnnotation,
         PropertySignature,
         InterfaceDeclaration,
+        ClassDeclaration,
+        MethodDeclaration,
+        PropertyDeclaration,
+        ConstructorDeclaration,
 
         // Expressions
         NumericLiteralExpression,

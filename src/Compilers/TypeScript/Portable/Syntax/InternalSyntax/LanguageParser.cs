@@ -85,6 +85,8 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         {
             switch (_currentToken.Kind)
             {
+                case SyntaxKind.ClassKeyword:
+                    return ParseClassDeclaration();
                 case SyntaxKind.InterfaceKeyword:
                     return ParseInterfaceDeclaration();
                 case SyntaxKind.FunctionKeyword:
@@ -199,6 +201,83 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             var closeBrace = EatToken(SyntaxKind.CloseBraceToken);
 
             return SyntaxFactory.InterfaceDeclaration(interfaceKeyword, identifier, openBrace, members.ToList(), closeBrace);
+        }
+
+        internal ClassDeclarationSyntax ParseClassDeclaration()
+        {
+            var classKeyword = EatToken(SyntaxKind.ClassKeyword);
+            var identifier = EatOptionalToken(SyntaxKind.IdentifierToken);
+            var openBrace = EatToken(SyntaxKind.OpenBraceToken);
+
+            var members = new SyntaxListBuilder<ClassElementSyntax>(8);
+            while (_currentToken.Kind != SyntaxKind.CloseBraceToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
+            {
+                members.Add(ParseClassElement());
+            }
+
+            var closeBrace = EatToken(SyntaxKind.CloseBraceToken);
+
+            return SyntaxFactory.ClassDeclaration(classKeyword, identifier, openBrace, members.ToList(), closeBrace);
+        }
+
+        internal ClassElementSyntax ParseClassElement()
+        {
+            // Constructor
+            if (_currentToken.Kind == SyntaxKind.ConstructorKeyword)
+            {
+                return ParseConstructorDeclaration();
+            }
+
+            // Method or Property
+            // Simplified lookahead: if '(' follows identifier, it's a method. Otherwise property.
+            // TODO: handle modifiers (public, private, static, etc.)
+
+            var identifier = ParseIdentifierName();
+            if (_currentToken.Kind == SyntaxKind.OpenParenToken)
+            {
+                return ParseMethodDeclaration(identifier);
+            }
+            else
+            {
+                return ParsePropertyDeclaration(identifier);
+            }
+        }
+
+        internal ConstructorDeclarationSyntax ParseConstructorDeclaration()
+        {
+            var constructorKeyword = EatToken(SyntaxKind.ConstructorKeyword);
+            var parameterList = ParseParameterList();
+            BlockSyntax? body = null;
+            if (_currentToken.Kind == SyntaxKind.OpenBraceToken)
+            {
+                body = ParseBlock();
+            }
+            // else semicolon?
+            return SyntaxFactory.ConstructorDeclaration(constructorKeyword, parameterList, body);
+        }
+
+        internal MethodDeclarationSyntax ParseMethodDeclaration(IdentifierNameSyntax name)
+        {
+            var parameterList = ParseParameterList();
+            var typeAnnotation = ParseOptionalTypeAnnotation();
+            BlockSyntax? body = null;
+            if (_currentToken.Kind == SyntaxKind.OpenBraceToken)
+            {
+                body = ParseBlock();
+            }
+            return SyntaxFactory.MethodDeclaration(name, parameterList, typeAnnotation, body);
+        }
+
+        internal PropertyDeclarationSyntax ParsePropertyDeclaration(IdentifierNameSyntax name)
+        {
+            var typeAnnotation = ParseOptionalTypeAnnotation();
+            EqualsValueClauseSyntax? initializer = null;
+            if (_currentToken.Kind == SyntaxKind.EqualsToken)
+            {
+                initializer = ParseEqualsValueClause();
+            }
+            var semicolon = EatOptionalToken(SyntaxKind.SemicolonToken);
+            return SyntaxFactory.PropertyDeclaration(name, typeAnnotation, initializer, semicolon);
         }
 
         internal FunctionDeclarationSyntax ParseFunctionDeclaration()
