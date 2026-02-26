@@ -169,6 +169,12 @@ namespace Microsoft.CodeAnalysis.TypeScript
         TrueLiteralExpression,
         FalseLiteralExpression,
         NullLiteralExpression,
+        PrefixUnaryExpression,
+        PostfixUnaryExpression,
+        DeleteExpression,
+        TypeOfExpression,
+        VoidExpression,
+        ThisExpression,
         AddExpression,
         SubtractExpression,
         MultiplyExpression,
@@ -182,6 +188,10 @@ namespace Microsoft.CodeAnalysis.TypeScript
         LogicalAndExpression,
         LogicalOrExpression,
         AssignmentExpression,
+        NewExpression,
+        ArrayLiteralExpression,
+        ObjectLiteralExpression,
+        PropertyAssignment,
 
         // Statements
         Block,
@@ -199,12 +209,27 @@ namespace Microsoft.CodeAnalysis.TypeScript
         WhileStatement,
         ForStatement,
         EmptyStatement,
+        SwitchStatement,
+        CaseClause,
+        DefaultClause,
+        TryStatement,
+        CatchClause,
+        FinallyClause,
+        ThrowStatement,
 
         // New Expressions
         CallExpression,
         MemberAccessExpression,
         ArgumentList,
         Argument,
+
+        // Types
+        ArrayType,
+        TypeParameter,
+        TypeParameterConstraintClause,
+        TypeParameterDefaultClause,
+        TypeParameterList,
+        TypeArgumentList,
 
         // Structured Trivia
         StructuredTrivia = 9000,
