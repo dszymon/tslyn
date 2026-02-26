@@ -85,6 +85,8 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         {
             switch (_currentToken.Kind)
             {
+                case SyntaxKind.ClassKeyword:
+                    return ParseClassDeclaration();
                 case SyntaxKind.InterfaceKeyword:
                     return ParseInterfaceDeclaration();
                 case SyntaxKind.FunctionKeyword:
@@ -97,9 +99,91 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                     return ParseBlock();
                 case SyntaxKind.ReturnKeyword:
                     return ParseReturnStatement();
+                case SyntaxKind.IfKeyword:
+                    return ParseIfStatement();
+                case SyntaxKind.WhileKeyword:
+                    return ParseWhileStatement();
+                case SyntaxKind.ForKeyword:
+                    return ParseForStatement();
+                case SyntaxKind.SemicolonToken:
+                    return ParseEmptyStatement();
                 default:
                     return ParseExpressionStatement();
             }
+        }
+
+        internal IfStatementSyntax ParseIfStatement()
+        {
+            var ifKeyword = EatToken(SyntaxKind.IfKeyword);
+            var openParen = EatToken(SyntaxKind.OpenParenToken);
+            var condition = ParseExpression();
+            var closeParen = EatToken(SyntaxKind.CloseParenToken);
+            var statement = ParseStatement();
+            ElseClauseSyntax? elseClause = null;
+            if (_currentToken.Kind == SyntaxKind.ElseKeyword)
+            {
+                var elseKeyword = EatToken();
+                var elseStatement = ParseStatement();
+                elseClause = SyntaxFactory.ElseClause(elseKeyword, elseStatement);
+            }
+            return SyntaxFactory.IfStatement(ifKeyword, openParen, condition, closeParen, statement, elseClause);
+        }
+
+        internal WhileStatementSyntax ParseWhileStatement()
+        {
+            var whileKeyword = EatToken(SyntaxKind.WhileKeyword);
+            var openParen = EatToken(SyntaxKind.OpenParenToken);
+            var condition = ParseExpression();
+            var closeParen = EatToken(SyntaxKind.CloseParenToken);
+            var statement = ParseStatement();
+            return SyntaxFactory.WhileStatement(whileKeyword, openParen, condition, closeParen, statement);
+        }
+
+        internal ForStatementSyntax ParseForStatement()
+        {
+            var forKeyword = EatToken(SyntaxKind.ForKeyword);
+            var openParen = EatToken(SyntaxKind.OpenParenToken);
+
+            StatementSyntax? initializer = null;
+            if (_currentToken.Kind != SyntaxKind.SemicolonToken)
+            {
+                if (_currentToken.Kind == SyntaxKind.VarKeyword || _currentToken.Kind == SyntaxKind.LetKeyword || _currentToken.Kind == SyntaxKind.ConstKeyword)
+                {
+                    initializer = ParseVariableStatement();
+                }
+                else
+                {
+                    initializer = ParseExpressionStatement();
+                }
+            }
+            else
+            {
+                 initializer = ParseEmptyStatement();
+            }
+
+            ExpressionSyntax? condition = null;
+            if (_currentToken.Kind != SyntaxKind.SemicolonToken)
+            {
+                condition = ParseExpression();
+            }
+            var secondSemicolon = EatToken(SyntaxKind.SemicolonToken);
+
+            ExpressionSyntax? increment = null;
+            if (_currentToken.Kind != SyntaxKind.CloseParenToken)
+            {
+                increment = ParseExpression();
+            }
+            var closeParen = EatToken(SyntaxKind.CloseParenToken);
+
+            var statement = ParseStatement();
+
+            return SyntaxFactory.ForStatement(forKeyword, openParen, initializer, condition, secondSemicolon, increment, closeParen, statement);
+        }
+
+        internal EmptyStatementSyntax ParseEmptyStatement()
+        {
+            var semicolon = EatToken(SyntaxKind.SemicolonToken);
+            return SyntaxFactory.EmptyStatement(semicolon);
         }
 
         internal InterfaceDeclarationSyntax ParseInterfaceDeclaration()
@@ -117,6 +201,83 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             var closeBrace = EatToken(SyntaxKind.CloseBraceToken);
 
             return SyntaxFactory.InterfaceDeclaration(interfaceKeyword, identifier, openBrace, members.ToList(), closeBrace);
+        }
+
+        internal ClassDeclarationSyntax ParseClassDeclaration()
+        {
+            var classKeyword = EatToken(SyntaxKind.ClassKeyword);
+            var identifier = EatOptionalToken(SyntaxKind.IdentifierToken);
+            var openBrace = EatToken(SyntaxKind.OpenBraceToken);
+
+            var members = new SyntaxListBuilder<ClassElementSyntax>(8);
+            while (_currentToken.Kind != SyntaxKind.CloseBraceToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
+            {
+                members.Add(ParseClassElement());
+            }
+
+            var closeBrace = EatToken(SyntaxKind.CloseBraceToken);
+
+            return SyntaxFactory.ClassDeclaration(classKeyword, identifier, openBrace, members.ToList(), closeBrace);
+        }
+
+        internal ClassElementSyntax ParseClassElement()
+        {
+            // Constructor
+            if (_currentToken.Kind == SyntaxKind.ConstructorKeyword)
+            {
+                return ParseConstructorDeclaration();
+            }
+
+            // Method or Property
+            // Simplified lookahead: if '(' follows identifier, it's a method. Otherwise property.
+            // TODO: handle modifiers (public, private, static, etc.)
+
+            var identifier = ParseIdentifierName();
+            if (_currentToken.Kind == SyntaxKind.OpenParenToken)
+            {
+                return ParseMethodDeclaration(identifier);
+            }
+            else
+            {
+                return ParsePropertyDeclaration(identifier);
+            }
+        }
+
+        internal ConstructorDeclarationSyntax ParseConstructorDeclaration()
+        {
+            var constructorKeyword = EatToken(SyntaxKind.ConstructorKeyword);
+            var parameterList = ParseParameterList();
+            BlockSyntax? body = null;
+            if (_currentToken.Kind == SyntaxKind.OpenBraceToken)
+            {
+                body = ParseBlock();
+            }
+            // else semicolon?
+            return SyntaxFactory.ConstructorDeclaration(constructorKeyword, parameterList, body);
+        }
+
+        internal MethodDeclarationSyntax ParseMethodDeclaration(IdentifierNameSyntax name)
+        {
+            var parameterList = ParseParameterList();
+            var typeAnnotation = ParseOptionalTypeAnnotation();
+            BlockSyntax? body = null;
+            if (_currentToken.Kind == SyntaxKind.OpenBraceToken)
+            {
+                body = ParseBlock();
+            }
+            return SyntaxFactory.MethodDeclaration(name, parameterList, typeAnnotation, body);
+        }
+
+        internal PropertyDeclarationSyntax ParsePropertyDeclaration(IdentifierNameSyntax name)
+        {
+            var typeAnnotation = ParseOptionalTypeAnnotation();
+            EqualsValueClauseSyntax? initializer = null;
+            if (_currentToken.Kind == SyntaxKind.EqualsToken)
+            {
+                initializer = ParseEqualsValueClause();
+            }
+            var semicolon = EatOptionalToken(SyntaxKind.SemicolonToken);
+            return SyntaxFactory.PropertyDeclaration(name, typeAnnotation, initializer, semicolon);
         }
 
         internal FunctionDeclarationSyntax ParseFunctionDeclaration()
@@ -320,13 +481,25 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             {
                 case SyntaxKind.AsteriskToken:
                 case SyntaxKind.SlashToken:
-                    return 5;
+                case SyntaxKind.PercentToken:
+                    return 10;
                 case SyntaxKind.PlusToken:
                 case SyntaxKind.MinusToken:
-                    return 4;
+                    return 9;
+                case SyntaxKind.LessThanToken:
+                case SyntaxKind.GreaterThanToken:
+                case SyntaxKind.LessThanEqualsToken:
+                case SyntaxKind.GreaterThanEqualsToken:
+                    return 8;
                 case SyntaxKind.EqualsEqualsToken:
                 case SyntaxKind.ExclamationEqualsToken:
-                    return 3;
+                    return 7;
+                case SyntaxKind.AmpersandAmpersandToken:
+                    return 6;
+                case SyntaxKind.BarBarToken:
+                    return 5;
+                case SyntaxKind.EqualsToken:
+                    return 4;
                 default:
                     return 0;
             }
@@ -342,13 +515,67 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                 case SyntaxKind.SlashToken: return SyntaxKind.DivideExpression;
                 case SyntaxKind.EqualsEqualsToken: return SyntaxKind.EqualsExpression;
                 case SyntaxKind.ExclamationEqualsToken: return SyntaxKind.NotEqualsExpression;
+                case SyntaxKind.LessThanToken: return SyntaxKind.LessThanExpression;
+                case SyntaxKind.LessThanEqualsToken: return SyntaxKind.LessThanOrEqualExpression;
+                case SyntaxKind.GreaterThanToken: return SyntaxKind.GreaterThanExpression;
+                case SyntaxKind.GreaterThanEqualsToken: return SyntaxKind.GreaterThanOrEqualExpression;
+                case SyntaxKind.AmpersandAmpersandToken: return SyntaxKind.LogicalAndExpression;
+                case SyntaxKind.BarBarToken: return SyntaxKind.LogicalOrExpression;
+                case SyntaxKind.EqualsToken: return SyntaxKind.AssignmentExpression;
                 default: return SyntaxKind.None;
             }
         }
 
         internal ExpressionSyntax ParseUnaryExpression()
         {
-            return ParsePrimaryExpression();
+            return ParsePostfixExpression();
+        }
+
+        internal ExpressionSyntax ParsePostfixExpression()
+        {
+            var expr = ParsePrimaryExpression();
+            while (true)
+            {
+                if (_currentToken.Kind == SyntaxKind.DotToken)
+                {
+                     var dot = EatToken();
+                     var name = ParseIdentifierName();
+                     expr = SyntaxFactory.MemberAccessExpression(expr, dot, name);
+                }
+                else if (_currentToken.Kind == SyntaxKind.OpenParenToken)
+                {
+                     var args = ParseArgumentList();
+                     expr = SyntaxFactory.CallExpression(expr, args);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return expr;
+        }
+
+        internal ArgumentListSyntax ParseArgumentList()
+        {
+            var openParen = EatToken(SyntaxKind.OpenParenToken);
+            var arguments = new SeparatedSyntaxListBuilder<ArgumentSyntax>(8);
+            if (_currentToken.Kind != SyntaxKind.CloseParenToken)
+            {
+                arguments.Add(ParseArgument());
+                while (_currentToken.Kind == SyntaxKind.CommaToken)
+                {
+                    arguments.AddSeparator(EatToken());
+                    arguments.Add(ParseArgument());
+                }
+            }
+            var closeParen = EatToken(SyntaxKind.CloseParenToken);
+            return SyntaxFactory.ArgumentList(openParen, arguments.ToList(), closeParen);
+        }
+
+        internal ArgumentSyntax ParseArgument()
+        {
+             var expr = ParseExpression();
+             return SyntaxFactory.Argument(expr);
         }
 
         internal ExpressionSyntax ParsePrimaryExpression()

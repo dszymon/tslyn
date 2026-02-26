@@ -52,6 +52,14 @@ public abstract partial class TypeElementSyntax : TypeScriptSyntaxNode
     }
 }
 
+public abstract partial class ClassElementSyntax : TypeScriptSyntaxNode
+{
+    internal ClassElementSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+}
+
 /// <remarks>
 /// <para>This node is associated with the following syntax kinds:</para>
 /// <list type="bullet">
@@ -141,6 +149,13 @@ public sealed partial class LiteralExpressionSyntax : ExpressionSyntax
 /// <item><description><see cref="SyntaxKind.DivideExpression"/></description></item>
 /// <item><description><see cref="SyntaxKind.EqualsExpression"/></description></item>
 /// <item><description><see cref="SyntaxKind.NotEqualsExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.LessThanExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.LessThanOrEqualExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.GreaterThanExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.GreaterThanOrEqualExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.LogicalAndExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.LogicalOrExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.AssignmentExpression"/></description></item>
 /// </list>
 /// </remarks>
 public sealed partial class BinaryExpressionSyntax : ExpressionSyntax
@@ -193,6 +208,214 @@ public sealed partial class BinaryExpressionSyntax : ExpressionSyntax
     public BinaryExpressionSyntax WithLeft(ExpressionSyntax left) => Update(left, this.OperatorToken, this.Right);
     public BinaryExpressionSyntax WithOperatorToken(SyntaxToken operatorToken) => Update(this.Left, operatorToken, this.Right);
     public BinaryExpressionSyntax WithRight(ExpressionSyntax right) => Update(this.Left, this.OperatorToken, right);
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.MemberAccessExpression"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class MemberAccessExpressionSyntax : ExpressionSyntax
+{
+    private ExpressionSyntax? expression;
+    private IdentifierNameSyntax? name;
+
+    internal MemberAccessExpressionSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public ExpressionSyntax Expression => GetRedAtZero(ref this.expression)!;
+
+    public SyntaxToken DotToken => new SyntaxToken(this, ((InternalSyntax.MemberAccessExpressionSyntax)this.Green).dotToken, GetChildPosition(1), GetChildIndex(1));
+
+    public IdentifierNameSyntax Name => GetRed(ref this.name, 2)!;
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            0 => GetRedAtZero(ref this.expression)!,
+            2 => GetRed(ref this.name, 2)!,
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            0 => this.expression,
+            2 => this.name,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitMemberAccessExpression(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitMemberAccessExpression(this);
+
+    public MemberAccessExpressionSyntax Update(ExpressionSyntax expression, SyntaxToken dotToken, IdentifierNameSyntax name)
+    {
+        if (expression != this.Expression || dotToken != this.DotToken || name != this.Name)
+        {
+            var newNode = SyntaxFactory.MemberAccessExpression(expression, dotToken, name);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (MemberAccessExpressionSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public MemberAccessExpressionSyntax WithExpression(ExpressionSyntax expression) => Update(expression, this.DotToken, this.Name);
+    public MemberAccessExpressionSyntax WithDotToken(SyntaxToken dotToken) => Update(this.Expression, dotToken, this.Name);
+    public MemberAccessExpressionSyntax WithName(IdentifierNameSyntax name) => Update(this.Expression, this.DotToken, name);
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.Argument"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ArgumentSyntax : TypeScriptSyntaxNode
+{
+    private ExpressionSyntax? expression;
+
+    internal ArgumentSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public ExpressionSyntax Expression => GetRedAtZero(ref this.expression)!;
+
+    internal override SyntaxNode? GetNodeSlot(int index) => index == 0 ? GetRedAtZero(ref this.expression)! : null;
+
+    internal override SyntaxNode? GetCachedSlot(int index) => index == 0 ? this.expression : null;
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitArgument(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitArgument(this);
+
+    public ArgumentSyntax Update(ExpressionSyntax expression)
+    {
+        if (expression != this.Expression)
+        {
+            var newNode = SyntaxFactory.Argument(expression);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ArgumentSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ArgumentSyntax WithExpression(ExpressionSyntax expression) => Update(expression);
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.ArgumentList"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ArgumentListSyntax : TypeScriptSyntaxNode
+{
+    private SyntaxNode? arguments;
+
+    internal ArgumentListSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken OpenParenToken => new SyntaxToken(this, ((InternalSyntax.ArgumentListSyntax)this.Green).openParenToken, Position, 0);
+
+    public SeparatedSyntaxList<ArgumentSyntax> Arguments
+    {
+        get
+        {
+            var red = GetRed(ref this.arguments, 1);
+            return red != null ? new SeparatedSyntaxList<ArgumentSyntax>(red, GetChildIndex(1)) : default;
+        }
+    }
+
+    public SyntaxToken CloseParenToken => new SyntaxToken(this, ((InternalSyntax.ArgumentListSyntax)this.Green).closeParenToken, GetChildPosition(2), GetChildIndex(2));
+
+    internal override SyntaxNode? GetNodeSlot(int index) => index == 1 ? GetRed(ref this.arguments, 1)! : null;
+
+    internal override SyntaxNode? GetCachedSlot(int index) => index == 1 ? this.arguments : null;
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitArgumentList(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitArgumentList(this);
+
+    public ArgumentListSyntax Update(SyntaxToken openParenToken, SeparatedSyntaxList<ArgumentSyntax> arguments, SyntaxToken closeParenToken)
+    {
+        if (openParenToken != this.OpenParenToken || arguments != this.Arguments || closeParenToken != this.CloseParenToken)
+        {
+            var newNode = SyntaxFactory.ArgumentList(openParenToken, arguments, closeParenToken);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ArgumentListSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ArgumentListSyntax WithOpenParenToken(SyntaxToken openParenToken) => Update(openParenToken, this.Arguments, this.CloseParenToken);
+    public ArgumentListSyntax WithArguments(SeparatedSyntaxList<ArgumentSyntax> arguments) => Update(this.OpenParenToken, arguments, this.CloseParenToken);
+    public ArgumentListSyntax WithCloseParenToken(SyntaxToken closeParenToken) => Update(this.OpenParenToken, this.Arguments, closeParenToken);
+
+    public ArgumentListSyntax AddArguments(params ArgumentSyntax[] items) => WithArguments(this.Arguments.AddRange(items));
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.CallExpression"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class CallExpressionSyntax : ExpressionSyntax
+{
+    private ExpressionSyntax? expression;
+    private ArgumentListSyntax? argumentList;
+
+    internal CallExpressionSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public ExpressionSyntax Expression => GetRedAtZero(ref this.expression)!;
+
+    public ArgumentListSyntax ArgumentList => GetRed(ref this.argumentList, 1)!;
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            0 => GetRedAtZero(ref this.expression)!,
+            1 => GetRed(ref this.argumentList, 1)!,
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            0 => this.expression,
+            1 => this.argumentList,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitCallExpression(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitCallExpression(this);
+
+    public CallExpressionSyntax Update(ExpressionSyntax expression, ArgumentListSyntax argumentList)
+    {
+        if (expression != this.Expression || argumentList != this.ArgumentList)
+        {
+            var newNode = SyntaxFactory.CallExpression(expression, argumentList);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (CallExpressionSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public CallExpressionSyntax WithExpression(ExpressionSyntax expression) => Update(expression, this.ArgumentList);
+    public CallExpressionSyntax WithArgumentList(ArgumentListSyntax argumentList) => Update(this.Expression, argumentList);
+
+    public CallExpressionSyntax AddArgumentListArguments(params ArgumentSyntax[] items) => WithArgumentList(this.ArgumentList.WithArguments(this.ArgumentList.Arguments.AddRange(items)));
 }
 
 /// <remarks>
@@ -535,6 +758,299 @@ public sealed partial class ReturnStatementSyntax : StatementSyntax
     public ReturnStatementSyntax WithReturnKeyword(SyntaxToken returnKeyword) => Update(returnKeyword, this.Expression, this.SemicolonToken);
     public ReturnStatementSyntax WithExpression(ExpressionSyntax? expression) => Update(this.ReturnKeyword, expression, this.SemicolonToken);
     public ReturnStatementSyntax WithSemicolonToken(SyntaxToken semicolonToken) => Update(this.ReturnKeyword, this.Expression, semicolonToken);
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.EmptyStatement"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class EmptyStatementSyntax : StatementSyntax
+{
+
+    internal EmptyStatementSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken SemicolonToken => new SyntaxToken(this, ((InternalSyntax.EmptyStatementSyntax)this.Green).semicolonToken, Position, 0);
+
+    internal override SyntaxNode? GetNodeSlot(int index) => null;
+
+    internal override SyntaxNode? GetCachedSlot(int index) => null;
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitEmptyStatement(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitEmptyStatement(this);
+
+    public EmptyStatementSyntax Update(SyntaxToken semicolonToken)
+    {
+        if (semicolonToken != this.SemicolonToken)
+        {
+            var newNode = SyntaxFactory.EmptyStatement(semicolonToken);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (EmptyStatementSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public EmptyStatementSyntax WithSemicolonToken(SyntaxToken semicolonToken) => Update(semicolonToken);
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.IfStatement"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class IfStatementSyntax : StatementSyntax
+{
+    private ExpressionSyntax? condition;
+    private StatementSyntax? statement;
+    private ElseClauseSyntax? @else;
+
+    internal IfStatementSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken IfKeyword => new SyntaxToken(this, ((InternalSyntax.IfStatementSyntax)this.Green).ifKeyword, Position, 0);
+
+    public SyntaxToken OpenParenToken => new SyntaxToken(this, ((InternalSyntax.IfStatementSyntax)this.Green).openParenToken, GetChildPosition(1), GetChildIndex(1));
+
+    public ExpressionSyntax Condition => GetRed(ref this.condition, 2)!;
+
+    public SyntaxToken CloseParenToken => new SyntaxToken(this, ((InternalSyntax.IfStatementSyntax)this.Green).closeParenToken, GetChildPosition(3), GetChildIndex(3));
+
+    public StatementSyntax Statement => GetRed(ref this.statement, 4)!;
+
+    public ElseClauseSyntax? Else => GetRed(ref this.@else, 5);
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            2 => GetRed(ref this.condition, 2)!,
+            4 => GetRed(ref this.statement, 4)!,
+            5 => GetRed(ref this.@else, 5),
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            2 => this.condition,
+            4 => this.statement,
+            5 => this.@else,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitIfStatement(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitIfStatement(this);
+
+    public IfStatementSyntax Update(SyntaxToken ifKeyword, SyntaxToken openParenToken, ExpressionSyntax condition, SyntaxToken closeParenToken, StatementSyntax statement, ElseClauseSyntax? @else)
+    {
+        if (ifKeyword != this.IfKeyword || openParenToken != this.OpenParenToken || condition != this.Condition || closeParenToken != this.CloseParenToken || statement != this.Statement || @else != this.Else)
+        {
+            var newNode = SyntaxFactory.IfStatement(ifKeyword, openParenToken, condition, closeParenToken, statement, @else);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (IfStatementSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public IfStatementSyntax WithIfKeyword(SyntaxToken ifKeyword) => Update(ifKeyword, this.OpenParenToken, this.Condition, this.CloseParenToken, this.Statement, this.Else);
+    public IfStatementSyntax WithOpenParenToken(SyntaxToken openParenToken) => Update(this.IfKeyword, openParenToken, this.Condition, this.CloseParenToken, this.Statement, this.Else);
+    public IfStatementSyntax WithCondition(ExpressionSyntax condition) => Update(this.IfKeyword, this.OpenParenToken, condition, this.CloseParenToken, this.Statement, this.Else);
+    public IfStatementSyntax WithCloseParenToken(SyntaxToken closeParenToken) => Update(this.IfKeyword, this.OpenParenToken, this.Condition, closeParenToken, this.Statement, this.Else);
+    public IfStatementSyntax WithStatement(StatementSyntax statement) => Update(this.IfKeyword, this.OpenParenToken, this.Condition, this.CloseParenToken, statement, this.Else);
+    public IfStatementSyntax WithElse(ElseClauseSyntax? @else) => Update(this.IfKeyword, this.OpenParenToken, this.Condition, this.CloseParenToken, this.Statement, @else);
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.ElseClause"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ElseClauseSyntax : TypeScriptSyntaxNode
+{
+    private StatementSyntax? statement;
+
+    internal ElseClauseSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken ElseKeyword => new SyntaxToken(this, ((InternalSyntax.ElseClauseSyntax)this.Green).elseKeyword, Position, 0);
+
+    public StatementSyntax Statement => GetRed(ref this.statement, 1)!;
+
+    internal override SyntaxNode? GetNodeSlot(int index) => index == 1 ? GetRed(ref this.statement, 1)! : null;
+
+    internal override SyntaxNode? GetCachedSlot(int index) => index == 1 ? this.statement : null;
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitElseClause(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitElseClause(this);
+
+    public ElseClauseSyntax Update(SyntaxToken elseKeyword, StatementSyntax statement)
+    {
+        if (elseKeyword != this.ElseKeyword || statement != this.Statement)
+        {
+            var newNode = SyntaxFactory.ElseClause(elseKeyword, statement);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ElseClauseSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ElseClauseSyntax WithElseKeyword(SyntaxToken elseKeyword) => Update(elseKeyword, this.Statement);
+    public ElseClauseSyntax WithStatement(StatementSyntax statement) => Update(this.ElseKeyword, statement);
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.WhileStatement"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class WhileStatementSyntax : StatementSyntax
+{
+    private ExpressionSyntax? condition;
+    private StatementSyntax? statement;
+
+    internal WhileStatementSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken WhileKeyword => new SyntaxToken(this, ((InternalSyntax.WhileStatementSyntax)this.Green).whileKeyword, Position, 0);
+
+    public SyntaxToken OpenParenToken => new SyntaxToken(this, ((InternalSyntax.WhileStatementSyntax)this.Green).openParenToken, GetChildPosition(1), GetChildIndex(1));
+
+    public ExpressionSyntax Condition => GetRed(ref this.condition, 2)!;
+
+    public SyntaxToken CloseParenToken => new SyntaxToken(this, ((InternalSyntax.WhileStatementSyntax)this.Green).closeParenToken, GetChildPosition(3), GetChildIndex(3));
+
+    public StatementSyntax Statement => GetRed(ref this.statement, 4)!;
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            2 => GetRed(ref this.condition, 2)!,
+            4 => GetRed(ref this.statement, 4)!,
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            2 => this.condition,
+            4 => this.statement,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitWhileStatement(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitWhileStatement(this);
+
+    public WhileStatementSyntax Update(SyntaxToken whileKeyword, SyntaxToken openParenToken, ExpressionSyntax condition, SyntaxToken closeParenToken, StatementSyntax statement)
+    {
+        if (whileKeyword != this.WhileKeyword || openParenToken != this.OpenParenToken || condition != this.Condition || closeParenToken != this.CloseParenToken || statement != this.Statement)
+        {
+            var newNode = SyntaxFactory.WhileStatement(whileKeyword, openParenToken, condition, closeParenToken, statement);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (WhileStatementSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public WhileStatementSyntax WithWhileKeyword(SyntaxToken whileKeyword) => Update(whileKeyword, this.OpenParenToken, this.Condition, this.CloseParenToken, this.Statement);
+    public WhileStatementSyntax WithOpenParenToken(SyntaxToken openParenToken) => Update(this.WhileKeyword, openParenToken, this.Condition, this.CloseParenToken, this.Statement);
+    public WhileStatementSyntax WithCondition(ExpressionSyntax condition) => Update(this.WhileKeyword, this.OpenParenToken, condition, this.CloseParenToken, this.Statement);
+    public WhileStatementSyntax WithCloseParenToken(SyntaxToken closeParenToken) => Update(this.WhileKeyword, this.OpenParenToken, this.Condition, closeParenToken, this.Statement);
+    public WhileStatementSyntax WithStatement(StatementSyntax statement) => Update(this.WhileKeyword, this.OpenParenToken, this.Condition, this.CloseParenToken, statement);
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.ForStatement"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ForStatementSyntax : StatementSyntax
+{
+    private StatementSyntax? initializer;
+    private ExpressionSyntax? condition;
+    private ExpressionSyntax? increment;
+    private StatementSyntax? statement;
+
+    internal ForStatementSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken ForKeyword => new SyntaxToken(this, ((InternalSyntax.ForStatementSyntax)this.Green).forKeyword, Position, 0);
+
+    public SyntaxToken OpenParenToken => new SyntaxToken(this, ((InternalSyntax.ForStatementSyntax)this.Green).openParenToken, GetChildPosition(1), GetChildIndex(1));
+
+    public StatementSyntax? Initializer => GetRed(ref this.initializer, 2);
+
+    public ExpressionSyntax? Condition => GetRed(ref this.condition, 3);
+
+    public SyntaxToken SecondSemicolonToken => new SyntaxToken(this, ((InternalSyntax.ForStatementSyntax)this.Green).secondSemicolonToken, GetChildPosition(4), GetChildIndex(4));
+
+    public ExpressionSyntax? Increment => GetRed(ref this.increment, 5);
+
+    public SyntaxToken CloseParenToken => new SyntaxToken(this, ((InternalSyntax.ForStatementSyntax)this.Green).closeParenToken, GetChildPosition(6), GetChildIndex(6));
+
+    public StatementSyntax Statement => GetRed(ref this.statement, 7)!;
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            2 => GetRed(ref this.initializer, 2),
+            3 => GetRed(ref this.condition, 3),
+            5 => GetRed(ref this.increment, 5),
+            7 => GetRed(ref this.statement, 7)!,
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            2 => this.initializer,
+            3 => this.condition,
+            5 => this.increment,
+            7 => this.statement,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitForStatement(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitForStatement(this);
+
+    public ForStatementSyntax Update(SyntaxToken forKeyword, SyntaxToken openParenToken, StatementSyntax? initializer, ExpressionSyntax? condition, SyntaxToken secondSemicolonToken, ExpressionSyntax? increment, SyntaxToken closeParenToken, StatementSyntax statement)
+    {
+        if (forKeyword != this.ForKeyword || openParenToken != this.OpenParenToken || initializer != this.Initializer || condition != this.Condition || secondSemicolonToken != this.SecondSemicolonToken || increment != this.Increment || closeParenToken != this.CloseParenToken || statement != this.Statement)
+        {
+            var newNode = SyntaxFactory.ForStatement(forKeyword, openParenToken, initializer, condition, secondSemicolonToken, increment, closeParenToken, statement);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ForStatementSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ForStatementSyntax WithForKeyword(SyntaxToken forKeyword) => Update(forKeyword, this.OpenParenToken, this.Initializer, this.Condition, this.SecondSemicolonToken, this.Increment, this.CloseParenToken, this.Statement);
+    public ForStatementSyntax WithOpenParenToken(SyntaxToken openParenToken) => Update(this.ForKeyword, openParenToken, this.Initializer, this.Condition, this.SecondSemicolonToken, this.Increment, this.CloseParenToken, this.Statement);
+    public ForStatementSyntax WithInitializer(StatementSyntax? initializer) => Update(this.ForKeyword, this.OpenParenToken, initializer, this.Condition, this.SecondSemicolonToken, this.Increment, this.CloseParenToken, this.Statement);
+    public ForStatementSyntax WithCondition(ExpressionSyntax? condition) => Update(this.ForKeyword, this.OpenParenToken, this.Initializer, condition, this.SecondSemicolonToken, this.Increment, this.CloseParenToken, this.Statement);
+    public ForStatementSyntax WithSecondSemicolonToken(SyntaxToken secondSemicolonToken) => Update(this.ForKeyword, this.OpenParenToken, this.Initializer, this.Condition, secondSemicolonToken, this.Increment, this.CloseParenToken, this.Statement);
+    public ForStatementSyntax WithIncrement(ExpressionSyntax? increment) => Update(this.ForKeyword, this.OpenParenToken, this.Initializer, this.Condition, this.SecondSemicolonToken, increment, this.CloseParenToken, this.Statement);
+    public ForStatementSyntax WithCloseParenToken(SyntaxToken closeParenToken) => Update(this.ForKeyword, this.OpenParenToken, this.Initializer, this.Condition, this.SecondSemicolonToken, this.Increment, closeParenToken, this.Statement);
+    public ForStatementSyntax WithStatement(StatementSyntax statement) => Update(this.ForKeyword, this.OpenParenToken, this.Initializer, this.Condition, this.SecondSemicolonToken, this.Increment, this.CloseParenToken, statement);
 }
 
 /// <remarks>
@@ -917,6 +1433,276 @@ public sealed partial class InterfaceDeclarationSyntax : DeclarationStatementSyn
     public InterfaceDeclarationSyntax WithCloseBraceToken(SyntaxToken closeBraceToken) => Update(this.InterfaceKeyword, this.Identifier, this.OpenBraceToken, this.Members, closeBraceToken);
 
     public InterfaceDeclarationSyntax AddMembers(params TypeElementSyntax[] items) => WithMembers(this.Members.AddRange(items));
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.ClassDeclaration"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ClassDeclarationSyntax : DeclarationStatementSyntax
+{
+    private SyntaxNode? members;
+
+    internal ClassDeclarationSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken ClassKeyword => new SyntaxToken(this, ((InternalSyntax.ClassDeclarationSyntax)this.Green).classKeyword, Position, 0);
+
+    public SyntaxToken Identifier
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.ClassDeclarationSyntax)this.Green).identifier;
+            return slot != null ? new SyntaxToken(this, slot, GetChildPosition(1), GetChildIndex(1)) : default;
+        }
+    }
+
+    public SyntaxToken OpenBraceToken => new SyntaxToken(this, ((InternalSyntax.ClassDeclarationSyntax)this.Green).openBraceToken, GetChildPosition(2), GetChildIndex(2));
+
+    public SyntaxList<ClassElementSyntax> Members => new SyntaxList<ClassElementSyntax>(GetRed(ref this.members, 3));
+
+    public SyntaxToken CloseBraceToken => new SyntaxToken(this, ((InternalSyntax.ClassDeclarationSyntax)this.Green).closeBraceToken, GetChildPosition(4), GetChildIndex(4));
+
+    internal override SyntaxNode? GetNodeSlot(int index) => index == 3 ? GetRed(ref this.members, 3)! : null;
+
+    internal override SyntaxNode? GetCachedSlot(int index) => index == 3 ? this.members : null;
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitClassDeclaration(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitClassDeclaration(this);
+
+    public ClassDeclarationSyntax Update(SyntaxToken classKeyword, SyntaxToken identifier, SyntaxToken openBraceToken, SyntaxList<ClassElementSyntax> members, SyntaxToken closeBraceToken)
+    {
+        if (classKeyword != this.ClassKeyword || identifier != this.Identifier || openBraceToken != this.OpenBraceToken || members != this.Members || closeBraceToken != this.CloseBraceToken)
+        {
+            var newNode = SyntaxFactory.ClassDeclaration(classKeyword, identifier, openBraceToken, members, closeBraceToken);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ClassDeclarationSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ClassDeclarationSyntax WithClassKeyword(SyntaxToken classKeyword) => Update(classKeyword, this.Identifier, this.OpenBraceToken, this.Members, this.CloseBraceToken);
+    public ClassDeclarationSyntax WithIdentifier(SyntaxToken identifier) => Update(this.ClassKeyword, identifier, this.OpenBraceToken, this.Members, this.CloseBraceToken);
+    public ClassDeclarationSyntax WithOpenBraceToken(SyntaxToken openBraceToken) => Update(this.ClassKeyword, this.Identifier, openBraceToken, this.Members, this.CloseBraceToken);
+    public ClassDeclarationSyntax WithMembers(SyntaxList<ClassElementSyntax> members) => Update(this.ClassKeyword, this.Identifier, this.OpenBraceToken, members, this.CloseBraceToken);
+    public ClassDeclarationSyntax WithCloseBraceToken(SyntaxToken closeBraceToken) => Update(this.ClassKeyword, this.Identifier, this.OpenBraceToken, this.Members, closeBraceToken);
+
+    public ClassDeclarationSyntax AddMembers(params ClassElementSyntax[] items) => WithMembers(this.Members.AddRange(items));
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.MethodDeclaration"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class MethodDeclarationSyntax : ClassElementSyntax
+{
+    private IdentifierNameSyntax? name;
+    private ParameterListSyntax? parameterList;
+    private TypeAnnotationSyntax? typeAnnotation;
+    private BlockSyntax? body;
+
+    internal MethodDeclarationSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public IdentifierNameSyntax Name => GetRedAtZero(ref this.name)!;
+
+    public ParameterListSyntax ParameterList => GetRed(ref this.parameterList, 1)!;
+
+    public TypeAnnotationSyntax? TypeAnnotation => GetRed(ref this.typeAnnotation, 2);
+
+    public BlockSyntax? Body => GetRed(ref this.body, 3);
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            0 => GetRedAtZero(ref this.name)!,
+            1 => GetRed(ref this.parameterList, 1)!,
+            2 => GetRed(ref this.typeAnnotation, 2),
+            3 => GetRed(ref this.body, 3),
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            0 => this.name,
+            1 => this.parameterList,
+            2 => this.typeAnnotation,
+            3 => this.body,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitMethodDeclaration(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitMethodDeclaration(this);
+
+    public MethodDeclarationSyntax Update(IdentifierNameSyntax name, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
+    {
+        if (name != this.Name || parameterList != this.ParameterList || typeAnnotation != this.TypeAnnotation || body != this.Body)
+        {
+            var newNode = SyntaxFactory.MethodDeclaration(name, parameterList, typeAnnotation, body);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (MethodDeclarationSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public MethodDeclarationSyntax WithName(IdentifierNameSyntax name) => Update(name, this.ParameterList, this.TypeAnnotation, this.Body);
+    public MethodDeclarationSyntax WithParameterList(ParameterListSyntax parameterList) => Update(this.Name, parameterList, this.TypeAnnotation, this.Body);
+    public MethodDeclarationSyntax WithTypeAnnotation(TypeAnnotationSyntax? typeAnnotation) => Update(this.Name, this.ParameterList, typeAnnotation, this.Body);
+    public MethodDeclarationSyntax WithBody(BlockSyntax? body) => Update(this.Name, this.ParameterList, this.TypeAnnotation, body);
+
+    public MethodDeclarationSyntax AddParameterListParameters(params ParameterSyntax[] items) => WithParameterList(this.ParameterList.WithParameters(this.ParameterList.Parameters.AddRange(items)));
+    public MethodDeclarationSyntax AddBodyStatements(params StatementSyntax[] items)
+    {
+        var body = this.Body ?? SyntaxFactory.Block();
+        return WithBody(body.WithStatements(body.Statements.AddRange(items)));
+    }
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.PropertyDeclaration"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class PropertyDeclarationSyntax : ClassElementSyntax
+{
+    private IdentifierNameSyntax? name;
+    private TypeAnnotationSyntax? typeAnnotation;
+    private EqualsValueClauseSyntax? equalsValueClause;
+
+    internal PropertyDeclarationSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public IdentifierNameSyntax Name => GetRedAtZero(ref this.name)!;
+
+    public TypeAnnotationSyntax? TypeAnnotation => GetRed(ref this.typeAnnotation, 1);
+
+    public EqualsValueClauseSyntax? EqualsValueClause => GetRed(ref this.equalsValueClause, 2);
+
+    public SyntaxToken SemicolonToken
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.PropertyDeclarationSyntax)this.Green).semicolonToken;
+            return slot != null ? new SyntaxToken(this, slot, GetChildPosition(3), GetChildIndex(3)) : default;
+        }
+    }
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            0 => GetRedAtZero(ref this.name)!,
+            1 => GetRed(ref this.typeAnnotation, 1),
+            2 => GetRed(ref this.equalsValueClause, 2),
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            0 => this.name,
+            1 => this.typeAnnotation,
+            2 => this.equalsValueClause,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitPropertyDeclaration(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitPropertyDeclaration(this);
+
+    public PropertyDeclarationSyntax Update(IdentifierNameSyntax name, TypeAnnotationSyntax? typeAnnotation, EqualsValueClauseSyntax? equalsValueClause, SyntaxToken semicolonToken)
+    {
+        if (name != this.Name || typeAnnotation != this.TypeAnnotation || equalsValueClause != this.EqualsValueClause || semicolonToken != this.SemicolonToken)
+        {
+            var newNode = SyntaxFactory.PropertyDeclaration(name, typeAnnotation, equalsValueClause, semicolonToken);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (PropertyDeclarationSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public PropertyDeclarationSyntax WithName(IdentifierNameSyntax name) => Update(name, this.TypeAnnotation, this.EqualsValueClause, this.SemicolonToken);
+    public PropertyDeclarationSyntax WithTypeAnnotation(TypeAnnotationSyntax? typeAnnotation) => Update(this.Name, typeAnnotation, this.EqualsValueClause, this.SemicolonToken);
+    public PropertyDeclarationSyntax WithEqualsValueClause(EqualsValueClauseSyntax? equalsValueClause) => Update(this.Name, this.TypeAnnotation, equalsValueClause, this.SemicolonToken);
+    public PropertyDeclarationSyntax WithSemicolonToken(SyntaxToken semicolonToken) => Update(this.Name, this.TypeAnnotation, this.EqualsValueClause, semicolonToken);
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.ConstructorDeclaration"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ConstructorDeclarationSyntax : ClassElementSyntax
+{
+    private ParameterListSyntax? parameterList;
+    private BlockSyntax? body;
+
+    internal ConstructorDeclarationSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken ConstructorKeyword => new SyntaxToken(this, ((InternalSyntax.ConstructorDeclarationSyntax)this.Green).constructorKeyword, Position, 0);
+
+    public ParameterListSyntax ParameterList => GetRed(ref this.parameterList, 1)!;
+
+    public BlockSyntax? Body => GetRed(ref this.body, 2);
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            1 => GetRed(ref this.parameterList, 1)!,
+            2 => GetRed(ref this.body, 2),
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            1 => this.parameterList,
+            2 => this.body,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitConstructorDeclaration(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitConstructorDeclaration(this);
+
+    public ConstructorDeclarationSyntax Update(SyntaxToken constructorKeyword, ParameterListSyntax parameterList, BlockSyntax? body)
+    {
+        if (constructorKeyword != this.ConstructorKeyword || parameterList != this.ParameterList || body != this.Body)
+        {
+            var newNode = SyntaxFactory.ConstructorDeclaration(constructorKeyword, parameterList, body);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ConstructorDeclarationSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ConstructorDeclarationSyntax WithConstructorKeyword(SyntaxToken constructorKeyword) => Update(constructorKeyword, this.ParameterList, this.Body);
+    public ConstructorDeclarationSyntax WithParameterList(ParameterListSyntax parameterList) => Update(this.ConstructorKeyword, parameterList, this.Body);
+    public ConstructorDeclarationSyntax WithBody(BlockSyntax? body) => Update(this.ConstructorKeyword, this.ParameterList, body);
+
+    public ConstructorDeclarationSyntax AddParameterListParameters(params ParameterSyntax[] items) => WithParameterList(this.ParameterList.WithParameters(this.ParameterList.Parameters.AddRange(items)));
+    public ConstructorDeclarationSyntax AddBodyStatements(params StatementSyntax[] items)
+    {
+        var body = this.Body ?? SyntaxFactory.Block();
+        return WithBody(body.WithStatements(body.Statements.AddRange(items)));
+    }
 }
 
 /// <remarks>

@@ -158,6 +158,10 @@ namespace Microsoft.CodeAnalysis.TypeScript
         TypeAnnotation,
         PropertySignature,
         InterfaceDeclaration,
+        ClassDeclaration,
+        MethodDeclaration,
+        PropertyDeclaration,
+        ConstructorDeclaration,
 
         // Expressions
         NumericLiteralExpression,
@@ -171,6 +175,13 @@ namespace Microsoft.CodeAnalysis.TypeScript
         DivideExpression,
         EqualsExpression,
         NotEqualsExpression,
+        LessThanExpression,
+        LessThanOrEqualExpression,
+        GreaterThanExpression,
+        GreaterThanOrEqualExpression,
+        LogicalAndExpression,
+        LogicalOrExpression,
+        AssignmentExpression,
 
         // Statements
         Block,
@@ -181,6 +192,19 @@ namespace Microsoft.CodeAnalysis.TypeScript
         FunctionDeclaration,
         Parameter,
         ParameterList,
+
+        // Control Flow
+        IfStatement,
+        ElseClause,
+        WhileStatement,
+        ForStatement,
+        EmptyStatement,
+
+        // New Expressions
+        CallExpression,
+        MemberAccessExpression,
+        ArgumentList,
+        Argument,
 
         // Structured Trivia
         StructuredTrivia = 9000,

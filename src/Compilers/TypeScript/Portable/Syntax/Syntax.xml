@@ -10,6 +10,7 @@
   <AbstractNode Name="TypeSyntax" Base="ExpressionSyntax"/>
   <AbstractNode Name="DeclarationStatementSyntax" Base="StatementSyntax"/>
   <AbstractNode Name="TypeElementSyntax" Base="TypeScriptSyntaxNode"/>
+  <AbstractNode Name="ClassElementSyntax" Base="TypeScriptSyntaxNode"/>
 
   <!-- Expressions -->
   <Node Name="IdentifierNameSyntax" Base="TypeSyntax">
@@ -35,9 +36,47 @@
     <Kind Name="DivideExpression"/>
     <Kind Name="EqualsExpression"/>
     <Kind Name="NotEqualsExpression"/>
+    <Kind Name="LessThanExpression"/>
+    <Kind Name="LessThanOrEqualExpression"/>
+    <Kind Name="GreaterThanExpression"/>
+    <Kind Name="GreaterThanOrEqualExpression"/>
+    <Kind Name="LogicalAndExpression"/>
+    <Kind Name="LogicalOrExpression"/>
+    <Kind Name="AssignmentExpression"/>
     <Field Name="Left" Type="ExpressionSyntax"/>
     <Field Name="OperatorToken" Type="SyntaxToken"/>
     <Field Name="Right" Type="ExpressionSyntax"/>
+  </Node>
+
+  <Node Name="MemberAccessExpressionSyntax" Base="ExpressionSyntax">
+    <Kind Name="MemberAccessExpression"/>
+    <Field Name="Expression" Type="ExpressionSyntax"/>
+    <Field Name="DotToken" Type="SyntaxToken">
+        <Kind Name="DotToken"/>
+    </Field>
+    <Field Name="Name" Type="IdentifierNameSyntax"/>
+  </Node>
+
+  <Node Name="ArgumentSyntax" Base="TypeScriptSyntaxNode">
+    <Kind Name="Argument"/>
+    <Field Name="Expression" Type="ExpressionSyntax"/>
+  </Node>
+
+  <Node Name="ArgumentListSyntax" Base="TypeScriptSyntaxNode">
+    <Kind Name="ArgumentList"/>
+    <Field Name="OpenParenToken" Type="SyntaxToken">
+        <Kind Name="OpenParenToken"/>
+    </Field>
+    <Field Name="Arguments" Type="SeparatedSyntaxList&lt;ArgumentSyntax&gt;"/>
+    <Field Name="CloseParenToken" Type="SyntaxToken">
+        <Kind Name="CloseParenToken"/>
+    </Field>
+  </Node>
+
+  <Node Name="CallExpressionSyntax" Base="ExpressionSyntax">
+    <Kind Name="CallExpression"/>
+    <Field Name="Expression" Type="ExpressionSyntax"/>
+    <Field Name="ArgumentList" Type="ArgumentListSyntax"/>
   </Node>
 
   <!-- Types -->
@@ -103,6 +142,72 @@
     <Field Name="SemicolonToken" Type="SyntaxToken" Optional="true">
         <Kind Name="SemicolonToken"/>
     </Field>
+  </Node>
+
+  <Node Name="EmptyStatementSyntax" Base="StatementSyntax">
+    <Kind Name="EmptyStatement"/>
+    <Field Name="SemicolonToken" Type="SyntaxToken">
+        <Kind Name="SemicolonToken"/>
+    </Field>
+  </Node>
+
+  <Node Name="IfStatementSyntax" Base="StatementSyntax">
+    <Kind Name="IfStatement"/>
+    <Field Name="IfKeyword" Type="SyntaxToken">
+        <Kind Name="IfKeyword"/>
+    </Field>
+    <Field Name="OpenParenToken" Type="SyntaxToken">
+        <Kind Name="OpenParenToken"/>
+    </Field>
+    <Field Name="Condition" Type="ExpressionSyntax"/>
+    <Field Name="CloseParenToken" Type="SyntaxToken">
+        <Kind Name="CloseParenToken"/>
+    </Field>
+    <Field Name="Statement" Type="StatementSyntax"/>
+    <Field Name="Else" Type="ElseClauseSyntax" Optional="true"/>
+  </Node>
+
+  <Node Name="ElseClauseSyntax" Base="TypeScriptSyntaxNode">
+    <Kind Name="ElseClause"/>
+    <Field Name="ElseKeyword" Type="SyntaxToken">
+        <Kind Name="ElseKeyword"/>
+    </Field>
+    <Field Name="Statement" Type="StatementSyntax"/>
+  </Node>
+
+  <Node Name="WhileStatementSyntax" Base="StatementSyntax">
+    <Kind Name="WhileStatement"/>
+    <Field Name="WhileKeyword" Type="SyntaxToken">
+        <Kind Name="WhileKeyword"/>
+    </Field>
+    <Field Name="OpenParenToken" Type="SyntaxToken">
+        <Kind Name="OpenParenToken"/>
+    </Field>
+    <Field Name="Condition" Type="ExpressionSyntax"/>
+    <Field Name="CloseParenToken" Type="SyntaxToken">
+        <Kind Name="CloseParenToken"/>
+    </Field>
+    <Field Name="Statement" Type="StatementSyntax"/>
+  </Node>
+
+  <Node Name="ForStatementSyntax" Base="StatementSyntax">
+    <Kind Name="ForStatement"/>
+    <Field Name="ForKeyword" Type="SyntaxToken">
+        <Kind Name="ForKeyword"/>
+    </Field>
+    <Field Name="OpenParenToken" Type="SyntaxToken">
+        <Kind Name="OpenParenToken"/>
+    </Field>
+    <Field Name="Initializer" Type="StatementSyntax" Optional="true"/>
+    <Field Name="Condition" Type="ExpressionSyntax" Optional="true"/>
+    <Field Name="SecondSemicolonToken" Type="SyntaxToken">
+        <Kind Name="SemicolonToken"/>
+    </Field>
+    <Field Name="Increment" Type="ExpressionSyntax" Optional="true"/>
+    <Field Name="CloseParenToken" Type="SyntaxToken">
+        <Kind Name="CloseParenToken"/>
+    </Field>
+    <Field Name="Statement" Type="StatementSyntax"/>
   </Node>
 
   <Node Name="VariableDeclarationSyntax" Base="TypeScriptSyntaxNode">
@@ -178,6 +283,50 @@
     <Field Name="CloseBraceToken" Type="SyntaxToken">
       <Kind Name="CloseBraceToken"/>
     </Field>
+  </Node>
+
+  <Node Name="ClassDeclarationSyntax" Base="DeclarationStatementSyntax">
+    <Kind Name="ClassDeclaration"/>
+    <Field Name="ClassKeyword" Type="SyntaxToken">
+      <Kind Name="ClassKeyword"/>
+    </Field>
+    <Field Name="Identifier" Type="SyntaxToken" Optional="true">
+      <Kind Name="IdentifierToken"/>
+    </Field>
+    <Field Name="OpenBraceToken" Type="SyntaxToken">
+      <Kind Name="OpenBraceToken"/>
+    </Field>
+    <Field Name="Members" Type="SyntaxList&lt;ClassElementSyntax&gt;"/>
+    <Field Name="CloseBraceToken" Type="SyntaxToken">
+      <Kind Name="CloseBraceToken"/>
+    </Field>
+  </Node>
+
+  <Node Name="MethodDeclarationSyntax" Base="ClassElementSyntax">
+    <Kind Name="MethodDeclaration"/>
+    <Field Name="Name" Type="IdentifierNameSyntax"/>
+    <Field Name="ParameterList" Type="ParameterListSyntax"/>
+    <Field Name="TypeAnnotation" Type="TypeAnnotationSyntax" Optional="true"/>
+    <Field Name="Body" Type="BlockSyntax" Optional="true"/>
+  </Node>
+
+  <Node Name="PropertyDeclarationSyntax" Base="ClassElementSyntax">
+    <Kind Name="PropertyDeclaration"/>
+    <Field Name="Name" Type="IdentifierNameSyntax"/>
+    <Field Name="TypeAnnotation" Type="TypeAnnotationSyntax" Optional="true"/>
+    <Field Name="EqualsValueClause" Type="EqualsValueClauseSyntax" Optional="true"/>
+    <Field Name="SemicolonToken" Type="SyntaxToken" Optional="true">
+        <Kind Name="SemicolonToken"/>
+    </Field>
+  </Node>
+
+  <Node Name="ConstructorDeclarationSyntax" Base="ClassElementSyntax">
+    <Kind Name="ConstructorDeclaration"/>
+    <Field Name="ConstructorKeyword" Type="SyntaxToken">
+        <Kind Name="ConstructorKeyword"/>
+    </Field>
+    <Field Name="ParameterList" Type="ParameterListSyntax"/>
+    <Field Name="Body" Type="BlockSyntax" Optional="true"/>
   </Node>
 
   <!-- Compilation Unit -->
