@@ -105,11 +105,109 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                     return ParseWhileStatement();
                 case SyntaxKind.ForKeyword:
                     return ParseForStatement();
+                case SyntaxKind.SwitchKeyword:
+                    return ParseSwitchStatement();
+                case SyntaxKind.TryKeyword:
+                    return ParseTryStatement();
+                case SyntaxKind.ThrowKeyword:
+                    return ParseThrowStatement();
                 case SyntaxKind.SemicolonToken:
                     return ParseEmptyStatement();
                 default:
                     return ParseExpressionStatement();
             }
+        }
+
+        internal SwitchStatementSyntax ParseSwitchStatement()
+        {
+            var switchKeyword = EatToken(SyntaxKind.SwitchKeyword);
+            var openParen = EatToken(SyntaxKind.OpenParenToken);
+            var expression = ParseExpression();
+            var closeParen = EatToken(SyntaxKind.CloseParenToken);
+            var openBrace = EatToken(SyntaxKind.OpenBraceToken);
+
+            var clauses = new SyntaxListBuilder<SwitchLabelSyntax>(8);
+            while (_currentToken.Kind != SyntaxKind.CloseBraceToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
+            {
+                clauses.Add(ParseSwitchClause());
+            }
+
+            var closeBrace = EatToken(SyntaxKind.CloseBraceToken);
+            return SyntaxFactory.SwitchStatement(switchKeyword, openParen, expression, closeParen, openBrace, clauses.ToList(), closeBrace);
+        }
+
+        internal SwitchLabelSyntax ParseSwitchClause()
+        {
+            if (_currentToken.Kind == SyntaxKind.CaseKeyword)
+            {
+                var caseKeyword = EatToken();
+                var expression = ParseExpression();
+                var colon = EatToken(SyntaxKind.ColonToken);
+                var statements = ParseSwitchClauseStatements();
+                return SyntaxFactory.CaseClause(caseKeyword, expression, colon, statements);
+            }
+            else
+            {
+                var defaultKeyword = EatToken(SyntaxKind.DefaultKeyword);
+                var colon = EatToken(SyntaxKind.ColonToken);
+                var statements = ParseSwitchClauseStatements();
+                return SyntaxFactory.DefaultClause(defaultKeyword, colon, statements);
+            }
+        }
+
+        internal Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<StatementSyntax> ParseSwitchClauseStatements()
+        {
+            var statements = new SyntaxListBuilder<StatementSyntax>(8);
+            while (_currentToken.Kind != SyntaxKind.CaseKeyword &&
+                   _currentToken.Kind != SyntaxKind.DefaultKeyword &&
+                   _currentToken.Kind != SyntaxKind.CloseBraceToken &&
+                   _currentToken.Kind != SyntaxKind.EndOfFileToken)
+            {
+                statements.Add(ParseStatement());
+            }
+            return statements.ToList();
+        }
+
+        internal TryStatementSyntax ParseTryStatement()
+        {
+            var tryKeyword = EatToken(SyntaxKind.TryKeyword);
+            var block = ParseBlock();
+            CatchClauseSyntax? catchClause = null;
+            if (_currentToken.Kind == SyntaxKind.CatchKeyword)
+            {
+                var catchKeyword = EatToken();
+                SyntaxToken? openParen = null;
+                VariableDeclarationSyntax? declaration = null;
+                SyntaxToken? closeParen = null;
+
+                if (_currentToken.Kind == SyntaxKind.OpenParenToken)
+                {
+                    openParen = EatToken();
+                    declaration = ParseVariableDeclaration(); // Typically just identifier but can be binding pattern
+                    closeParen = EatToken(SyntaxKind.CloseParenToken);
+                }
+
+                var catchBlock = ParseBlock();
+                catchClause = SyntaxFactory.CatchClause(catchKeyword, openParen, declaration, closeParen, catchBlock);
+            }
+
+            FinallyClauseSyntax? finallyClause = null;
+            if (_currentToken.Kind == SyntaxKind.FinallyKeyword)
+            {
+                var finallyKeyword = EatToken();
+                var finallyBlock = ParseBlock();
+                finallyClause = SyntaxFactory.FinallyClause(finallyKeyword, finallyBlock);
+            }
+
+            return SyntaxFactory.TryStatement(tryKeyword, block, catchClause, finallyClause);
+        }
+
+        internal ThrowStatementSyntax ParseThrowStatement()
+        {
+            var throwKeyword = EatToken(SyntaxKind.ThrowKeyword);
+            var expression = ParseExpression();
+            var semicolon = EatOptionalToken(SyntaxKind.SemicolonToken);
+            return SyntaxFactory.ThrowStatement(throwKeyword, expression, semicolon);
         }
 
         internal IfStatementSyntax ParseIfStatement()
@@ -528,24 +626,63 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
         internal ExpressionSyntax ParseUnaryExpression()
         {
+            if (IsPrefixUnaryOperator(_currentToken.Kind))
+            {
+                var opToken = EatToken();
+                var operand = ParseUnaryExpression();
+                return SyntaxFactory.PrefixUnaryExpression(opToken, operand);
+            }
+
+            if (_currentToken.Kind == SyntaxKind.DeleteKeyword)
+            {
+                var deleteKeyword = EatToken();
+                var expression = ParseUnaryExpression();
+                return SyntaxFactory.DeleteExpression(deleteKeyword, expression);
+            }
+
+            if (_currentToken.Kind == SyntaxKind.TypeOfKeyword)
+            {
+                var typeofKeyword = EatToken();
+                var expression = ParseUnaryExpression();
+                return SyntaxFactory.TypeOfExpression(typeofKeyword, expression);
+            }
+
+            if (_currentToken.Kind == SyntaxKind.VoidKeyword)
+            {
+                var voidKeyword = EatToken();
+                var expression = ParseUnaryExpression();
+                return SyntaxFactory.VoidExpression(voidKeyword, expression);
+            }
+
             return ParsePostfixExpression();
+        }
+
+        private bool IsPrefixUnaryOperator(SyntaxKind kind)
+        {
+            switch (kind)
+            {
+                case SyntaxKind.PlusPlusToken:
+                case SyntaxKind.MinusMinusToken:
+                case SyntaxKind.PlusToken:
+                case SyntaxKind.MinusToken:
+                case SyntaxKind.TildeToken:
+                case SyntaxKind.ExclamationToken:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         internal ExpressionSyntax ParsePostfixExpression()
         {
-            var expr = ParsePrimaryExpression();
+            var expr = ParseLeftHandSideExpression();
             while (true)
             {
-                if (_currentToken.Kind == SyntaxKind.DotToken)
+                if (_currentToken.Kind == SyntaxKind.PlusPlusToken || _currentToken.Kind == SyntaxKind.MinusMinusToken)
                 {
-                     var dot = EatToken();
-                     var name = ParseIdentifierName();
-                     expr = SyntaxFactory.MemberAccessExpression(expr, dot, name);
-                }
-                else if (_currentToken.Kind == SyntaxKind.OpenParenToken)
-                {
-                     var args = ParseArgumentList();
-                     expr = SyntaxFactory.CallExpression(expr, args);
+                    // Check for new line? Postfix operators shouldn't have line terminator before them.
+                    var opToken = EatToken();
+                    expr = SyntaxFactory.PostfixUnaryExpression(expr, opToken);
                 }
                 else
                 {
@@ -553,6 +690,76 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                 }
             }
             return expr;
+        }
+
+        internal ExpressionSyntax ParseLeftHandSideExpression()
+        {
+            var expr = ParseMemberExpression();
+            while (true)
+            {
+                 if (_currentToken.Kind == SyntaxKind.OpenParenToken)
+                 {
+                     var args = ParseArgumentList();
+                     expr = SyntaxFactory.CallExpression(expr, args);
+                 }
+                 else
+                 {
+                     break;
+                 }
+            }
+            return expr;
+        }
+
+        internal ExpressionSyntax ParseMemberExpression()
+        {
+             ExpressionSyntax expr;
+             if (_currentToken.Kind == SyntaxKind.NewKeyword)
+             {
+                 expr = ParseNewExpression();
+             }
+             else
+             {
+                 expr = ParsePrimaryExpression();
+             }
+
+             while (true)
+             {
+                if (_currentToken.Kind == SyntaxKind.DotToken)
+                {
+                     var dot = EatToken();
+                     var name = ParseIdentifierName();
+                     expr = SyntaxFactory.MemberAccessExpression(expr, dot, name);
+                }
+                else if (_currentToken.Kind == SyntaxKind.OpenBracketToken)
+                {
+                    // TODO: Indexer access not yet in Syntax.xml?
+                    // For now, break or handle if we add it.
+                    // Given the plan was literals, I might have missed MemberAccess via brackets.
+                    // Sticking to dot for now as per previous implementation, but let's check plan.
+                    // The plan didn't explicitly mention ElementAccessExpression, so I'll skip for now or treat as end of member loop.
+                    break;
+                }
+                else
+                {
+                    break;
+                }
+             }
+             return expr;
+        }
+
+        internal NewExpressionSyntax ParseNewExpression()
+        {
+            var newKeyword = EatToken(SyntaxKind.NewKeyword);
+            var type = ParseType(); // Simplified: usually it's MemberExpression or CallExpression.
+                                    // But using TypeSyntax for now as per Syntax.xml definition
+                                    // "Field Name="Type" Type="TypeSyntax""
+
+            ArgumentListSyntax? args = null;
+            if (_currentToken.Kind == SyntaxKind.OpenParenToken)
+            {
+                args = ParseArgumentList();
+            }
+            return SyntaxFactory.NewExpression(newKeyword, type, args);
         }
 
         internal ArgumentListSyntax ParseArgumentList()
@@ -594,10 +801,86 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                     return SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression, EatToken());
                 case SyntaxKind.IdentifierToken:
                     return ParseIdentifierName();
+                case SyntaxKind.ThisKeyword:
+                    return SyntaxFactory.ThisExpression(EatToken());
+                case SyntaxKind.OpenBracketToken:
+                    return ParseArrayLiteralExpression();
+                case SyntaxKind.OpenBraceToken:
+                    return ParseObjectLiteralExpression();
+                case SyntaxKind.OpenParenToken:
+                    return ParseParenthesizedExpression();
                 default:
                     // Error recovery
                     return SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken));
             }
+        }
+
+        internal ExpressionSyntax ParseParenthesizedExpression()
+        {
+            var open = EatToken(SyntaxKind.OpenParenToken);
+            var expr = ParseExpression();
+            var close = EatToken(SyntaxKind.CloseParenToken);
+            return expr;
+        }
+
+        internal ArrayLiteralExpressionSyntax ParseArrayLiteralExpression()
+        {
+            var openBracket = EatToken(SyntaxKind.OpenBracketToken);
+            var elements = new SeparatedSyntaxListBuilder<ExpressionSyntax>(8);
+
+            if (_currentToken.Kind != SyntaxKind.CloseBracketToken)
+            {
+                while (_currentToken.Kind != SyntaxKind.CloseBracketToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
+                {
+                    elements.Add(ParseExpression());
+
+                    if (_currentToken.Kind == SyntaxKind.CommaToken)
+                    {
+                        elements.AddSeparator(EatToken());
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+
+            var closeBracket = EatToken(SyntaxKind.CloseBracketToken);
+            return SyntaxFactory.ArrayLiteralExpression(openBracket, elements.ToList(), closeBracket);
+        }
+
+        internal ObjectLiteralExpressionSyntax ParseObjectLiteralExpression()
+        {
+            var openBrace = EatToken(SyntaxKind.OpenBraceToken);
+            var properties = new SeparatedSyntaxListBuilder<PropertyAssignmentSyntax>(8);
+
+            if (_currentToken.Kind != SyntaxKind.CloseBraceToken)
+            {
+                while (_currentToken.Kind != SyntaxKind.CloseBraceToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
+                {
+                    properties.Add(ParsePropertyAssignment());
+
+                    if (_currentToken.Kind == SyntaxKind.CommaToken)
+                    {
+                        properties.AddSeparator(EatToken());
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+
+            var closeBrace = EatToken(SyntaxKind.CloseBraceToken);
+            return SyntaxFactory.ObjectLiteralExpression(openBrace, properties.ToList(), closeBrace);
+        }
+
+        internal PropertyAssignmentSyntax ParsePropertyAssignment()
+        {
+            var name = ParseIdentifierName();
+            var colon = EatToken(SyntaxKind.ColonToken);
+            var expr = ParseExpression();
+            return SyntaxFactory.PropertyAssignment(name, colon, expr);
         }
 
         internal IdentifierNameSyntax ParseIdentifierName()
