@@ -1,9 +1,10 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics;
+using System.Collections.Concurrent;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.TypeScript;
 
@@ -11,7 +12,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.ParserStatus
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             if (args.Length == 0)
             {
@@ -19,6 +20,33 @@ namespace Microsoft.CodeAnalysis.TypeScript.ParserStatus
                 return;
             }
 
+            // Worker mode
+            if (args.Length == 2 && args[0] == "--parse-single")
+            {
+                string file = args[1];
+                try
+                {
+                    var sourceText = File.ReadAllText(file);
+                    var tree = TypeScriptSyntaxTree.ParseText(sourceText);
+                    var diagnostics = tree.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToList();
+
+                    if (diagnostics.Count == 0)
+                    {
+                        Environment.Exit(0); // Success
+                    }
+                    else
+                    {
+                        Environment.Exit(1); // Parsed with errors
+                    }
+                }
+                catch
+                {
+                    Environment.Exit(2); // Exception
+                }
+                return;
+            }
+
+            // Coordinator mode
             string directoryPath = args[0];
             if (!Directory.Exists(directoryPath))
             {
@@ -34,42 +62,50 @@ namespace Microsoft.CodeAnalysis.TypeScript.ParserStatus
             int failedParses = 0;
             int timedOutParses = 0;
 
-            // Short timeout since real files should parse in milliseconds.
-            // A 3-second timeout catches infinite loops gracefully.
+            // Timeout per file
             var timeout = TimeSpan.FromSeconds(3);
 
-            // Give the entire parallel loop a maximum global time budget (e.g. 5 minutes)
-            var globalTimeout = TimeSpan.FromMinutes(5);
+            // Path to the current executable
+            string exePath = Process.GetCurrentProcess().MainModule?.FileName ?? "dotnet";
+            string argumentsPrefix = string.Empty;
 
-            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-
-            try
+            // Determine if running via `dotnet run` or compiled exe
+            if (exePath.EndsWith("dotnet") || exePath.EndsWith("dotnet.exe"))
             {
-                using (var ctsGlobal = new CancellationTokenSource(globalTimeout))
+                // Assuming we are run via `dotnet run --project ...`
+                // We'll just invoke our own assembly.
+                exePath = typeof(Program).Assembly.Location;
+                // If it's a dll, we use `dotnet path/to.dll`
+                if (exePath.EndsWith(".dll"))
                 {
-                    parallelOptions.CancellationToken = ctsGlobal.Token;
+                    argumentsPrefix = $"\"{exePath}\" ";
+                    exePath = "dotnet";
+                }
+            }
 
-                    Parallel.ForEach(files, parallelOptions, file =>
+            // Limit concurrency
+            var semaphore = new SemaphoreSlim(Environment.ProcessorCount);
+
+            var tasks = files.Select(async file =>
+            {
+                await semaphore.WaitAsync();
+                try
+                {
+                    using (var process = new Process())
                     {
-                        var sourceText = File.ReadAllText(file);
+                        process.StartInfo.FileName = exePath;
+                        process.StartInfo.Arguments = $"{argumentsPrefix}--parse-single \"{file}\"";
+                        process.StartInfo.UseShellExecute = false;
+                        process.StartInfo.CreateNoWindow = true;
 
-                        var task = Task.Run(() =>
-                        {
-                            try
-                            {
-                                var tree = TypeScriptSyntaxTree.ParseText(sourceText);
-                                var diagnostics = tree.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToList();
-                                return diagnostics.Count == 0;
-                            }
-                            catch
-                            {
-                                return false;
-                            }
-                        });
+                        process.Start();
 
-                        if (task.Wait(timeout))
+                        // Wait for exit with timeout
+                        bool exited = process.WaitForExit((int)timeout.TotalMilliseconds);
+
+                        if (exited)
                         {
-                            if (task.Result)
+                            if (process.ExitCode == 0)
                             {
                                 Interlocked.Increment(ref successfulParses);
                             }
@@ -80,29 +116,22 @@ namespace Microsoft.CodeAnalysis.TypeScript.ParserStatus
                         }
                         else
                         {
+                            // Kill hanging parser
+                            try { process.Kill(entireProcessTree: true); } catch { }
+
                             Interlocked.Increment(ref failedParses);
                             Interlocked.Increment(ref timedOutParses);
                             Console.WriteLine($"Timeout processing file: {file}");
                         }
-                    });
+                    }
                 }
-            }
-            catch (OperationCanceledException)
-            {
-                Console.WriteLine($"\nWARNING: Global timeout of {globalTimeout.TotalMinutes} minutes reached. Terminating early.");
-                // Count remaining unvisited files as failed.
-                int unvisited = totalFiles - (successfulParses + failedParses);
-                if (unvisited > 0)
+                finally
                 {
-                    failedParses += unvisited;
-                    timedOutParses += unvisited;
-                    Console.WriteLine($"{unvisited} files abandoned due to global timeout.");
+                    semaphore.Release();
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Fatal Error: {ex.Message}");
-            }
+            });
+
+            await Task.WhenAll(tasks);
 
             double successRate = totalFiles > 0 ? (double)successfulParses / totalFiles * 100 : 0;
 
