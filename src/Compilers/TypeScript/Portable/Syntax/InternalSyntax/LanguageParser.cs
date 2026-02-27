@@ -866,28 +866,151 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
         internal TypeSyntax ParseType()
         {
-            TypeSyntax type;
-            if (IsPredefinedType(_currentToken.Kind))
-            {
-                type = ParsePredefinedType();
-            }
-            else if (_currentToken.Kind == SyntaxKind.IdentifierToken || _currentToken.Kind == SyntaxKind.AsyncKeyword || _currentToken.Kind == SyntaxKind.AwaitKeyword)
-            {
-                type = ParseTypeReference();
-            }
-            else
-            {
-                type = ParseTypeReference();
-            }
+            return ParseUnionType();
+        }
 
+        internal TypeSyntax ParseUnionType()
+        {
+            var type = ParseIntersectionType();
+            if (_currentToken.Kind == SyntaxKind.BarToken)
+            {
+                var types = new SeparatedSyntaxListBuilder<TypeSyntax>(4);
+                types.Add(type);
+                while (_currentToken.Kind == SyntaxKind.BarToken)
+                {
+                    types.AddSeparator(EatToken());
+                    types.Add(ParseIntersectionType());
+                }
+                return SyntaxFactory.UnionType(types.ToList());
+            }
+            return type;
+        }
+
+        internal TypeSyntax ParseIntersectionType()
+        {
+            var type = ParsePostfixType();
+            if (_currentToken.Kind == SyntaxKind.AmpersandToken)
+            {
+                var types = new SeparatedSyntaxListBuilder<TypeSyntax>(4);
+                types.Add(type);
+                while (_currentToken.Kind == SyntaxKind.AmpersandToken)
+                {
+                    types.AddSeparator(EatToken());
+                    types.Add(ParsePostfixType());
+                }
+                return SyntaxFactory.IntersectionType(types.ToList());
+            }
+            return type;
+        }
+
+        internal TypeSyntax ParsePostfixType()
+        {
+            var type = ParsePrimaryType();
             while (_currentToken.Kind == SyntaxKind.OpenBracketToken)
             {
                 var openBracket = EatToken();
                 var closeBracket = EatToken(SyntaxKind.CloseBracketToken);
                 type = SyntaxFactory.ArrayType(type, openBracket, closeBracket);
             }
-
             return type;
+        }
+
+        internal TypeSyntax ParsePrimaryType()
+        {
+            if (IsPredefinedType(_currentToken.Kind))
+            {
+                return ParsePredefinedType();
+            }
+            else if (_currentToken.Kind == SyntaxKind.IdentifierToken || _currentToken.Kind == SyntaxKind.AsyncKeyword || _currentToken.Kind == SyntaxKind.AwaitKeyword)
+            {
+                return ParseTypeReference();
+            }
+            else if (_currentToken.Kind == SyntaxKind.OpenParenToken)
+            {
+                return ParseParenthesizedType();
+            }
+            else if (_currentToken.Kind == SyntaxKind.OpenBracketToken)
+            {
+                return ParseTupleType();
+            }
+
+            // Fallback or error recovery
+            return ParseTypeReference();
+        }
+
+        internal TypeSyntax ParseParenthesizedType()
+        {
+            var openParen = EatToken(SyntaxKind.OpenParenToken);
+            var type = ParseType();
+            var closeParen = EatToken(SyntaxKind.CloseParenToken);
+            return SyntaxFactory.ParenthesizedType(openParen, type, closeParen);
+        }
+
+        internal TupleTypeSyntax ParseTupleType()
+        {
+            var openBracket = EatToken(SyntaxKind.OpenBracketToken);
+            var elements = new SeparatedSyntaxListBuilder<TupleElementSyntax>(4);
+            if (_currentToken.Kind != SyntaxKind.CloseBracketToken)
+            {
+                while (_currentToken.Kind != SyntaxKind.CloseBracketToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
+                {
+                    elements.Add(ParseTupleElement());
+                    if (_currentToken.Kind == SyntaxKind.CommaToken)
+                    {
+                        elements.AddSeparator(EatToken());
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+            var closeBracket = EatToken(SyntaxKind.CloseBracketToken);
+            return SyntaxFactory.TupleType(openBracket, elements.ToList(), closeBracket);
+        }
+
+        internal TupleElementSyntax ParseTupleElement()
+        {
+            SyntaxToken? dotDotDot = null;
+            if (_currentToken.Kind == SyntaxKind.DotDotDotToken)
+            {
+                dotDotDot = EatToken();
+            }
+
+            // Tuple element can be "Name?: Type" or just "Type"
+            // If we have identifier followed by colon or question colon, it's a named element.
+            // But types can also start with identifier.
+            // Lookahead needed or heuristics.
+            // "a: string" -> Name: a, Type: string
+            // "string" -> Type: string
+            // "a?: string" -> Name: a, Question, Type: string
+
+            IdentifierNameSyntax? name = null;
+            SyntaxToken? question = null;
+            SyntaxToken? colon = null;
+
+            if (_currentToken.Kind == SyntaxKind.IdentifierToken)
+            {
+                // Check next token
+                var next = PeekToken(1);
+                if (next.Kind == SyntaxKind.ColonToken)
+                {
+                    name = ParseIdentifierName();
+                    colon = EatToken();
+                }
+                else if (next.Kind == SyntaxKind.QuestionToken && PeekToken(2).Kind == SyntaxKind.ColonToken)
+                {
+                    name = ParseIdentifierName();
+                    question = EatToken();
+                    colon = EatToken();
+                }
+            }
+
+            // Note: If we consumed name and colon, we must parse type.
+            // If we didn't, we just parse type, but 'name' is null.
+
+            var type = ParseType();
+            return SyntaxFactory.TupleElement(dotDotDot, name, question, colon, type);
         }
 
         private bool IsPredefinedType(SyntaxKind kind)

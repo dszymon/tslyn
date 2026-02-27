@@ -199,7 +199,14 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                 case ']': _textWindow.AdvanceChar(); return SyntaxKind.CloseBracketToken;
                 case ';': _textWindow.AdvanceChar(); return SyntaxKind.SemicolonToken;
                 case ',': _textWindow.AdvanceChar(); return SyntaxKind.CommaToken;
-                case '.': _textWindow.AdvanceChar(); return SyntaxKind.DotToken; // Could be ...
+                case '.':
+                    _textWindow.AdvanceChar();
+                    if (_textWindow.PeekChar() == '.' && _textWindow.PeekChar(1) == '.')
+                    {
+                        _textWindow.AdvanceChar(2);
+                        return SyntaxKind.DotDotDotToken;
+                    }
+                    return SyntaxKind.DotToken;
                 case ':': _textWindow.AdvanceChar(); return SyntaxKind.ColonToken;
                 case '?': _textWindow.AdvanceChar(); return SyntaxKind.QuestionToken; // Could be ?? or ?.
                 case '~': _textWindow.AdvanceChar(); return SyntaxKind.TildeToken;

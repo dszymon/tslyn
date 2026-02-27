@@ -2517,6 +2517,468 @@ internal sealed partial class TypeAnnotationSyntax : TypeScriptSyntaxNode
         => new TypeAnnotationSyntax(this.Kind, this.colonToken, this.type, GetDiagnostics(), annotations);
 }
 
+internal sealed partial class UnionTypeSyntax : TypeSyntax
+{
+    internal readonly GreenNode? types;
+
+    internal UnionTypeSyntax(SyntaxKind kind, GreenNode? types, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 1;
+        if (types != null)
+        {
+            this.AdjustFlagsAndWidth(types);
+            this.types = types;
+        }
+    }
+
+    internal UnionTypeSyntax(SyntaxKind kind, GreenNode? types, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 1;
+        if (types != null)
+        {
+            this.AdjustFlagsAndWidth(types);
+            this.types = types;
+        }
+    }
+
+    internal UnionTypeSyntax(SyntaxKind kind, GreenNode? types)
+      : base(kind)
+    {
+        this.SlotCount = 1;
+        if (types != null)
+        {
+            this.AdjustFlagsAndWidth(types);
+            this.types = types;
+        }
+    }
+
+    public CoreSyntax.SeparatedSyntaxList<TypeSyntax> Types => new CoreSyntax.SeparatedSyntaxList<TypeSyntax>(new CoreSyntax.SyntaxList<TypeScriptSyntaxNode>(this.types));
+
+    internal override GreenNode? GetSlot(int index)
+        => index == 0 ? this.types : null;
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.UnionTypeSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitUnionType(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitUnionType(this);
+
+    public UnionTypeSyntax Update(CoreSyntax.SeparatedSyntaxList<TypeSyntax> types)
+    {
+        if (types != this.Types)
+        {
+            var newNode = SyntaxFactory.UnionType(types);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new UnionTypeSyntax(this.Kind, this.types, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new UnionTypeSyntax(this.Kind, this.types, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class IntersectionTypeSyntax : TypeSyntax
+{
+    internal readonly GreenNode? types;
+
+    internal IntersectionTypeSyntax(SyntaxKind kind, GreenNode? types, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 1;
+        if (types != null)
+        {
+            this.AdjustFlagsAndWidth(types);
+            this.types = types;
+        }
+    }
+
+    internal IntersectionTypeSyntax(SyntaxKind kind, GreenNode? types, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 1;
+        if (types != null)
+        {
+            this.AdjustFlagsAndWidth(types);
+            this.types = types;
+        }
+    }
+
+    internal IntersectionTypeSyntax(SyntaxKind kind, GreenNode? types)
+      : base(kind)
+    {
+        this.SlotCount = 1;
+        if (types != null)
+        {
+            this.AdjustFlagsAndWidth(types);
+            this.types = types;
+        }
+    }
+
+    public CoreSyntax.SeparatedSyntaxList<TypeSyntax> Types => new CoreSyntax.SeparatedSyntaxList<TypeSyntax>(new CoreSyntax.SyntaxList<TypeScriptSyntaxNode>(this.types));
+
+    internal override GreenNode? GetSlot(int index)
+        => index == 0 ? this.types : null;
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.IntersectionTypeSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitIntersectionType(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitIntersectionType(this);
+
+    public IntersectionTypeSyntax Update(CoreSyntax.SeparatedSyntaxList<TypeSyntax> types)
+    {
+        if (types != this.Types)
+        {
+            var newNode = SyntaxFactory.IntersectionType(types);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new IntersectionTypeSyntax(this.Kind, this.types, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new IntersectionTypeSyntax(this.Kind, this.types, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class TupleTypeSyntax : TypeSyntax
+{
+    internal readonly SyntaxToken openBracketToken;
+    internal readonly GreenNode? elements;
+    internal readonly SyntaxToken closeBracketToken;
+
+    internal TupleTypeSyntax(SyntaxKind kind, SyntaxToken openBracketToken, GreenNode? elements, SyntaxToken closeBracketToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(openBracketToken);
+        this.openBracketToken = openBracketToken;
+        if (elements != null)
+        {
+            this.AdjustFlagsAndWidth(elements);
+            this.elements = elements;
+        }
+        this.AdjustFlagsAndWidth(closeBracketToken);
+        this.closeBracketToken = closeBracketToken;
+    }
+
+    internal TupleTypeSyntax(SyntaxKind kind, SyntaxToken openBracketToken, GreenNode? elements, SyntaxToken closeBracketToken, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(openBracketToken);
+        this.openBracketToken = openBracketToken;
+        if (elements != null)
+        {
+            this.AdjustFlagsAndWidth(elements);
+            this.elements = elements;
+        }
+        this.AdjustFlagsAndWidth(closeBracketToken);
+        this.closeBracketToken = closeBracketToken;
+    }
+
+    internal TupleTypeSyntax(SyntaxKind kind, SyntaxToken openBracketToken, GreenNode? elements, SyntaxToken closeBracketToken)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(openBracketToken);
+        this.openBracketToken = openBracketToken;
+        if (elements != null)
+        {
+            this.AdjustFlagsAndWidth(elements);
+            this.elements = elements;
+        }
+        this.AdjustFlagsAndWidth(closeBracketToken);
+        this.closeBracketToken = closeBracketToken;
+    }
+
+    public SyntaxToken OpenBracketToken => this.openBracketToken;
+    public CoreSyntax.SeparatedSyntaxList<TupleElementSyntax> Elements => new CoreSyntax.SeparatedSyntaxList<TupleElementSyntax>(new CoreSyntax.SyntaxList<TypeScriptSyntaxNode>(this.elements));
+    public SyntaxToken CloseBracketToken => this.closeBracketToken;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.openBracketToken,
+            1 => this.elements,
+            2 => this.closeBracketToken,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.TupleTypeSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitTupleType(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitTupleType(this);
+
+    public TupleTypeSyntax Update(SyntaxToken openBracketToken, CoreSyntax.SeparatedSyntaxList<TupleElementSyntax> elements, SyntaxToken closeBracketToken)
+    {
+        if (openBracketToken != this.OpenBracketToken || elements != this.Elements || closeBracketToken != this.CloseBracketToken)
+        {
+            var newNode = SyntaxFactory.TupleType(openBracketToken, elements, closeBracketToken);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new TupleTypeSyntax(this.Kind, this.openBracketToken, this.elements, this.closeBracketToken, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new TupleTypeSyntax(this.Kind, this.openBracketToken, this.elements, this.closeBracketToken, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class TupleElementSyntax : TypeScriptSyntaxNode
+{
+    internal readonly SyntaxToken? dotDotDotToken;
+    internal readonly IdentifierNameSyntax? name;
+    internal readonly SyntaxToken? questionToken;
+    internal readonly SyntaxToken? colonToken;
+    internal readonly TypeSyntax type;
+
+    internal TupleElementSyntax(SyntaxKind kind, SyntaxToken? dotDotDotToken, IdentifierNameSyntax? name, SyntaxToken? questionToken, SyntaxToken? colonToken, TypeSyntax type, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 5;
+        if (dotDotDotToken != null)
+        {
+            this.AdjustFlagsAndWidth(dotDotDotToken);
+            this.dotDotDotToken = dotDotDotToken;
+        }
+        if (name != null)
+        {
+            this.AdjustFlagsAndWidth(name);
+            this.name = name;
+        }
+        if (questionToken != null)
+        {
+            this.AdjustFlagsAndWidth(questionToken);
+            this.questionToken = questionToken;
+        }
+        if (colonToken != null)
+        {
+            this.AdjustFlagsAndWidth(colonToken);
+            this.colonToken = colonToken;
+        }
+        this.AdjustFlagsAndWidth(type);
+        this.type = type;
+    }
+
+    internal TupleElementSyntax(SyntaxKind kind, SyntaxToken? dotDotDotToken, IdentifierNameSyntax? name, SyntaxToken? questionToken, SyntaxToken? colonToken, TypeSyntax type, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 5;
+        if (dotDotDotToken != null)
+        {
+            this.AdjustFlagsAndWidth(dotDotDotToken);
+            this.dotDotDotToken = dotDotDotToken;
+        }
+        if (name != null)
+        {
+            this.AdjustFlagsAndWidth(name);
+            this.name = name;
+        }
+        if (questionToken != null)
+        {
+            this.AdjustFlagsAndWidth(questionToken);
+            this.questionToken = questionToken;
+        }
+        if (colonToken != null)
+        {
+            this.AdjustFlagsAndWidth(colonToken);
+            this.colonToken = colonToken;
+        }
+        this.AdjustFlagsAndWidth(type);
+        this.type = type;
+    }
+
+    internal TupleElementSyntax(SyntaxKind kind, SyntaxToken? dotDotDotToken, IdentifierNameSyntax? name, SyntaxToken? questionToken, SyntaxToken? colonToken, TypeSyntax type)
+      : base(kind)
+    {
+        this.SlotCount = 5;
+        if (dotDotDotToken != null)
+        {
+            this.AdjustFlagsAndWidth(dotDotDotToken);
+            this.dotDotDotToken = dotDotDotToken;
+        }
+        if (name != null)
+        {
+            this.AdjustFlagsAndWidth(name);
+            this.name = name;
+        }
+        if (questionToken != null)
+        {
+            this.AdjustFlagsAndWidth(questionToken);
+            this.questionToken = questionToken;
+        }
+        if (colonToken != null)
+        {
+            this.AdjustFlagsAndWidth(colonToken);
+            this.colonToken = colonToken;
+        }
+        this.AdjustFlagsAndWidth(type);
+        this.type = type;
+    }
+
+    public SyntaxToken? DotDotDotToken => this.dotDotDotToken;
+    public IdentifierNameSyntax? Name => this.name;
+    public SyntaxToken? QuestionToken => this.questionToken;
+    public SyntaxToken? ColonToken => this.colonToken;
+    public TypeSyntax Type => this.type;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.dotDotDotToken,
+            1 => this.name,
+            2 => this.questionToken,
+            3 => this.colonToken,
+            4 => this.type,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.TupleElementSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitTupleElement(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitTupleElement(this);
+
+    public TupleElementSyntax Update(SyntaxToken dotDotDotToken, IdentifierNameSyntax name, SyntaxToken questionToken, SyntaxToken colonToken, TypeSyntax type)
+    {
+        if (dotDotDotToken != this.DotDotDotToken || name != this.Name || questionToken != this.QuestionToken || colonToken != this.ColonToken || type != this.Type)
+        {
+            var newNode = SyntaxFactory.TupleElement(dotDotDotToken, name, questionToken, colonToken, type);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new TupleElementSyntax(this.Kind, this.dotDotDotToken, this.name, this.questionToken, this.colonToken, this.type, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new TupleElementSyntax(this.Kind, this.dotDotDotToken, this.name, this.questionToken, this.colonToken, this.type, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class ParenthesizedTypeSyntax : TypeSyntax
+{
+    internal readonly SyntaxToken openParenToken;
+    internal readonly TypeSyntax type;
+    internal readonly SyntaxToken closeParenToken;
+
+    internal ParenthesizedTypeSyntax(SyntaxKind kind, SyntaxToken openParenToken, TypeSyntax type, SyntaxToken closeParenToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(openParenToken);
+        this.openParenToken = openParenToken;
+        this.AdjustFlagsAndWidth(type);
+        this.type = type;
+        this.AdjustFlagsAndWidth(closeParenToken);
+        this.closeParenToken = closeParenToken;
+    }
+
+    internal ParenthesizedTypeSyntax(SyntaxKind kind, SyntaxToken openParenToken, TypeSyntax type, SyntaxToken closeParenToken, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(openParenToken);
+        this.openParenToken = openParenToken;
+        this.AdjustFlagsAndWidth(type);
+        this.type = type;
+        this.AdjustFlagsAndWidth(closeParenToken);
+        this.closeParenToken = closeParenToken;
+    }
+
+    internal ParenthesizedTypeSyntax(SyntaxKind kind, SyntaxToken openParenToken, TypeSyntax type, SyntaxToken closeParenToken)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(openParenToken);
+        this.openParenToken = openParenToken;
+        this.AdjustFlagsAndWidth(type);
+        this.type = type;
+        this.AdjustFlagsAndWidth(closeParenToken);
+        this.closeParenToken = closeParenToken;
+    }
+
+    public SyntaxToken OpenParenToken => this.openParenToken;
+    public TypeSyntax Type => this.type;
+    public SyntaxToken CloseParenToken => this.closeParenToken;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.openParenToken,
+            1 => this.type,
+            2 => this.closeParenToken,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.ParenthesizedTypeSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitParenthesizedType(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitParenthesizedType(this);
+
+    public ParenthesizedTypeSyntax Update(SyntaxToken openParenToken, TypeSyntax type, SyntaxToken closeParenToken)
+    {
+        if (openParenToken != this.OpenParenToken || type != this.Type || closeParenToken != this.CloseParenToken)
+        {
+            var newNode = SyntaxFactory.ParenthesizedType(openParenToken, type, closeParenToken);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new ParenthesizedTypeSyntax(this.Kind, this.openParenToken, this.type, this.closeParenToken, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new ParenthesizedTypeSyntax(this.Kind, this.openParenToken, this.type, this.closeParenToken, GetDiagnostics(), annotations);
+}
+
 internal sealed partial class PropertySignatureSyntax : TypeElementSyntax
 {
     internal readonly IdentifierNameSyntax name;
@@ -7094,6 +7556,11 @@ internal partial class TypeScriptSyntaxVisitor<TResult>
     public virtual TResult VisitTypeParameterList(TypeParameterListSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitTypeArgumentList(TypeArgumentListSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitTypeAnnotation(TypeAnnotationSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitUnionType(UnionTypeSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitIntersectionType(IntersectionTypeSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitTupleType(TupleTypeSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitTupleElement(TupleElementSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitParenthesizedType(ParenthesizedTypeSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitPropertySignature(PropertySignatureSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitBlock(BlockSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitExpressionStatement(ExpressionStatementSyntax node) => this.DefaultVisit(node);
@@ -7169,6 +7636,11 @@ internal partial class TypeScriptSyntaxVisitor
     public virtual void VisitTypeParameterList(TypeParameterListSyntax node) => this.DefaultVisit(node);
     public virtual void VisitTypeArgumentList(TypeArgumentListSyntax node) => this.DefaultVisit(node);
     public virtual void VisitTypeAnnotation(TypeAnnotationSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitUnionType(UnionTypeSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitIntersectionType(IntersectionTypeSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitTupleType(TupleTypeSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitTupleElement(TupleElementSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitParenthesizedType(ParenthesizedTypeSyntax node) => this.DefaultVisit(node);
     public virtual void VisitPropertySignature(PropertySignatureSyntax node) => this.DefaultVisit(node);
     public virtual void VisitBlock(BlockSyntax node) => this.DefaultVisit(node);
     public virtual void VisitExpressionStatement(ExpressionStatementSyntax node) => this.DefaultVisit(node);
@@ -7301,6 +7773,21 @@ internal partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<TypeSc
 
     public override TypeScriptSyntaxNode VisitTypeAnnotation(TypeAnnotationSyntax node)
         => node.Update((SyntaxToken)Visit(node.ColonToken), (TypeSyntax)Visit(node.Type));
+
+    public override TypeScriptSyntaxNode VisitUnionType(UnionTypeSyntax node)
+        => node.Update(VisitList(node.Types));
+
+    public override TypeScriptSyntaxNode VisitIntersectionType(IntersectionTypeSyntax node)
+        => node.Update(VisitList(node.Types));
+
+    public override TypeScriptSyntaxNode VisitTupleType(TupleTypeSyntax node)
+        => node.Update((SyntaxToken)Visit(node.OpenBracketToken), VisitList(node.Elements), (SyntaxToken)Visit(node.CloseBracketToken));
+
+    public override TypeScriptSyntaxNode VisitTupleElement(TupleElementSyntax node)
+        => node.Update((SyntaxToken)Visit(node.DotDotDotToken), (IdentifierNameSyntax)Visit(node.Name), (SyntaxToken)Visit(node.QuestionToken), (SyntaxToken)Visit(node.ColonToken), (TypeSyntax)Visit(node.Type));
+
+    public override TypeScriptSyntaxNode VisitParenthesizedType(ParenthesizedTypeSyntax node)
+        => node.Update((SyntaxToken)Visit(node.OpenParenToken), (TypeSyntax)Visit(node.Type), (SyntaxToken)Visit(node.CloseParenToken));
 
     public override TypeScriptSyntaxNode VisitPropertySignature(PropertySignatureSyntax node)
         => node.Update((IdentifierNameSyntax)Visit(node.Name), (SyntaxToken)Visit(node.QuestionToken), (TypeAnnotationSyntax)Visit(node.TypeAnnotation), (SyntaxToken)Visit(node.SemicolonToken));
@@ -8059,6 +8546,123 @@ internal partial class ContextAwareSyntax
         if (cached != null) return (TypeAnnotationSyntax)cached;
 
         var result = new TypeAnnotationSyntax(SyntaxKind.TypeAnnotation, colonToken, type, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public UnionTypeSyntax UnionType(CoreSyntax.SeparatedSyntaxList<TypeSyntax> types)
+    {
+#if DEBUG
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.UnionType, types.Node, this.context, out hash);
+        if (cached != null) return (UnionTypeSyntax)cached;
+
+        var result = new UnionTypeSyntax(SyntaxKind.UnionType, types.Node, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public IntersectionTypeSyntax IntersectionType(CoreSyntax.SeparatedSyntaxList<TypeSyntax> types)
+    {
+#if DEBUG
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.IntersectionType, types.Node, this.context, out hash);
+        if (cached != null) return (IntersectionTypeSyntax)cached;
+
+        var result = new IntersectionTypeSyntax(SyntaxKind.IntersectionType, types.Node, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public TupleTypeSyntax TupleType(SyntaxToken openBracketToken, CoreSyntax.SeparatedSyntaxList<TupleElementSyntax> elements, SyntaxToken closeBracketToken)
+    {
+#if DEBUG
+        if (openBracketToken == null) throw new ArgumentNullException(nameof(openBracketToken));
+        if (openBracketToken.Kind != SyntaxKind.OpenBracketToken) throw new ArgumentException(nameof(openBracketToken));
+        if (closeBracketToken == null) throw new ArgumentNullException(nameof(closeBracketToken));
+        if (closeBracketToken.Kind != SyntaxKind.CloseBracketToken) throw new ArgumentException(nameof(closeBracketToken));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.TupleType, openBracketToken, elements.Node, closeBracketToken, this.context, out hash);
+        if (cached != null) return (TupleTypeSyntax)cached;
+
+        var result = new TupleTypeSyntax(SyntaxKind.TupleType, openBracketToken, elements.Node, closeBracketToken, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public TupleElementSyntax TupleElement(SyntaxToken? dotDotDotToken, IdentifierNameSyntax? name, SyntaxToken? questionToken, SyntaxToken? colonToken, TypeSyntax type)
+    {
+#if DEBUG
+        if (dotDotDotToken != null)
+        {
+            switch (dotDotDotToken.Kind)
+            {
+                case SyntaxKind.DotDotDotToken:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(dotDotDotToken));
+            }
+        }
+        if (questionToken != null)
+        {
+            switch (questionToken.Kind)
+            {
+                case SyntaxKind.QuestionToken:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(questionToken));
+            }
+        }
+        if (colonToken != null)
+        {
+            switch (colonToken.Kind)
+            {
+                case SyntaxKind.ColonToken:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(colonToken));
+            }
+        }
+        if (type == null) throw new ArgumentNullException(nameof(type));
+#endif
+
+        return new TupleElementSyntax(SyntaxKind.TupleElement, dotDotDotToken, name, questionToken, colonToken, type, this.context);
+    }
+
+    public ParenthesizedTypeSyntax ParenthesizedType(SyntaxToken openParenToken, TypeSyntax type, SyntaxToken closeParenToken)
+    {
+#if DEBUG
+        if (openParenToken == null) throw new ArgumentNullException(nameof(openParenToken));
+        if (openParenToken.Kind != SyntaxKind.OpenParenToken) throw new ArgumentException(nameof(openParenToken));
+        if (type == null) throw new ArgumentNullException(nameof(type));
+        if (closeParenToken == null) throw new ArgumentNullException(nameof(closeParenToken));
+        if (closeParenToken.Kind != SyntaxKind.CloseParenToken) throw new ArgumentException(nameof(closeParenToken));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.ParenthesizedType, openParenToken, type, closeParenToken, this.context, out hash);
+        if (cached != null) return (ParenthesizedTypeSyntax)cached;
+
+        var result = new ParenthesizedTypeSyntax(SyntaxKind.ParenthesizedType, openParenToken, type, closeParenToken, this.context);
         if (hash >= 0)
         {
             SyntaxNodeCache.AddNode(result, hash);
@@ -9644,6 +10248,123 @@ internal static partial class SyntaxFactory
         if (cached != null) return (TypeAnnotationSyntax)cached;
 
         var result = new TypeAnnotationSyntax(SyntaxKind.TypeAnnotation, colonToken, type);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static UnionTypeSyntax UnionType(CoreSyntax.SeparatedSyntaxList<TypeSyntax> types)
+    {
+#if DEBUG
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.UnionType, types.Node, out hash);
+        if (cached != null) return (UnionTypeSyntax)cached;
+
+        var result = new UnionTypeSyntax(SyntaxKind.UnionType, types.Node);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static IntersectionTypeSyntax IntersectionType(CoreSyntax.SeparatedSyntaxList<TypeSyntax> types)
+    {
+#if DEBUG
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.IntersectionType, types.Node, out hash);
+        if (cached != null) return (IntersectionTypeSyntax)cached;
+
+        var result = new IntersectionTypeSyntax(SyntaxKind.IntersectionType, types.Node);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static TupleTypeSyntax TupleType(SyntaxToken openBracketToken, CoreSyntax.SeparatedSyntaxList<TupleElementSyntax> elements, SyntaxToken closeBracketToken)
+    {
+#if DEBUG
+        if (openBracketToken == null) throw new ArgumentNullException(nameof(openBracketToken));
+        if (openBracketToken.Kind != SyntaxKind.OpenBracketToken) throw new ArgumentException(nameof(openBracketToken));
+        if (closeBracketToken == null) throw new ArgumentNullException(nameof(closeBracketToken));
+        if (closeBracketToken.Kind != SyntaxKind.CloseBracketToken) throw new ArgumentException(nameof(closeBracketToken));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.TupleType, openBracketToken, elements.Node, closeBracketToken, out hash);
+        if (cached != null) return (TupleTypeSyntax)cached;
+
+        var result = new TupleTypeSyntax(SyntaxKind.TupleType, openBracketToken, elements.Node, closeBracketToken);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static TupleElementSyntax TupleElement(SyntaxToken? dotDotDotToken, IdentifierNameSyntax? name, SyntaxToken? questionToken, SyntaxToken? colonToken, TypeSyntax type)
+    {
+#if DEBUG
+        if (dotDotDotToken != null)
+        {
+            switch (dotDotDotToken.Kind)
+            {
+                case SyntaxKind.DotDotDotToken:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(dotDotDotToken));
+            }
+        }
+        if (questionToken != null)
+        {
+            switch (questionToken.Kind)
+            {
+                case SyntaxKind.QuestionToken:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(questionToken));
+            }
+        }
+        if (colonToken != null)
+        {
+            switch (colonToken.Kind)
+            {
+                case SyntaxKind.ColonToken:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(colonToken));
+            }
+        }
+        if (type == null) throw new ArgumentNullException(nameof(type));
+#endif
+
+        return new TupleElementSyntax(SyntaxKind.TupleElement, dotDotDotToken, name, questionToken, colonToken, type);
+    }
+
+    public static ParenthesizedTypeSyntax ParenthesizedType(SyntaxToken openParenToken, TypeSyntax type, SyntaxToken closeParenToken)
+    {
+#if DEBUG
+        if (openParenToken == null) throw new ArgumentNullException(nameof(openParenToken));
+        if (openParenToken.Kind != SyntaxKind.OpenParenToken) throw new ArgumentException(nameof(openParenToken));
+        if (type == null) throw new ArgumentNullException(nameof(type));
+        if (closeParenToken == null) throw new ArgumentNullException(nameof(closeParenToken));
+        if (closeParenToken.Kind != SyntaxKind.CloseParenToken) throw new ArgumentException(nameof(closeParenToken));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.ParenthesizedType, openParenToken, type, closeParenToken, out hash);
+        if (cached != null) return (ParenthesizedTypeSyntax)cached;
+
+        var result = new ParenthesizedTypeSyntax(SyntaxKind.ParenthesizedType, openParenToken, type, closeParenToken);
         if (hash >= 0)
         {
             SyntaxNodeCache.AddNode(result, hash);

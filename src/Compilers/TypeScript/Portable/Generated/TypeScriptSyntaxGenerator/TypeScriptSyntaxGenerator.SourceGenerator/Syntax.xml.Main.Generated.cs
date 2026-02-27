@@ -103,6 +103,21 @@ public partial class TypeScriptSyntaxVisitor<TResult>
     /// <summary>Called when the visitor visits a TypeAnnotationSyntax node.</summary>
     public virtual TResult? VisitTypeAnnotation(TypeAnnotationSyntax node) => this.DefaultVisit(node);
 
+    /// <summary>Called when the visitor visits a UnionTypeSyntax node.</summary>
+    public virtual TResult? VisitUnionType(UnionTypeSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a IntersectionTypeSyntax node.</summary>
+    public virtual TResult? VisitIntersectionType(IntersectionTypeSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a TupleTypeSyntax node.</summary>
+    public virtual TResult? VisitTupleType(TupleTypeSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a TupleElementSyntax node.</summary>
+    public virtual TResult? VisitTupleElement(TupleElementSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a ParenthesizedTypeSyntax node.</summary>
+    public virtual TResult? VisitParenthesizedType(ParenthesizedTypeSyntax node) => this.DefaultVisit(node);
+
     /// <summary>Called when the visitor visits a PropertySignatureSyntax node.</summary>
     public virtual TResult? VisitPropertySignature(PropertySignatureSyntax node) => this.DefaultVisit(node);
 
@@ -319,6 +334,21 @@ public partial class TypeScriptSyntaxVisitor
     /// <summary>Called when the visitor visits a TypeAnnotationSyntax node.</summary>
     public virtual void VisitTypeAnnotation(TypeAnnotationSyntax node) => this.DefaultVisit(node);
 
+    /// <summary>Called when the visitor visits a UnionTypeSyntax node.</summary>
+    public virtual void VisitUnionType(UnionTypeSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a IntersectionTypeSyntax node.</summary>
+    public virtual void VisitIntersectionType(IntersectionTypeSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a TupleTypeSyntax node.</summary>
+    public virtual void VisitTupleType(TupleTypeSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a TupleElementSyntax node.</summary>
+    public virtual void VisitTupleElement(TupleElementSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a ParenthesizedTypeSyntax node.</summary>
+    public virtual void VisitParenthesizedType(ParenthesizedTypeSyntax node) => this.DefaultVisit(node);
+
     /// <summary>Called when the visitor visits a PropertySignatureSyntax node.</summary>
     public virtual void VisitPropertySignature(PropertySignatureSyntax node) => this.DefaultVisit(node);
 
@@ -534,6 +564,21 @@ public partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<SyntaxNo
 
     public override SyntaxNode? VisitTypeAnnotation(TypeAnnotationSyntax node)
         => node.Update(VisitToken(node.ColonToken), (TypeSyntax?)Visit(node.Type) ?? throw new ArgumentNullException("type"));
+
+    public override SyntaxNode? VisitUnionType(UnionTypeSyntax node)
+        => node.Update(VisitList(node.Types));
+
+    public override SyntaxNode? VisitIntersectionType(IntersectionTypeSyntax node)
+        => node.Update(VisitList(node.Types));
+
+    public override SyntaxNode? VisitTupleType(TupleTypeSyntax node)
+        => node.Update(VisitToken(node.OpenBracketToken), VisitList(node.Elements), VisitToken(node.CloseBracketToken));
+
+    public override SyntaxNode? VisitTupleElement(TupleElementSyntax node)
+        => node.Update(VisitToken(node.DotDotDotToken), (IdentifierNameSyntax?)Visit(node.Name), VisitToken(node.QuestionToken), VisitToken(node.ColonToken), (TypeSyntax?)Visit(node.Type) ?? throw new ArgumentNullException("type"));
+
+    public override SyntaxNode? VisitParenthesizedType(ParenthesizedTypeSyntax node)
+        => node.Update(VisitToken(node.OpenParenToken), (TypeSyntax?)Visit(node.Type) ?? throw new ArgumentNullException("type"), VisitToken(node.CloseParenToken));
 
     public override SyntaxNode? VisitPropertySignature(PropertySignatureSyntax node)
         => node.Update((IdentifierNameSyntax?)Visit(node.Name) ?? throw new ArgumentNullException("name"), VisitToken(node.QuestionToken), (TypeAnnotationSyntax?)Visit(node.TypeAnnotation), VisitToken(node.SemicolonToken));
@@ -1042,6 +1087,84 @@ public static partial class SyntaxFactory
     /// <summary>Creates a new TypeAnnotationSyntax instance.</summary>
     public static TypeAnnotationSyntax TypeAnnotation(TypeSyntax type)
         => SyntaxFactory.TypeAnnotation(SyntaxFactory.Token(SyntaxKind.ColonToken), type);
+
+    /// <summary>Creates a new UnionTypeSyntax instance.</summary>
+    public static UnionTypeSyntax UnionType(SeparatedSyntaxList<TypeSyntax> types)
+    {
+        return (UnionTypeSyntax)Syntax.InternalSyntax.SyntaxFactory.UnionType(types.Node.ToGreenSeparatedList<Syntax.InternalSyntax.TypeSyntax>()).CreateRed();
+    }
+
+    /// <summary>Creates a new UnionTypeSyntax instance.</summary>
+    public static UnionTypeSyntax UnionType()
+        => SyntaxFactory.UnionType(default);
+
+    /// <summary>Creates a new IntersectionTypeSyntax instance.</summary>
+    public static IntersectionTypeSyntax IntersectionType(SeparatedSyntaxList<TypeSyntax> types)
+    {
+        return (IntersectionTypeSyntax)Syntax.InternalSyntax.SyntaxFactory.IntersectionType(types.Node.ToGreenSeparatedList<Syntax.InternalSyntax.TypeSyntax>()).CreateRed();
+    }
+
+    /// <summary>Creates a new IntersectionTypeSyntax instance.</summary>
+    public static IntersectionTypeSyntax IntersectionType()
+        => SyntaxFactory.IntersectionType(default);
+
+    /// <summary>Creates a new TupleTypeSyntax instance.</summary>
+    public static TupleTypeSyntax TupleType(SyntaxToken openBracketToken, SeparatedSyntaxList<TupleElementSyntax> elements, SyntaxToken closeBracketToken)
+    {
+        if (openBracketToken.Kind() != SyntaxKind.OpenBracketToken) throw new ArgumentException(nameof(openBracketToken));
+        if (closeBracketToken.Kind() != SyntaxKind.CloseBracketToken) throw new ArgumentException(nameof(closeBracketToken));
+        return (TupleTypeSyntax)Syntax.InternalSyntax.SyntaxFactory.TupleType((Syntax.InternalSyntax.SyntaxToken)openBracketToken.Node!, elements.Node.ToGreenSeparatedList<Syntax.InternalSyntax.TupleElementSyntax>(), (Syntax.InternalSyntax.SyntaxToken)closeBracketToken.Node!).CreateRed();
+    }
+
+    /// <summary>Creates a new TupleTypeSyntax instance.</summary>
+    public static TupleTypeSyntax TupleType(SeparatedSyntaxList<TupleElementSyntax> elements = default)
+        => SyntaxFactory.TupleType(SyntaxFactory.Token(SyntaxKind.OpenBracketToken), elements, SyntaxFactory.Token(SyntaxKind.CloseBracketToken));
+
+    /// <summary>Creates a new TupleElementSyntax instance.</summary>
+    public static TupleElementSyntax TupleElement(SyntaxToken dotDotDotToken, IdentifierNameSyntax? name, SyntaxToken questionToken, SyntaxToken colonToken, TypeSyntax type)
+    {
+        switch (dotDotDotToken.Kind())
+        {
+            case SyntaxKind.DotDotDotToken:
+            case SyntaxKind.None: break;
+            default: throw new ArgumentException(nameof(dotDotDotToken));
+        }
+        switch (questionToken.Kind())
+        {
+            case SyntaxKind.QuestionToken:
+            case SyntaxKind.None: break;
+            default: throw new ArgumentException(nameof(questionToken));
+        }
+        switch (colonToken.Kind())
+        {
+            case SyntaxKind.ColonToken:
+            case SyntaxKind.None: break;
+            default: throw new ArgumentException(nameof(colonToken));
+        }
+        if (type == null) throw new ArgumentNullException(nameof(type));
+        return (TupleElementSyntax)Syntax.InternalSyntax.SyntaxFactory.TupleElement((Syntax.InternalSyntax.SyntaxToken?)dotDotDotToken.Node, name == null ? null : (Syntax.InternalSyntax.IdentifierNameSyntax)name.Green, (Syntax.InternalSyntax.SyntaxToken?)questionToken.Node, (Syntax.InternalSyntax.SyntaxToken?)colonToken.Node, (Syntax.InternalSyntax.TypeSyntax)type.Green).CreateRed();
+    }
+
+    /// <summary>Creates a new TupleElementSyntax instance.</summary>
+    public static TupleElementSyntax TupleElement(IdentifierNameSyntax? name, TypeSyntax type)
+        => SyntaxFactory.TupleElement(default, name, default, default, type);
+
+    /// <summary>Creates a new TupleElementSyntax instance.</summary>
+    public static TupleElementSyntax TupleElement(TypeSyntax type)
+        => SyntaxFactory.TupleElement(default, default, default, default, type);
+
+    /// <summary>Creates a new ParenthesizedTypeSyntax instance.</summary>
+    public static ParenthesizedTypeSyntax ParenthesizedType(SyntaxToken openParenToken, TypeSyntax type, SyntaxToken closeParenToken)
+    {
+        if (openParenToken.Kind() != SyntaxKind.OpenParenToken) throw new ArgumentException(nameof(openParenToken));
+        if (type == null) throw new ArgumentNullException(nameof(type));
+        if (closeParenToken.Kind() != SyntaxKind.CloseParenToken) throw new ArgumentException(nameof(closeParenToken));
+        return (ParenthesizedTypeSyntax)Syntax.InternalSyntax.SyntaxFactory.ParenthesizedType((Syntax.InternalSyntax.SyntaxToken)openParenToken.Node!, (Syntax.InternalSyntax.TypeSyntax)type.Green, (Syntax.InternalSyntax.SyntaxToken)closeParenToken.Node!).CreateRed();
+    }
+
+    /// <summary>Creates a new ParenthesizedTypeSyntax instance.</summary>
+    public static ParenthesizedTypeSyntax ParenthesizedType(TypeSyntax type)
+        => SyntaxFactory.ParenthesizedType(SyntaxFactory.Token(SyntaxKind.OpenParenToken), type, SyntaxFactory.Token(SyntaxKind.CloseParenToken));
 
     /// <summary>Creates a new PropertySignatureSyntax instance.</summary>
     public static PropertySignatureSyntax PropertySignature(IdentifierNameSyntax name, SyntaxToken questionToken, TypeAnnotationSyntax? typeAnnotation, SyntaxToken semicolonToken)
