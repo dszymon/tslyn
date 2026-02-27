@@ -139,6 +139,15 @@ public partial class TypeScriptSyntaxVisitor<TResult>
     /// <summary>Called when the visitor visits a WhileStatementSyntax node.</summary>
     public virtual TResult? VisitWhileStatement(WhileStatementSyntax node) => this.DefaultVisit(node);
 
+    /// <summary>Called when the visitor visits a DoStatementSyntax node.</summary>
+    public virtual TResult? VisitDoStatement(DoStatementSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a BreakStatementSyntax node.</summary>
+    public virtual TResult? VisitBreakStatement(BreakStatementSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a ContinueStatementSyntax node.</summary>
+    public virtual TResult? VisitContinueStatement(ContinueStatementSyntax node) => this.DefaultVisit(node);
+
     /// <summary>Called when the visitor visits a ForStatementSyntax node.</summary>
     public virtual TResult? VisitForStatement(ForStatementSyntax node) => this.DefaultVisit(node);
 
@@ -156,6 +165,15 @@ public partial class TypeScriptSyntaxVisitor<TResult>
 
     /// <summary>Called when the visitor visits a ParameterListSyntax node.</summary>
     public virtual TResult? VisitParameterList(ParameterListSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a TypeAliasDeclarationSyntax node.</summary>
+    public virtual TResult? VisitTypeAliasDeclaration(TypeAliasDeclarationSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a EnumDeclarationSyntax node.</summary>
+    public virtual TResult? VisitEnumDeclaration(EnumDeclarationSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a EnumMemberSyntax node.</summary>
+    public virtual TResult? VisitEnumMember(EnumMemberSyntax node) => this.DefaultVisit(node);
 
     /// <summary>Called when the visitor visits a FunctionDeclarationSyntax node.</summary>
     public virtual TResult? VisitFunctionDeclaration(FunctionDeclarationSyntax node) => this.DefaultVisit(node);
@@ -304,6 +322,15 @@ public partial class TypeScriptSyntaxVisitor
     /// <summary>Called when the visitor visits a WhileStatementSyntax node.</summary>
     public virtual void VisitWhileStatement(WhileStatementSyntax node) => this.DefaultVisit(node);
 
+    /// <summary>Called when the visitor visits a DoStatementSyntax node.</summary>
+    public virtual void VisitDoStatement(DoStatementSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a BreakStatementSyntax node.</summary>
+    public virtual void VisitBreakStatement(BreakStatementSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a ContinueStatementSyntax node.</summary>
+    public virtual void VisitContinueStatement(ContinueStatementSyntax node) => this.DefaultVisit(node);
+
     /// <summary>Called when the visitor visits a ForStatementSyntax node.</summary>
     public virtual void VisitForStatement(ForStatementSyntax node) => this.DefaultVisit(node);
 
@@ -321,6 +348,15 @@ public partial class TypeScriptSyntaxVisitor
 
     /// <summary>Called when the visitor visits a ParameterListSyntax node.</summary>
     public virtual void VisitParameterList(ParameterListSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a TypeAliasDeclarationSyntax node.</summary>
+    public virtual void VisitTypeAliasDeclaration(TypeAliasDeclarationSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a EnumDeclarationSyntax node.</summary>
+    public virtual void VisitEnumDeclaration(EnumDeclarationSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a EnumMemberSyntax node.</summary>
+    public virtual void VisitEnumMember(EnumMemberSyntax node) => this.DefaultVisit(node);
 
     /// <summary>Called when the visitor visits a FunctionDeclarationSyntax node.</summary>
     public virtual void VisitFunctionDeclaration(FunctionDeclarationSyntax node) => this.DefaultVisit(node);
@@ -469,6 +505,15 @@ public partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<SyntaxNo
     public override SyntaxNode? VisitWhileStatement(WhileStatementSyntax node)
         => node.Update(VisitToken(node.WhileKeyword), VisitToken(node.OpenParenToken), (ExpressionSyntax?)Visit(node.Condition) ?? throw new ArgumentNullException("condition"), VisitToken(node.CloseParenToken), (StatementSyntax?)Visit(node.Statement) ?? throw new ArgumentNullException("statement"));
 
+    public override SyntaxNode? VisitDoStatement(DoStatementSyntax node)
+        => node.Update(VisitToken(node.DoKeyword), (StatementSyntax?)Visit(node.Statement) ?? throw new ArgumentNullException("statement"), VisitToken(node.WhileKeyword), VisitToken(node.OpenParenToken), (ExpressionSyntax?)Visit(node.Condition) ?? throw new ArgumentNullException("condition"), VisitToken(node.CloseParenToken), VisitToken(node.SemicolonToken));
+
+    public override SyntaxNode? VisitBreakStatement(BreakStatementSyntax node)
+        => node.Update(VisitToken(node.BreakKeyword), (IdentifierNameSyntax?)Visit(node.Label), VisitToken(node.SemicolonToken));
+
+    public override SyntaxNode? VisitContinueStatement(ContinueStatementSyntax node)
+        => node.Update(VisitToken(node.ContinueKeyword), (IdentifierNameSyntax?)Visit(node.Label), VisitToken(node.SemicolonToken));
+
     public override SyntaxNode? VisitForStatement(ForStatementSyntax node)
         => node.Update(VisitToken(node.ForKeyword), VisitToken(node.OpenParenToken), (StatementSyntax?)Visit(node.Initializer), (ExpressionSyntax?)Visit(node.Condition), VisitToken(node.SecondSemicolonToken), (ExpressionSyntax?)Visit(node.Increment), VisitToken(node.CloseParenToken), (StatementSyntax?)Visit(node.Statement) ?? throw new ArgumentNullException("statement"));
 
@@ -486,6 +531,15 @@ public partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<SyntaxNo
 
     public override SyntaxNode? VisitParameterList(ParameterListSyntax node)
         => node.Update(VisitToken(node.OpenParenToken), VisitList(node.Parameters), VisitToken(node.CloseParenToken));
+
+    public override SyntaxNode? VisitTypeAliasDeclaration(TypeAliasDeclarationSyntax node)
+        => node.Update(VisitToken(node.TypeKeyword), VisitToken(node.Identifier), (TypeParameterListSyntax?)Visit(node.TypeParameters), VisitToken(node.EqualsToken), (TypeSyntax?)Visit(node.Type) ?? throw new ArgumentNullException("type"), VisitToken(node.SemicolonToken));
+
+    public override SyntaxNode? VisitEnumDeclaration(EnumDeclarationSyntax node)
+        => node.Update(VisitToken(node.EnumKeyword), VisitToken(node.Identifier), VisitToken(node.OpenBraceToken), VisitList(node.Members), VisitToken(node.CloseBraceToken));
+
+    public override SyntaxNode? VisitEnumMember(EnumMemberSyntax node)
+        => node.Update(VisitToken(node.Identifier), (EqualsValueClauseSyntax?)Visit(node.EqualsValueClause));
 
     public override SyntaxNode? VisitFunctionDeclaration(FunctionDeclarationSyntax node)
         => node.Update(VisitToken(node.FunctionKeyword), VisitToken(node.Identifier), (TypeParameterListSyntax?)Visit(node.TypeParameters), (ParameterListSyntax?)Visit(node.ParameterList) ?? throw new ArgumentNullException("parameterList"), (TypeAnnotationSyntax?)Visit(node.TypeAnnotation), (BlockSyntax?)Visit(node.Body));
@@ -1091,6 +1145,62 @@ public static partial class SyntaxFactory
     public static WhileStatementSyntax WhileStatement(ExpressionSyntax condition, StatementSyntax statement)
         => SyntaxFactory.WhileStatement(SyntaxFactory.Token(SyntaxKind.WhileKeyword), SyntaxFactory.Token(SyntaxKind.OpenParenToken), condition, SyntaxFactory.Token(SyntaxKind.CloseParenToken), statement);
 
+    /// <summary>Creates a new DoStatementSyntax instance.</summary>
+    public static DoStatementSyntax DoStatement(SyntaxToken doKeyword, StatementSyntax statement, SyntaxToken whileKeyword, SyntaxToken openParenToken, ExpressionSyntax condition, SyntaxToken closeParenToken, SyntaxToken semicolonToken)
+    {
+        if (doKeyword.Kind() != SyntaxKind.DoKeyword) throw new ArgumentException(nameof(doKeyword));
+        if (statement == null) throw new ArgumentNullException(nameof(statement));
+        if (whileKeyword.Kind() != SyntaxKind.WhileKeyword) throw new ArgumentException(nameof(whileKeyword));
+        if (openParenToken.Kind() != SyntaxKind.OpenParenToken) throw new ArgumentException(nameof(openParenToken));
+        if (condition == null) throw new ArgumentNullException(nameof(condition));
+        if (closeParenToken.Kind() != SyntaxKind.CloseParenToken) throw new ArgumentException(nameof(closeParenToken));
+        switch (semicolonToken.Kind())
+        {
+            case SyntaxKind.SemicolonToken:
+            case SyntaxKind.None: break;
+            default: throw new ArgumentException(nameof(semicolonToken));
+        }
+        return (DoStatementSyntax)Syntax.InternalSyntax.SyntaxFactory.DoStatement((Syntax.InternalSyntax.SyntaxToken)doKeyword.Node!, (Syntax.InternalSyntax.StatementSyntax)statement.Green, (Syntax.InternalSyntax.SyntaxToken)whileKeyword.Node!, (Syntax.InternalSyntax.SyntaxToken)openParenToken.Node!, (Syntax.InternalSyntax.ExpressionSyntax)condition.Green, (Syntax.InternalSyntax.SyntaxToken)closeParenToken.Node!, (Syntax.InternalSyntax.SyntaxToken?)semicolonToken.Node).CreateRed();
+    }
+
+    /// <summary>Creates a new DoStatementSyntax instance.</summary>
+    public static DoStatementSyntax DoStatement(StatementSyntax statement, ExpressionSyntax condition)
+        => SyntaxFactory.DoStatement(SyntaxFactory.Token(SyntaxKind.DoKeyword), statement, SyntaxFactory.Token(SyntaxKind.WhileKeyword), SyntaxFactory.Token(SyntaxKind.OpenParenToken), condition, SyntaxFactory.Token(SyntaxKind.CloseParenToken), default);
+
+    /// <summary>Creates a new BreakStatementSyntax instance.</summary>
+    public static BreakStatementSyntax BreakStatement(SyntaxToken breakKeyword, IdentifierNameSyntax? label, SyntaxToken semicolonToken)
+    {
+        if (breakKeyword.Kind() != SyntaxKind.BreakKeyword) throw new ArgumentException(nameof(breakKeyword));
+        switch (semicolonToken.Kind())
+        {
+            case SyntaxKind.SemicolonToken:
+            case SyntaxKind.None: break;
+            default: throw new ArgumentException(nameof(semicolonToken));
+        }
+        return (BreakStatementSyntax)Syntax.InternalSyntax.SyntaxFactory.BreakStatement((Syntax.InternalSyntax.SyntaxToken)breakKeyword.Node!, label == null ? null : (Syntax.InternalSyntax.IdentifierNameSyntax)label.Green, (Syntax.InternalSyntax.SyntaxToken?)semicolonToken.Node).CreateRed();
+    }
+
+    /// <summary>Creates a new BreakStatementSyntax instance.</summary>
+    public static BreakStatementSyntax BreakStatement(IdentifierNameSyntax? label = default)
+        => SyntaxFactory.BreakStatement(SyntaxFactory.Token(SyntaxKind.BreakKeyword), label, default);
+
+    /// <summary>Creates a new ContinueStatementSyntax instance.</summary>
+    public static ContinueStatementSyntax ContinueStatement(SyntaxToken continueKeyword, IdentifierNameSyntax? label, SyntaxToken semicolonToken)
+    {
+        if (continueKeyword.Kind() != SyntaxKind.ContinueKeyword) throw new ArgumentException(nameof(continueKeyword));
+        switch (semicolonToken.Kind())
+        {
+            case SyntaxKind.SemicolonToken:
+            case SyntaxKind.None: break;
+            default: throw new ArgumentException(nameof(semicolonToken));
+        }
+        return (ContinueStatementSyntax)Syntax.InternalSyntax.SyntaxFactory.ContinueStatement((Syntax.InternalSyntax.SyntaxToken)continueKeyword.Node!, label == null ? null : (Syntax.InternalSyntax.IdentifierNameSyntax)label.Green, (Syntax.InternalSyntax.SyntaxToken?)semicolonToken.Node).CreateRed();
+    }
+
+    /// <summary>Creates a new ContinueStatementSyntax instance.</summary>
+    public static ContinueStatementSyntax ContinueStatement(IdentifierNameSyntax? label = default)
+        => SyntaxFactory.ContinueStatement(SyntaxFactory.Token(SyntaxKind.ContinueKeyword), label, default);
+
     /// <summary>Creates a new ForStatementSyntax instance.</summary>
     public static ForStatementSyntax ForStatement(SyntaxToken forKeyword, SyntaxToken openParenToken, StatementSyntax? initializer, ExpressionSyntax? condition, SyntaxToken secondSemicolonToken, ExpressionSyntax? increment, SyntaxToken closeParenToken, StatementSyntax statement)
     {
@@ -1180,6 +1290,71 @@ public static partial class SyntaxFactory
     /// <summary>Creates a new ParameterListSyntax instance.</summary>
     public static ParameterListSyntax ParameterList(SeparatedSyntaxList<ParameterSyntax> parameters = default)
         => SyntaxFactory.ParameterList(SyntaxFactory.Token(SyntaxKind.OpenParenToken), parameters, SyntaxFactory.Token(SyntaxKind.CloseParenToken));
+
+    /// <summary>Creates a new TypeAliasDeclarationSyntax instance.</summary>
+    public static TypeAliasDeclarationSyntax TypeAliasDeclaration(SyntaxToken typeKeyword, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, SyntaxToken equalsToken, TypeSyntax type, SyntaxToken semicolonToken)
+    {
+        if (typeKeyword.Kind() != SyntaxKind.TypeKeyword) throw new ArgumentException(nameof(typeKeyword));
+        if (identifier.Kind() != SyntaxKind.IdentifierToken) throw new ArgumentException(nameof(identifier));
+        if (equalsToken.Kind() != SyntaxKind.EqualsToken) throw new ArgumentException(nameof(equalsToken));
+        if (type == null) throw new ArgumentNullException(nameof(type));
+        switch (semicolonToken.Kind())
+        {
+            case SyntaxKind.SemicolonToken:
+            case SyntaxKind.None: break;
+            default: throw new ArgumentException(nameof(semicolonToken));
+        }
+        return (TypeAliasDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.TypeAliasDeclaration((Syntax.InternalSyntax.SyntaxToken)typeKeyword.Node!, (Syntax.InternalSyntax.SyntaxToken)identifier.Node!, typeParameters == null ? null : (Syntax.InternalSyntax.TypeParameterListSyntax)typeParameters.Green, (Syntax.InternalSyntax.SyntaxToken)equalsToken.Node!, (Syntax.InternalSyntax.TypeSyntax)type.Green, (Syntax.InternalSyntax.SyntaxToken?)semicolonToken.Node).CreateRed();
+    }
+
+    /// <summary>Creates a new TypeAliasDeclarationSyntax instance.</summary>
+    public static TypeAliasDeclarationSyntax TypeAliasDeclaration(SyntaxToken identifier, TypeParameterListSyntax? typeParameters, TypeSyntax type)
+        => SyntaxFactory.TypeAliasDeclaration(SyntaxFactory.Token(SyntaxKind.TypeKeyword), identifier, typeParameters, SyntaxFactory.Token(SyntaxKind.EqualsToken), type, default);
+
+    /// <summary>Creates a new TypeAliasDeclarationSyntax instance.</summary>
+    public static TypeAliasDeclarationSyntax TypeAliasDeclaration(SyntaxToken identifier, TypeSyntax type)
+        => SyntaxFactory.TypeAliasDeclaration(SyntaxFactory.Token(SyntaxKind.TypeKeyword), identifier, default, SyntaxFactory.Token(SyntaxKind.EqualsToken), type, default);
+
+    /// <summary>Creates a new TypeAliasDeclarationSyntax instance.</summary>
+    public static TypeAliasDeclarationSyntax TypeAliasDeclaration(string identifier, TypeSyntax type)
+        => SyntaxFactory.TypeAliasDeclaration(SyntaxFactory.Token(SyntaxKind.TypeKeyword), SyntaxFactory.Identifier(identifier), default, SyntaxFactory.Token(SyntaxKind.EqualsToken), type, default);
+
+    /// <summary>Creates a new EnumDeclarationSyntax instance.</summary>
+    public static EnumDeclarationSyntax EnumDeclaration(SyntaxToken enumKeyword, SyntaxToken identifier, SyntaxToken openBraceToken, SeparatedSyntaxList<EnumMemberSyntax> members, SyntaxToken closeBraceToken)
+    {
+        if (enumKeyword.Kind() != SyntaxKind.EnumKeyword) throw new ArgumentException(nameof(enumKeyword));
+        if (identifier.Kind() != SyntaxKind.IdentifierToken) throw new ArgumentException(nameof(identifier));
+        if (openBraceToken.Kind() != SyntaxKind.OpenBraceToken) throw new ArgumentException(nameof(openBraceToken));
+        if (closeBraceToken.Kind() != SyntaxKind.CloseBraceToken) throw new ArgumentException(nameof(closeBraceToken));
+        return (EnumDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.EnumDeclaration((Syntax.InternalSyntax.SyntaxToken)enumKeyword.Node!, (Syntax.InternalSyntax.SyntaxToken)identifier.Node!, (Syntax.InternalSyntax.SyntaxToken)openBraceToken.Node!, members.Node.ToGreenSeparatedList<Syntax.InternalSyntax.EnumMemberSyntax>(), (Syntax.InternalSyntax.SyntaxToken)closeBraceToken.Node!).CreateRed();
+    }
+
+    /// <summary>Creates a new EnumDeclarationSyntax instance.</summary>
+    public static EnumDeclarationSyntax EnumDeclaration(SyntaxToken identifier, SeparatedSyntaxList<EnumMemberSyntax> members)
+        => SyntaxFactory.EnumDeclaration(SyntaxFactory.Token(SyntaxKind.EnumKeyword), identifier, SyntaxFactory.Token(SyntaxKind.OpenBraceToken), members, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
+
+    /// <summary>Creates a new EnumDeclarationSyntax instance.</summary>
+    public static EnumDeclarationSyntax EnumDeclaration(SyntaxToken identifier)
+        => SyntaxFactory.EnumDeclaration(SyntaxFactory.Token(SyntaxKind.EnumKeyword), identifier, SyntaxFactory.Token(SyntaxKind.OpenBraceToken), default, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
+
+    /// <summary>Creates a new EnumDeclarationSyntax instance.</summary>
+    public static EnumDeclarationSyntax EnumDeclaration(string identifier)
+        => SyntaxFactory.EnumDeclaration(SyntaxFactory.Token(SyntaxKind.EnumKeyword), SyntaxFactory.Identifier(identifier), SyntaxFactory.Token(SyntaxKind.OpenBraceToken), default, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
+
+    /// <summary>Creates a new EnumMemberSyntax instance.</summary>
+    public static EnumMemberSyntax EnumMember(SyntaxToken identifier, EqualsValueClauseSyntax? equalsValueClause)
+    {
+        if (identifier.Kind() != SyntaxKind.IdentifierToken) throw new ArgumentException(nameof(identifier));
+        return (EnumMemberSyntax)Syntax.InternalSyntax.SyntaxFactory.EnumMember((Syntax.InternalSyntax.SyntaxToken)identifier.Node!, equalsValueClause == null ? null : (Syntax.InternalSyntax.EqualsValueClauseSyntax)equalsValueClause.Green).CreateRed();
+    }
+
+    /// <summary>Creates a new EnumMemberSyntax instance.</summary>
+    public static EnumMemberSyntax EnumMember(SyntaxToken identifier)
+        => SyntaxFactory.EnumMember(identifier, default);
+
+    /// <summary>Creates a new EnumMemberSyntax instance.</summary>
+    public static EnumMemberSyntax EnumMember(string identifier)
+        => SyntaxFactory.EnumMember(SyntaxFactory.Identifier(identifier), default);
 
     /// <summary>Creates a new FunctionDeclarationSyntax instance.</summary>
     public static FunctionDeclarationSyntax FunctionDeclaration(SyntaxToken functionKeyword, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)

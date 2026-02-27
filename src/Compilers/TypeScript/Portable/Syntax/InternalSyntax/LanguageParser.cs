@@ -91,6 +91,10 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                     return ParseInterfaceDeclaration();
                 case SyntaxKind.FunctionKeyword:
                     return ParseFunctionDeclaration();
+                case SyntaxKind.TypeKeyword:
+                    return ParseTypeAliasDeclaration();
+                case SyntaxKind.EnumKeyword:
+                    return ParseEnumDeclaration();
                 case SyntaxKind.VarKeyword:
                 case SyntaxKind.LetKeyword:
                 case SyntaxKind.ConstKeyword:
@@ -103,8 +107,14 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                     return ParseIfStatement();
                 case SyntaxKind.WhileKeyword:
                     return ParseWhileStatement();
+                case SyntaxKind.DoKeyword:
+                    return ParseDoStatement();
                 case SyntaxKind.ForKeyword:
                     return ParseForStatement();
+                case SyntaxKind.BreakKeyword:
+                    return ParseBreakStatement();
+                case SyntaxKind.ContinueKeyword:
+                    return ParseContinueStatement();
                 case SyntaxKind.SwitchKeyword:
                     return ParseSwitchStatement();
                 case SyntaxKind.TryKeyword:
@@ -237,6 +247,51 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             return SyntaxFactory.WhileStatement(whileKeyword, openParen, condition, closeParen, statement);
         }
 
+        internal DoStatementSyntax ParseDoStatement()
+        {
+            var doKeyword = EatToken(SyntaxKind.DoKeyword);
+            var statement = ParseStatement();
+            var whileKeyword = EatToken(SyntaxKind.WhileKeyword);
+            var openParen = EatToken(SyntaxKind.OpenParenToken);
+            var condition = ParseExpression();
+            var closeParen = EatToken(SyntaxKind.CloseParenToken);
+            var semicolon = EatOptionalToken(SyntaxKind.SemicolonToken);
+            return SyntaxFactory.DoStatement(doKeyword, statement, whileKeyword, openParen, condition, closeParen, semicolon);
+        }
+
+        internal BreakStatementSyntax ParseBreakStatement()
+        {
+            var breakKeyword = EatToken(SyntaxKind.BreakKeyword);
+            IdentifierNameSyntax? label = null;
+            if (_currentToken.Kind == SyntaxKind.IdentifierToken && !_currentToken.IsMissing)
+            {
+                // Simple heuristic: if same line, it's a label.
+                // Since we don't have line info easily here in parser structure without peek,
+                // we assume if not semicolon, it's label.
+                if (_currentToken.Kind != SyntaxKind.SemicolonToken)
+                {
+                    label = ParseIdentifierName();
+                }
+            }
+            var semicolon = EatOptionalToken(SyntaxKind.SemicolonToken);
+            return SyntaxFactory.BreakStatement(breakKeyword, label, semicolon);
+        }
+
+        internal ContinueStatementSyntax ParseContinueStatement()
+        {
+            var continueKeyword = EatToken(SyntaxKind.ContinueKeyword);
+            IdentifierNameSyntax? label = null;
+            if (_currentToken.Kind == SyntaxKind.IdentifierToken && !_currentToken.IsMissing)
+            {
+                if (_currentToken.Kind != SyntaxKind.SemicolonToken)
+                {
+                    label = ParseIdentifierName();
+                }
+            }
+            var semicolon = EatOptionalToken(SyntaxKind.SemicolonToken);
+            return SyntaxFactory.ContinueStatement(continueKeyword, label, semicolon);
+        }
+
         internal ForStatementSyntax ParseForStatement()
         {
             var forKeyword = EatToken(SyntaxKind.ForKeyword);
@@ -300,6 +355,57 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             var closeBrace = EatToken(SyntaxKind.CloseBraceToken);
 
             return SyntaxFactory.InterfaceDeclaration(interfaceKeyword, identifier, typeParameters, openBrace, members.ToList(), closeBrace);
+        }
+
+        internal TypeAliasDeclarationSyntax ParseTypeAliasDeclaration()
+        {
+            var typeKeyword = EatToken(SyntaxKind.TypeKeyword);
+            var identifier = EatToken(SyntaxKind.IdentifierToken);
+            var typeParameters = ParseOptionalTypeParameters();
+            var equalsToken = EatToken(SyntaxKind.EqualsToken);
+            var type = ParseType();
+            var semicolon = EatOptionalToken(SyntaxKind.SemicolonToken);
+
+            return SyntaxFactory.TypeAliasDeclaration(typeKeyword, identifier, typeParameters, equalsToken, type, semicolon);
+        }
+
+        internal EnumDeclarationSyntax ParseEnumDeclaration()
+        {
+            var enumKeyword = EatToken(SyntaxKind.EnumKeyword);
+            var identifier = EatToken(SyntaxKind.IdentifierToken);
+            var openBrace = EatToken(SyntaxKind.OpenBraceToken);
+
+            var members = new SeparatedSyntaxListBuilder<EnumMemberSyntax>(8);
+            if (_currentToken.Kind != SyntaxKind.CloseBraceToken)
+            {
+                while (_currentToken.Kind != SyntaxKind.CloseBraceToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
+                {
+                    members.Add(ParseEnumMember());
+
+                    if (_currentToken.Kind == SyntaxKind.CommaToken)
+                    {
+                        members.AddSeparator(EatToken());
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+
+            var closeBrace = EatToken(SyntaxKind.CloseBraceToken);
+            return SyntaxFactory.EnumDeclaration(enumKeyword, identifier, openBrace, members.ToList(), closeBrace);
+        }
+
+        internal EnumMemberSyntax ParseEnumMember()
+        {
+            var identifier = EatToken(SyntaxKind.IdentifierToken);
+            EqualsValueClauseSyntax? initializer = null;
+            if (_currentToken.Kind == SyntaxKind.EqualsToken)
+            {
+                initializer = ParseEqualsValueClause();
+            }
+            return SyntaxFactory.EnumMember(identifier, initializer);
         }
 
         internal ClassDeclarationSyntax ParseClassDeclaration()
