@@ -867,44 +867,53 @@ public sealed partial class ArrowFunctionExpressionSyntax : ExpressionSyntax
     {
     }
 
-    public TypeParameterListSyntax? TypeParameters => GetRedAtZero(ref this.typeParameters);
+    public SyntaxToken AsyncKeyword
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.ArrowFunctionExpressionSyntax)this.Green).asyncKeyword;
+            return slot != null ? new SyntaxToken(this, slot, Position, 0) : default;
+        }
+    }
 
-    public ParameterListSyntax ParameterList => GetRed(ref this.parameterList, 1)!;
+    public TypeParameterListSyntax? TypeParameters => GetRed(ref this.typeParameters, 1);
 
-    public TypeAnnotationSyntax? TypeAnnotation => GetRed(ref this.typeAnnotation, 2);
+    public ParameterListSyntax ParameterList => GetRed(ref this.parameterList, 2)!;
 
-    public SyntaxToken EqualsGreaterThanToken => new SyntaxToken(this, ((InternalSyntax.ArrowFunctionExpressionSyntax)this.Green).equalsGreaterThanToken, GetChildPosition(3), GetChildIndex(3));
+    public TypeAnnotationSyntax? TypeAnnotation => GetRed(ref this.typeAnnotation, 3);
 
-    public TypeScriptSyntaxNode Body => GetRed(ref this.body, 4)!;
+    public SyntaxToken EqualsGreaterThanToken => new SyntaxToken(this, ((InternalSyntax.ArrowFunctionExpressionSyntax)this.Green).equalsGreaterThanToken, GetChildPosition(4), GetChildIndex(4));
+
+    public TypeScriptSyntaxNode Body => GetRed(ref this.body, 5)!;
 
     internal override SyntaxNode? GetNodeSlot(int index)
         => index switch
         {
-            0 => GetRedAtZero(ref this.typeParameters),
-            1 => GetRed(ref this.parameterList, 1)!,
-            2 => GetRed(ref this.typeAnnotation, 2),
-            4 => GetRed(ref this.body, 4)!,
+            1 => GetRed(ref this.typeParameters, 1),
+            2 => GetRed(ref this.parameterList, 2)!,
+            3 => GetRed(ref this.typeAnnotation, 3),
+            5 => GetRed(ref this.body, 5)!,
             _ => null,
         };
 
     internal override SyntaxNode? GetCachedSlot(int index)
         => index switch
         {
-            0 => this.typeParameters,
-            1 => this.parameterList,
-            2 => this.typeAnnotation,
-            4 => this.body,
+            1 => this.typeParameters,
+            2 => this.parameterList,
+            3 => this.typeAnnotation,
+            5 => this.body,
             _ => null,
         };
 
     public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitArrowFunctionExpression(this);
     public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitArrowFunctionExpression(this);
 
-    public ArrowFunctionExpressionSyntax Update(TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, SyntaxToken equalsGreaterThanToken, TypeScriptSyntaxNode body)
+    public ArrowFunctionExpressionSyntax Update(SyntaxToken asyncKeyword, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, SyntaxToken equalsGreaterThanToken, TypeScriptSyntaxNode body)
     {
-        if (typeParameters != this.TypeParameters || parameterList != this.ParameterList || typeAnnotation != this.TypeAnnotation || equalsGreaterThanToken != this.EqualsGreaterThanToken || body != this.Body)
+        if (asyncKeyword != this.AsyncKeyword || typeParameters != this.TypeParameters || parameterList != this.ParameterList || typeAnnotation != this.TypeAnnotation || equalsGreaterThanToken != this.EqualsGreaterThanToken || body != this.Body)
         {
-            var newNode = SyntaxFactory.ArrowFunctionExpression(typeParameters, parameterList, typeAnnotation, equalsGreaterThanToken, body);
+            var newNode = SyntaxFactory.ArrowFunctionExpression(asyncKeyword, typeParameters, parameterList, typeAnnotation, equalsGreaterThanToken, body);
             var annotations = GetAnnotations();
             return annotations?.Length > 0 ? (ArrowFunctionExpressionSyntax)newNode.WithAnnotations(annotations) : newNode;
         }
@@ -912,11 +921,12 @@ public sealed partial class ArrowFunctionExpressionSyntax : ExpressionSyntax
         return this;
     }
 
-    public ArrowFunctionExpressionSyntax WithTypeParameters(TypeParameterListSyntax? typeParameters) => Update(typeParameters, this.ParameterList, this.TypeAnnotation, this.EqualsGreaterThanToken, this.Body);
-    public ArrowFunctionExpressionSyntax WithParameterList(ParameterListSyntax parameterList) => Update(this.TypeParameters, parameterList, this.TypeAnnotation, this.EqualsGreaterThanToken, this.Body);
-    public ArrowFunctionExpressionSyntax WithTypeAnnotation(TypeAnnotationSyntax? typeAnnotation) => Update(this.TypeParameters, this.ParameterList, typeAnnotation, this.EqualsGreaterThanToken, this.Body);
-    public ArrowFunctionExpressionSyntax WithEqualsGreaterThanToken(SyntaxToken equalsGreaterThanToken) => Update(this.TypeParameters, this.ParameterList, this.TypeAnnotation, equalsGreaterThanToken, this.Body);
-    public ArrowFunctionExpressionSyntax WithBody(TypeScriptSyntaxNode body) => Update(this.TypeParameters, this.ParameterList, this.TypeAnnotation, this.EqualsGreaterThanToken, body);
+    public ArrowFunctionExpressionSyntax WithAsyncKeyword(SyntaxToken asyncKeyword) => Update(asyncKeyword, this.TypeParameters, this.ParameterList, this.TypeAnnotation, this.EqualsGreaterThanToken, this.Body);
+    public ArrowFunctionExpressionSyntax WithTypeParameters(TypeParameterListSyntax? typeParameters) => Update(this.AsyncKeyword, typeParameters, this.ParameterList, this.TypeAnnotation, this.EqualsGreaterThanToken, this.Body);
+    public ArrowFunctionExpressionSyntax WithParameterList(ParameterListSyntax parameterList) => Update(this.AsyncKeyword, this.TypeParameters, parameterList, this.TypeAnnotation, this.EqualsGreaterThanToken, this.Body);
+    public ArrowFunctionExpressionSyntax WithTypeAnnotation(TypeAnnotationSyntax? typeAnnotation) => Update(this.AsyncKeyword, this.TypeParameters, this.ParameterList, typeAnnotation, this.EqualsGreaterThanToken, this.Body);
+    public ArrowFunctionExpressionSyntax WithEqualsGreaterThanToken(SyntaxToken equalsGreaterThanToken) => Update(this.AsyncKeyword, this.TypeParameters, this.ParameterList, this.TypeAnnotation, equalsGreaterThanToken, this.Body);
+    public ArrowFunctionExpressionSyntax WithBody(TypeScriptSyntaxNode body) => Update(this.AsyncKeyword, this.TypeParameters, this.ParameterList, this.TypeAnnotation, this.EqualsGreaterThanToken, body);
 
     public ArrowFunctionExpressionSyntax AddTypeParametersParameters(params TypeParameterSyntax[] items)
     {
@@ -924,6 +934,48 @@ public sealed partial class ArrowFunctionExpressionSyntax : ExpressionSyntax
         return WithTypeParameters(typeParameters.WithParameters(typeParameters.Parameters.AddRange(items)));
     }
     public ArrowFunctionExpressionSyntax AddParameterListParameters(params ParameterSyntax[] items) => WithParameterList(this.ParameterList.WithParameters(this.ParameterList.Parameters.AddRange(items)));
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.AwaitExpression"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class AwaitExpressionSyntax : ExpressionSyntax
+{
+    private ExpressionSyntax? expression;
+
+    internal AwaitExpressionSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken AwaitKeyword => new SyntaxToken(this, ((InternalSyntax.AwaitExpressionSyntax)this.Green).awaitKeyword, Position, 0);
+
+    public ExpressionSyntax Expression => GetRed(ref this.expression, 1)!;
+
+    internal override SyntaxNode? GetNodeSlot(int index) => index == 1 ? GetRed(ref this.expression, 1)! : null;
+
+    internal override SyntaxNode? GetCachedSlot(int index) => index == 1 ? this.expression : null;
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitAwaitExpression(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitAwaitExpression(this);
+
+    public AwaitExpressionSyntax Update(SyntaxToken awaitKeyword, ExpressionSyntax expression)
+    {
+        if (awaitKeyword != this.AwaitKeyword || expression != this.Expression)
+        {
+            var newNode = SyntaxFactory.AwaitExpression(awaitKeyword, expression);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (AwaitExpressionSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public AwaitExpressionSyntax WithAwaitKeyword(SyntaxToken awaitKeyword) => Update(awaitKeyword, this.Expression);
+    public AwaitExpressionSyntax WithExpression(ExpressionSyntax expression) => Update(this.AwaitKeyword, expression);
 }
 
 /// <remarks>
@@ -2997,53 +3049,62 @@ public sealed partial class FunctionDeclarationSyntax : DeclarationStatementSynt
     {
     }
 
-    public SyntaxToken FunctionKeyword => new SyntaxToken(this, ((InternalSyntax.FunctionDeclarationSyntax)this.Green).functionKeyword, Position, 0);
+    public SyntaxToken AsyncKeyword
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.FunctionDeclarationSyntax)this.Green).asyncKeyword;
+            return slot != null ? new SyntaxToken(this, slot, Position, 0) : default;
+        }
+    }
+
+    public SyntaxToken FunctionKeyword => new SyntaxToken(this, ((InternalSyntax.FunctionDeclarationSyntax)this.Green).functionKeyword, GetChildPosition(1), GetChildIndex(1));
 
     public SyntaxToken Identifier
     {
         get
         {
             var slot = ((Syntax.InternalSyntax.FunctionDeclarationSyntax)this.Green).identifier;
-            return slot != null ? new SyntaxToken(this, slot, GetChildPosition(1), GetChildIndex(1)) : default;
+            return slot != null ? new SyntaxToken(this, slot, GetChildPosition(2), GetChildIndex(2)) : default;
         }
     }
 
-    public TypeParameterListSyntax? TypeParameters => GetRed(ref this.typeParameters, 2);
+    public TypeParameterListSyntax? TypeParameters => GetRed(ref this.typeParameters, 3);
 
-    public ParameterListSyntax ParameterList => GetRed(ref this.parameterList, 3)!;
+    public ParameterListSyntax ParameterList => GetRed(ref this.parameterList, 4)!;
 
-    public TypeAnnotationSyntax? TypeAnnotation => GetRed(ref this.typeAnnotation, 4);
+    public TypeAnnotationSyntax? TypeAnnotation => GetRed(ref this.typeAnnotation, 5);
 
-    public BlockSyntax? Body => GetRed(ref this.body, 5);
+    public BlockSyntax? Body => GetRed(ref this.body, 6);
 
     internal override SyntaxNode? GetNodeSlot(int index)
         => index switch
         {
-            2 => GetRed(ref this.typeParameters, 2),
-            3 => GetRed(ref this.parameterList, 3)!,
-            4 => GetRed(ref this.typeAnnotation, 4),
-            5 => GetRed(ref this.body, 5),
+            3 => GetRed(ref this.typeParameters, 3),
+            4 => GetRed(ref this.parameterList, 4)!,
+            5 => GetRed(ref this.typeAnnotation, 5),
+            6 => GetRed(ref this.body, 6),
             _ => null,
         };
 
     internal override SyntaxNode? GetCachedSlot(int index)
         => index switch
         {
-            2 => this.typeParameters,
-            3 => this.parameterList,
-            4 => this.typeAnnotation,
-            5 => this.body,
+            3 => this.typeParameters,
+            4 => this.parameterList,
+            5 => this.typeAnnotation,
+            6 => this.body,
             _ => null,
         };
 
     public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitFunctionDeclaration(this);
     public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitFunctionDeclaration(this);
 
-    public FunctionDeclarationSyntax Update(SyntaxToken functionKeyword, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
+    public FunctionDeclarationSyntax Update(SyntaxToken asyncKeyword, SyntaxToken functionKeyword, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
     {
-        if (functionKeyword != this.FunctionKeyword || identifier != this.Identifier || typeParameters != this.TypeParameters || parameterList != this.ParameterList || typeAnnotation != this.TypeAnnotation || body != this.Body)
+        if (asyncKeyword != this.AsyncKeyword || functionKeyword != this.FunctionKeyword || identifier != this.Identifier || typeParameters != this.TypeParameters || parameterList != this.ParameterList || typeAnnotation != this.TypeAnnotation || body != this.Body)
         {
-            var newNode = SyntaxFactory.FunctionDeclaration(functionKeyword, identifier, typeParameters, parameterList, typeAnnotation, body);
+            var newNode = SyntaxFactory.FunctionDeclaration(asyncKeyword, functionKeyword, identifier, typeParameters, parameterList, typeAnnotation, body);
             var annotations = GetAnnotations();
             return annotations?.Length > 0 ? (FunctionDeclarationSyntax)newNode.WithAnnotations(annotations) : newNode;
         }
@@ -3051,12 +3112,13 @@ public sealed partial class FunctionDeclarationSyntax : DeclarationStatementSynt
         return this;
     }
 
-    public FunctionDeclarationSyntax WithFunctionKeyword(SyntaxToken functionKeyword) => Update(functionKeyword, this.Identifier, this.TypeParameters, this.ParameterList, this.TypeAnnotation, this.Body);
-    public FunctionDeclarationSyntax WithIdentifier(SyntaxToken identifier) => Update(this.FunctionKeyword, identifier, this.TypeParameters, this.ParameterList, this.TypeAnnotation, this.Body);
-    public FunctionDeclarationSyntax WithTypeParameters(TypeParameterListSyntax? typeParameters) => Update(this.FunctionKeyword, this.Identifier, typeParameters, this.ParameterList, this.TypeAnnotation, this.Body);
-    public FunctionDeclarationSyntax WithParameterList(ParameterListSyntax parameterList) => Update(this.FunctionKeyword, this.Identifier, this.TypeParameters, parameterList, this.TypeAnnotation, this.Body);
-    public FunctionDeclarationSyntax WithTypeAnnotation(TypeAnnotationSyntax? typeAnnotation) => Update(this.FunctionKeyword, this.Identifier, this.TypeParameters, this.ParameterList, typeAnnotation, this.Body);
-    public FunctionDeclarationSyntax WithBody(BlockSyntax? body) => Update(this.FunctionKeyword, this.Identifier, this.TypeParameters, this.ParameterList, this.TypeAnnotation, body);
+    public FunctionDeclarationSyntax WithAsyncKeyword(SyntaxToken asyncKeyword) => Update(asyncKeyword, this.FunctionKeyword, this.Identifier, this.TypeParameters, this.ParameterList, this.TypeAnnotation, this.Body);
+    public FunctionDeclarationSyntax WithFunctionKeyword(SyntaxToken functionKeyword) => Update(this.AsyncKeyword, functionKeyword, this.Identifier, this.TypeParameters, this.ParameterList, this.TypeAnnotation, this.Body);
+    public FunctionDeclarationSyntax WithIdentifier(SyntaxToken identifier) => Update(this.AsyncKeyword, this.FunctionKeyword, identifier, this.TypeParameters, this.ParameterList, this.TypeAnnotation, this.Body);
+    public FunctionDeclarationSyntax WithTypeParameters(TypeParameterListSyntax? typeParameters) => Update(this.AsyncKeyword, this.FunctionKeyword, this.Identifier, typeParameters, this.ParameterList, this.TypeAnnotation, this.Body);
+    public FunctionDeclarationSyntax WithParameterList(ParameterListSyntax parameterList) => Update(this.AsyncKeyword, this.FunctionKeyword, this.Identifier, this.TypeParameters, parameterList, this.TypeAnnotation, this.Body);
+    public FunctionDeclarationSyntax WithTypeAnnotation(TypeAnnotationSyntax? typeAnnotation) => Update(this.AsyncKeyword, this.FunctionKeyword, this.Identifier, this.TypeParameters, this.ParameterList, typeAnnotation, this.Body);
+    public FunctionDeclarationSyntax WithBody(BlockSyntax? body) => Update(this.AsyncKeyword, this.FunctionKeyword, this.Identifier, this.TypeParameters, this.ParameterList, this.TypeAnnotation, body);
 
     public FunctionDeclarationSyntax AddTypeParametersParameters(params TypeParameterSyntax[] items)
     {
@@ -3245,46 +3307,55 @@ public sealed partial class MethodDeclarationSyntax : ClassElementSyntax
     {
     }
 
-    public IdentifierNameSyntax Name => GetRedAtZero(ref this.name)!;
+    public SyntaxToken AsyncKeyword
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.MethodDeclarationSyntax)this.Green).asyncKeyword;
+            return slot != null ? new SyntaxToken(this, slot, Position, 0) : default;
+        }
+    }
 
-    public TypeParameterListSyntax? TypeParameters => GetRed(ref this.typeParameters, 1);
+    public IdentifierNameSyntax Name => GetRed(ref this.name, 1)!;
 
-    public ParameterListSyntax ParameterList => GetRed(ref this.parameterList, 2)!;
+    public TypeParameterListSyntax? TypeParameters => GetRed(ref this.typeParameters, 2);
 
-    public TypeAnnotationSyntax? TypeAnnotation => GetRed(ref this.typeAnnotation, 3);
+    public ParameterListSyntax ParameterList => GetRed(ref this.parameterList, 3)!;
 
-    public BlockSyntax? Body => GetRed(ref this.body, 4);
+    public TypeAnnotationSyntax? TypeAnnotation => GetRed(ref this.typeAnnotation, 4);
+
+    public BlockSyntax? Body => GetRed(ref this.body, 5);
 
     internal override SyntaxNode? GetNodeSlot(int index)
         => index switch
         {
-            0 => GetRedAtZero(ref this.name)!,
-            1 => GetRed(ref this.typeParameters, 1),
-            2 => GetRed(ref this.parameterList, 2)!,
-            3 => GetRed(ref this.typeAnnotation, 3),
-            4 => GetRed(ref this.body, 4),
+            1 => GetRed(ref this.name, 1)!,
+            2 => GetRed(ref this.typeParameters, 2),
+            3 => GetRed(ref this.parameterList, 3)!,
+            4 => GetRed(ref this.typeAnnotation, 4),
+            5 => GetRed(ref this.body, 5),
             _ => null,
         };
 
     internal override SyntaxNode? GetCachedSlot(int index)
         => index switch
         {
-            0 => this.name,
-            1 => this.typeParameters,
-            2 => this.parameterList,
-            3 => this.typeAnnotation,
-            4 => this.body,
+            1 => this.name,
+            2 => this.typeParameters,
+            3 => this.parameterList,
+            4 => this.typeAnnotation,
+            5 => this.body,
             _ => null,
         };
 
     public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitMethodDeclaration(this);
     public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitMethodDeclaration(this);
 
-    public MethodDeclarationSyntax Update(IdentifierNameSyntax name, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
+    public MethodDeclarationSyntax Update(SyntaxToken asyncKeyword, IdentifierNameSyntax name, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
     {
-        if (name != this.Name || typeParameters != this.TypeParameters || parameterList != this.ParameterList || typeAnnotation != this.TypeAnnotation || body != this.Body)
+        if (asyncKeyword != this.AsyncKeyword || name != this.Name || typeParameters != this.TypeParameters || parameterList != this.ParameterList || typeAnnotation != this.TypeAnnotation || body != this.Body)
         {
-            var newNode = SyntaxFactory.MethodDeclaration(name, typeParameters, parameterList, typeAnnotation, body);
+            var newNode = SyntaxFactory.MethodDeclaration(asyncKeyword, name, typeParameters, parameterList, typeAnnotation, body);
             var annotations = GetAnnotations();
             return annotations?.Length > 0 ? (MethodDeclarationSyntax)newNode.WithAnnotations(annotations) : newNode;
         }
@@ -3292,11 +3363,12 @@ public sealed partial class MethodDeclarationSyntax : ClassElementSyntax
         return this;
     }
 
-    public MethodDeclarationSyntax WithName(IdentifierNameSyntax name) => Update(name, this.TypeParameters, this.ParameterList, this.TypeAnnotation, this.Body);
-    public MethodDeclarationSyntax WithTypeParameters(TypeParameterListSyntax? typeParameters) => Update(this.Name, typeParameters, this.ParameterList, this.TypeAnnotation, this.Body);
-    public MethodDeclarationSyntax WithParameterList(ParameterListSyntax parameterList) => Update(this.Name, this.TypeParameters, parameterList, this.TypeAnnotation, this.Body);
-    public MethodDeclarationSyntax WithTypeAnnotation(TypeAnnotationSyntax? typeAnnotation) => Update(this.Name, this.TypeParameters, this.ParameterList, typeAnnotation, this.Body);
-    public MethodDeclarationSyntax WithBody(BlockSyntax? body) => Update(this.Name, this.TypeParameters, this.ParameterList, this.TypeAnnotation, body);
+    public MethodDeclarationSyntax WithAsyncKeyword(SyntaxToken asyncKeyword) => Update(asyncKeyword, this.Name, this.TypeParameters, this.ParameterList, this.TypeAnnotation, this.Body);
+    public MethodDeclarationSyntax WithName(IdentifierNameSyntax name) => Update(this.AsyncKeyword, name, this.TypeParameters, this.ParameterList, this.TypeAnnotation, this.Body);
+    public MethodDeclarationSyntax WithTypeParameters(TypeParameterListSyntax? typeParameters) => Update(this.AsyncKeyword, this.Name, typeParameters, this.ParameterList, this.TypeAnnotation, this.Body);
+    public MethodDeclarationSyntax WithParameterList(ParameterListSyntax parameterList) => Update(this.AsyncKeyword, this.Name, this.TypeParameters, parameterList, this.TypeAnnotation, this.Body);
+    public MethodDeclarationSyntax WithTypeAnnotation(TypeAnnotationSyntax? typeAnnotation) => Update(this.AsyncKeyword, this.Name, this.TypeParameters, this.ParameterList, typeAnnotation, this.Body);
+    public MethodDeclarationSyntax WithBody(BlockSyntax? body) => Update(this.AsyncKeyword, this.Name, this.TypeParameters, this.ParameterList, this.TypeAnnotation, body);
 
     public MethodDeclarationSyntax AddTypeParametersParameters(params TypeParameterSyntax[] items)
     {

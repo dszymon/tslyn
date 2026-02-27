@@ -249,6 +249,7 @@ namespace Microsoft.CodeAnalysis.TypeScript
 
         // Arrow Function
         ArrowFunctionExpression,
+        AwaitExpression,
 
         // Structured Trivia
         StructuredTrivia = 9000,

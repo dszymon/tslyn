@@ -13,6 +13,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
     {
         private readonly Lexer _lexer;
         private SyntaxToken _currentToken;
+        private List<SyntaxToken> _tokenBuffer = new List<SyntaxToken>();
         private readonly TypeScriptParseOptions _options;
 
         internal LanguageParser(Lexer lexer, TypeScriptParseOptions? options = null)
@@ -29,10 +30,28 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
         private SyntaxToken CurrentToken => _currentToken;
 
+        private SyntaxToken PeekToken(int n = 1)
+        {
+            if (n == 0) return _currentToken;
+            while (_tokenBuffer.Count < n)
+            {
+                _tokenBuffer.Add(_lexer.Lex());
+            }
+            return _tokenBuffer[n - 1];
+        }
+
         private SyntaxToken EatToken()
         {
             var token = _currentToken;
-            _currentToken = _lexer.Lex();
+            if (_tokenBuffer.Count > 0)
+            {
+                _currentToken = _tokenBuffer[0];
+                _tokenBuffer.RemoveAt(0);
+            }
+            else
+            {
+                _currentToken = _lexer.Lex();
+            }
             return token;
         }
 
@@ -57,6 +76,33 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         private SyntaxToken CreateMissingToken(SyntaxKind kind)
         {
             return SyntaxToken.CreateMissing(kind, null, null);
+        }
+
+        private SyntaxToken ConvertToIdentifier(SyntaxToken token)
+        {
+            if (token.Kind == SyntaxKind.IdentifierToken)
+            {
+                return token;
+            }
+            return new SyntaxToken(SyntaxKind.IdentifierToken, token.Text, token.GetLeadingTriviaCore(), token.GetTrailingTriviaCore(), token.GetDiagnostics(), token.GetAnnotations());
+        }
+
+        private SyntaxToken ParseIdentifierToken()
+        {
+            if (_currentToken.Kind == SyntaxKind.AsyncKeyword || _currentToken.Kind == SyntaxKind.AwaitKeyword)
+            {
+                return ConvertToIdentifier(EatToken());
+            }
+            return EatToken(SyntaxKind.IdentifierToken);
+        }
+
+        private SyntaxToken? ParseOptionalIdentifierToken()
+        {
+            if (_currentToken.Kind == SyntaxKind.AsyncKeyword || _currentToken.Kind == SyntaxKind.AwaitKeyword)
+            {
+                return ConvertToIdentifier(EatToken());
+            }
+            return EatOptionalToken(SyntaxKind.IdentifierToken);
         }
 
         internal CompilationUnitSyntax ParseCompilationUnit()
@@ -127,6 +173,13 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                     return ParseThrowStatement();
                 case SyntaxKind.SemicolonToken:
                     return ParseEmptyStatement();
+                case SyntaxKind.AsyncKeyword:
+                    if (PeekToken(1).Kind == SyntaxKind.FunctionKeyword)
+                    {
+                        var asyncKeyword = EatToken();
+                        return ParseFunctionDeclaration(asyncKeyword);
+                    }
+                    return ParseExpressionStatement();
                 default:
                     return ParseExpressionStatement();
             }
@@ -157,7 +210,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         internal ImportClauseSyntax ParseImportClause()
         {
              IdentifierNameSyntax? name = null;
-             if (_currentToken.Kind == SyntaxKind.IdentifierToken)
+             if (_currentToken.Kind == SyntaxKind.IdentifierToken || _currentToken.Kind == SyntaxKind.AsyncKeyword || _currentToken.Kind == SyntaxKind.AwaitKeyword)
              {
                  name = ParseIdentifierName();
                  if (_currentToken.Kind == SyntaxKind.CommaToken)
@@ -404,7 +457,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         {
             var breakKeyword = EatToken(SyntaxKind.BreakKeyword);
             IdentifierNameSyntax? label = null;
-            if (_currentToken.Kind == SyntaxKind.IdentifierToken && !_currentToken.IsMissing)
+            if (_currentToken.Kind == SyntaxKind.IdentifierToken || _currentToken.Kind == SyntaxKind.AsyncKeyword || _currentToken.Kind == SyntaxKind.AwaitKeyword)
             {
                 // Simple heuristic: if same line, it's a label.
                 // Since we don't have line info easily here in parser structure without peek,
@@ -422,7 +475,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         {
             var continueKeyword = EatToken(SyntaxKind.ContinueKeyword);
             IdentifierNameSyntax? label = null;
-            if (_currentToken.Kind == SyntaxKind.IdentifierToken && !_currentToken.IsMissing)
+            if (_currentToken.Kind == SyntaxKind.IdentifierToken || _currentToken.Kind == SyntaxKind.AsyncKeyword || _currentToken.Kind == SyntaxKind.AwaitKeyword)
             {
                 if (_currentToken.Kind != SyntaxKind.SemicolonToken)
                 {
@@ -483,7 +536,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         internal InterfaceDeclarationSyntax ParseInterfaceDeclaration()
         {
             var interfaceKeyword = EatToken(SyntaxKind.InterfaceKeyword);
-            var identifier = EatToken(SyntaxKind.IdentifierToken);
+            var identifier = ParseIdentifierToken();
             var typeParameters = ParseOptionalTypeParameters();
             var openBrace = EatToken(SyntaxKind.OpenBraceToken);
 
@@ -501,7 +554,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         internal TypeAliasDeclarationSyntax ParseTypeAliasDeclaration()
         {
             var typeKeyword = EatToken(SyntaxKind.TypeKeyword);
-            var identifier = EatToken(SyntaxKind.IdentifierToken);
+            var identifier = ParseIdentifierToken();
             var typeParameters = ParseOptionalTypeParameters();
             var equalsToken = EatToken(SyntaxKind.EqualsToken);
             var type = ParseType();
@@ -513,7 +566,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         internal EnumDeclarationSyntax ParseEnumDeclaration()
         {
             var enumKeyword = EatToken(SyntaxKind.EnumKeyword);
-            var identifier = EatToken(SyntaxKind.IdentifierToken);
+            var identifier = ParseIdentifierToken();
             var openBrace = EatToken(SyntaxKind.OpenBraceToken);
 
             var members = new SeparatedSyntaxListBuilder<EnumMemberSyntax>(8);
@@ -540,7 +593,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
         internal EnumMemberSyntax ParseEnumMember()
         {
-            var identifier = EatToken(SyntaxKind.IdentifierToken);
+            var identifier = ParseIdentifierToken();
             EqualsValueClauseSyntax? initializer = null;
             if (_currentToken.Kind == SyntaxKind.EqualsToken)
             {
@@ -552,7 +605,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         internal ClassDeclarationSyntax ParseClassDeclaration()
         {
             var classKeyword = EatToken(SyntaxKind.ClassKeyword);
-            var identifier = EatOptionalToken(SyntaxKind.IdentifierToken);
+            var identifier = ParseOptionalIdentifierToken();
             var typeParameters = ParseOptionalTypeParameters();
             var openBrace = EatToken(SyntaxKind.OpenBraceToken);
 
@@ -589,7 +642,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
         internal TypeParameterSyntax ParseTypeParameter()
         {
-            var identifier = EatToken(SyntaxKind.IdentifierToken);
+            var identifier = ParseIdentifierToken();
             TypeParameterConstraintClauseSyntax? constraint = null;
             if (_currentToken.Kind == SyntaxKind.ExtendsKeyword)
             {
@@ -616,14 +669,32 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                 return ParseConstructorDeclaration();
             }
 
-            // Method or Property
-            // Simplified lookahead: if '(' follows identifier, it's a method. Otherwise property.
-            // TODO: handle modifiers (public, private, static, etc.)
+            SyntaxToken? asyncModifier = null;
+            if (_currentToken.Kind == SyntaxKind.AsyncKeyword)
+            {
+                // Check if 'async' is the method/property name
+                var next = PeekToken(1);
+                if (next.Kind == SyntaxKind.OpenParenToken ||
+                    next.Kind == SyntaxKind.ColonToken ||
+                    next.Kind == SyntaxKind.EqualsToken ||
+                    next.Kind == SyntaxKind.SemicolonToken ||
+                    next.Kind == SyntaxKind.CloseBraceToken || // Automatic semicolon
+                    next.Kind == SyntaxKind.LessThanToken) // generic method named async
+                {
+                    // It is named 'async', so it's not a modifier.
+                    asyncModifier = null;
+                }
+                else
+                {
+                    // It is likely a modifier (async method/prop)
+                    asyncModifier = EatToken();
+                }
+            }
 
             var identifier = ParseIdentifierName();
             if (_currentToken.Kind == SyntaxKind.OpenParenToken)
             {
-                return ParseMethodDeclaration(identifier);
+                return ParseMethodDeclaration(identifier, asyncModifier);
             }
             else
             {
@@ -644,7 +715,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             return SyntaxFactory.ConstructorDeclaration(constructorKeyword, parameterList, body);
         }
 
-        internal MethodDeclarationSyntax ParseMethodDeclaration(IdentifierNameSyntax name)
+        internal MethodDeclarationSyntax ParseMethodDeclaration(IdentifierNameSyntax name, SyntaxToken? asyncModifier = null)
         {
             var typeParameters = ParseOptionalTypeParameters();
             var parameterList = ParseParameterList();
@@ -654,7 +725,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             {
                 body = ParseBlock();
             }
-            return SyntaxFactory.MethodDeclaration(name, typeParameters, parameterList, typeAnnotation, body);
+            return SyntaxFactory.MethodDeclaration(asyncModifier, name, typeParameters, parameterList, typeAnnotation, body);
         }
 
         internal PropertyDeclarationSyntax ParsePropertyDeclaration(IdentifierNameSyntax name)
@@ -669,10 +740,10 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             return SyntaxFactory.PropertyDeclaration(name, typeAnnotation, initializer, semicolon);
         }
 
-        internal FunctionDeclarationSyntax ParseFunctionDeclaration()
+        internal FunctionDeclarationSyntax ParseFunctionDeclaration(SyntaxToken? asyncModifier = null)
         {
             var functionKeyword = EatToken(SyntaxKind.FunctionKeyword);
-            var identifier = EatOptionalToken(SyntaxKind.IdentifierToken);
+            var identifier = ParseOptionalIdentifierToken();
             var typeParameters = ParseOptionalTypeParameters();
             var parameterList = ParseParameterList();
             var typeAnnotation = ParseOptionalTypeAnnotation();
@@ -684,7 +755,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             }
             // else semicolon? or ambient?
 
-            return SyntaxFactory.FunctionDeclaration(functionKeyword, identifier, typeParameters, parameterList, typeAnnotation, body);
+            return SyntaxFactory.FunctionDeclaration(asyncModifier, functionKeyword, identifier, typeParameters, parameterList, typeAnnotation, body);
         }
 
         internal ParameterListSyntax ParseParameterList()
@@ -708,7 +779,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
         internal ParameterSyntax ParseParameter()
         {
-            var identifier = EatToken(SyntaxKind.IdentifierToken);
+            var identifier = ParseIdentifierToken();
             var typeAnnotation = ParseOptionalTypeAnnotation();
             return SyntaxFactory.Parameter(identifier, typeAnnotation);
         }
@@ -723,7 +794,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
         internal VariableDeclarationSyntax ParseVariableDeclaration()
         {
-            var identifier = EatToken(SyntaxKind.IdentifierToken);
+            var identifier = ParseIdentifierToken();
             var typeAnnotation = ParseOptionalTypeAnnotation();
             EqualsValueClauseSyntax? initializer = null;
             if (_currentToken.Kind == SyntaxKind.EqualsToken)
@@ -800,7 +871,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             {
                 type = ParsePredefinedType();
             }
-            else if (_currentToken.Kind == SyntaxKind.IdentifierToken)
+            else if (_currentToken.Kind == SyntaxKind.IdentifierToken || _currentToken.Kind == SyntaxKind.AsyncKeyword || _currentToken.Kind == SyntaxKind.AwaitKeyword)
             {
                 type = ParseTypeReference();
             }
@@ -886,7 +957,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                 var arrow = EatToken();
                 var body = ParseArrowFunctionBody();
                 var paramList = ConvertToParameterList(left);
-                return SyntaxFactory.ArrowFunctionExpression(null, paramList, null, arrow, body);
+                return SyntaxFactory.ArrowFunctionExpression(null, null, paramList, null, arrow, body);
             }
 
             while (true)
@@ -984,6 +1055,13 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                 var voidKeyword = EatToken();
                 var expression = ParseUnaryExpression();
                 return SyntaxFactory.VoidExpression(voidKeyword, expression);
+            }
+
+            if (_currentToken.Kind == SyntaxKind.AwaitKeyword)
+            {
+                var awaitKeyword = EatToken();
+                var expression = ParseUnaryExpression();
+                return SyntaxFactory.AwaitExpression(awaitKeyword, expression);
             }
 
             return ParsePostfixExpression();
@@ -1196,13 +1274,47 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                     return ParseObjectLiteralExpression();
                 case SyntaxKind.OpenParenToken:
                     return ParseParenthesizedOrArrowExpression();
+                case SyntaxKind.AsyncKeyword:
+                    if (PeekToken(1).Kind == SyntaxKind.OpenParenToken)
+                    {
+                        var asyncKeyword = EatToken();
+                        var expr = ParseParenthesizedOrArrowExpression(asyncKeyword);
+                        if (expr is ArrowFunctionExpressionSyntax)
+                        {
+                            return expr;
+                        }
+
+                        var asyncId = SyntaxFactory.IdentifierName(ConvertToIdentifier(asyncKeyword));
+                        var args = new SeparatedSyntaxListBuilder<ArgumentSyntax>(1);
+                        args.Add(SyntaxFactory.Argument(expr));
+                        var argList = SyntaxFactory.ArgumentList(
+                            SyntaxToken.CreateMissing(SyntaxKind.OpenParenToken, null, null),
+                            args.ToList(),
+                            SyntaxToken.CreateMissing(SyntaxKind.CloseParenToken, null, null));
+                        return SyntaxFactory.CallExpression(asyncId, null, argList);
+                    }
+                    if (PeekToken(1).Kind == SyntaxKind.IdentifierToken)
+                    {
+                        if (PeekToken(2).Kind == SyntaxKind.EqualsGreaterThanToken)
+                        {
+                            var asyncKeyword = EatToken();
+                            var identifier = ParseIdentifierName();
+                            var arrow = EatToken();
+                            var body = ParseArrowFunctionBody();
+                            var paramList = ConvertToParameterList(identifier);
+                            return SyntaxFactory.ArrowFunctionExpression(asyncKeyword, null, paramList, null, arrow, body);
+                        }
+                    }
+
+                    // Fallback: `async` as identifier.
+                    return SyntaxFactory.IdentifierName(ParseIdentifierToken());
                 default:
                     // Error recovery
                     return SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken));
             }
         }
 
-        internal ExpressionSyntax ParseParenthesizedOrArrowExpression()
+        internal ExpressionSyntax ParseParenthesizedOrArrowExpression(SyntaxToken? asyncKeyword = null)
         {
             var open = EatToken(SyntaxKind.OpenParenToken);
             if (_currentToken.Kind == SyntaxKind.CloseParenToken)
@@ -1213,7 +1325,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                     var arrow = EatToken();
                     var body = ParseArrowFunctionBody();
                     var paramList = SyntaxFactory.ParameterList(open, default(Microsoft.CodeAnalysis.Syntax.InternalSyntax.SeparatedSyntaxList<ParameterSyntax>), closeParen);
-                    return SyntaxFactory.ArrowFunctionExpression(null, paramList, null, arrow, body);
+                    return SyntaxFactory.ArrowFunctionExpression(asyncKeyword, null, paramList, null, arrow, body);
                 }
                 return SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken));
             }
@@ -1226,7 +1338,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                 var arrow = EatToken();
                 var body = ParseArrowFunctionBody();
                 var paramList = ConvertToParameterList(open, expr, close);
-                return SyntaxFactory.ArrowFunctionExpression(null, paramList, null, arrow, body);
+                return SyntaxFactory.ArrowFunctionExpression(asyncKeyword, null, paramList, null, arrow, body);
             }
 
             return expr;
@@ -1249,6 +1361,13 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                 list.Add(SyntaxFactory.Parameter(id.Identifier, null));
             }
             return SyntaxFactory.ParameterList(open, list.ToList(), close);
+        }
+
+        internal ParameterListSyntax ConvertToParameterList(IdentifierNameSyntax identifier)
+        {
+            var list = new SeparatedSyntaxListBuilder<ParameterSyntax>(4);
+            list.Add(SyntaxFactory.Parameter(identifier.Identifier, null));
+            return SyntaxFactory.ParameterList(CreateMissingToken(SyntaxKind.OpenParenToken), list.ToList(), CreateMissingToken(SyntaxKind.CloseParenToken));
         }
 
         internal ParameterListSyntax ConvertToParameterList(ExpressionSyntax expr)
@@ -1328,7 +1447,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
         internal IdentifierNameSyntax ParseIdentifierName()
         {
-            var token = EatToken(SyntaxKind.IdentifierToken);
+            var token = ParseIdentifierToken();
             return SyntaxFactory.IdentifierName(token);
         }
     }
