@@ -16,7 +16,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Parser
 
             Assert.Single(root.Statements);
             var func = Assert.IsType<FunctionDeclarationSyntax>(root.Statements[0]);
-            Assert.Equal("async", func.AsyncKeyword.Text);
+            Assert.Contains(func.Modifiers, m => m.Text == "async");
             Assert.Equal("function", func.FunctionKeyword.Text);
             Assert.Equal("foo", func.Identifier.Text);
         }
@@ -78,7 +78,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Parser
 
             var cls = (ClassDeclarationSyntax)root.Statements[0];
             var method = Assert.IsType<MethodDeclarationSyntax>(cls.Members[0]);
-            Assert.Equal("async", method.AsyncKeyword.Text);
+            Assert.Contains(method.Modifiers, m => m.Text == "async");
             Assert.Equal("m", method.Name.Identifier.Text);
         }
 
