@@ -156,6 +156,12 @@ public sealed partial class LiteralExpressionSyntax : ExpressionSyntax
 /// <item><description><see cref="SyntaxKind.LogicalAndExpression"/></description></item>
 /// <item><description><see cref="SyntaxKind.LogicalOrExpression"/></description></item>
 /// <item><description><see cref="SyntaxKind.AssignmentExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.BitwiseAndExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.BitwiseOrExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.ExclusiveOrExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.LeftShiftExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.RightShiftExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.UnsignedRightShiftExpression"/></description></item>
 /// </list>
 /// </remarks>
 public sealed partial class BinaryExpressionSyntax : ExpressionSyntax
@@ -476,6 +482,73 @@ public sealed partial class VoidExpressionSyntax : ExpressionSyntax
 
     public VoidExpressionSyntax WithVoidKeyword(SyntaxToken voidKeyword) => Update(voidKeyword, this.Expression);
     public VoidExpressionSyntax WithExpression(ExpressionSyntax expression) => Update(this.VoidKeyword, expression);
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.ConditionalExpression"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ConditionalExpressionSyntax : ExpressionSyntax
+{
+    private ExpressionSyntax? condition;
+    private ExpressionSyntax? whenTrue;
+    private ExpressionSyntax? whenFalse;
+
+    internal ConditionalExpressionSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public ExpressionSyntax Condition => GetRedAtZero(ref this.condition)!;
+
+    public SyntaxToken QuestionToken => new SyntaxToken(this, ((InternalSyntax.ConditionalExpressionSyntax)this.Green).questionToken, GetChildPosition(1), GetChildIndex(1));
+
+    public ExpressionSyntax WhenTrue => GetRed(ref this.whenTrue, 2)!;
+
+    public SyntaxToken ColonToken => new SyntaxToken(this, ((InternalSyntax.ConditionalExpressionSyntax)this.Green).colonToken, GetChildPosition(3), GetChildIndex(3));
+
+    public ExpressionSyntax WhenFalse => GetRed(ref this.whenFalse, 4)!;
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            0 => GetRedAtZero(ref this.condition)!,
+            2 => GetRed(ref this.whenTrue, 2)!,
+            4 => GetRed(ref this.whenFalse, 4)!,
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            0 => this.condition,
+            2 => this.whenTrue,
+            4 => this.whenFalse,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitConditionalExpression(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitConditionalExpression(this);
+
+    public ConditionalExpressionSyntax Update(ExpressionSyntax condition, SyntaxToken questionToken, ExpressionSyntax whenTrue, SyntaxToken colonToken, ExpressionSyntax whenFalse)
+    {
+        if (condition != this.Condition || questionToken != this.QuestionToken || whenTrue != this.WhenTrue || colonToken != this.ColonToken || whenFalse != this.WhenFalse)
+        {
+            var newNode = SyntaxFactory.ConditionalExpression(condition, questionToken, whenTrue, colonToken, whenFalse);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ConditionalExpressionSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ConditionalExpressionSyntax WithCondition(ExpressionSyntax condition) => Update(condition, this.QuestionToken, this.WhenTrue, this.ColonToken, this.WhenFalse);
+    public ConditionalExpressionSyntax WithQuestionToken(SyntaxToken questionToken) => Update(this.Condition, questionToken, this.WhenTrue, this.ColonToken, this.WhenFalse);
+    public ConditionalExpressionSyntax WithWhenTrue(ExpressionSyntax whenTrue) => Update(this.Condition, this.QuestionToken, whenTrue, this.ColonToken, this.WhenFalse);
+    public ConditionalExpressionSyntax WithColonToken(SyntaxToken colonToken) => Update(this.Condition, this.QuestionToken, this.WhenTrue, colonToken, this.WhenFalse);
+    public ConditionalExpressionSyntax WithWhenFalse(ExpressionSyntax whenFalse) => Update(this.Condition, this.QuestionToken, this.WhenTrue, this.ColonToken, whenFalse);
 }
 
 /// <remarks>

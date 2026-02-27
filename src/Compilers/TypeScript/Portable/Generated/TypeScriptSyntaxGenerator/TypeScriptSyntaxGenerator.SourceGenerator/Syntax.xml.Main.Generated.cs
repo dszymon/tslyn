@@ -43,6 +43,9 @@ public partial class TypeScriptSyntaxVisitor<TResult>
     /// <summary>Called when the visitor visits a VoidExpressionSyntax node.</summary>
     public virtual TResult? VisitVoidExpression(VoidExpressionSyntax node) => this.DefaultVisit(node);
 
+    /// <summary>Called when the visitor visits a ConditionalExpressionSyntax node.</summary>
+    public virtual TResult? VisitConditionalExpression(ConditionalExpressionSyntax node) => this.DefaultVisit(node);
+
     /// <summary>Called when the visitor visits a ThisExpressionSyntax node.</summary>
     public virtual TResult? VisitThisExpression(ThisExpressionSyntax node) => this.DefaultVisit(node);
 
@@ -256,6 +259,9 @@ public partial class TypeScriptSyntaxVisitor
     /// <summary>Called when the visitor visits a VoidExpressionSyntax node.</summary>
     public virtual void VisitVoidExpression(VoidExpressionSyntax node) => this.DefaultVisit(node);
 
+    /// <summary>Called when the visitor visits a ConditionalExpressionSyntax node.</summary>
+    public virtual void VisitConditionalExpression(ConditionalExpressionSyntax node) => this.DefaultVisit(node);
+
     /// <summary>Called when the visitor visits a ThisExpressionSyntax node.</summary>
     public virtual void VisitThisExpression(ThisExpressionSyntax node) => this.DefaultVisit(node);
 
@@ -468,6 +474,9 @@ public partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<SyntaxNo
 
     public override SyntaxNode? VisitVoidExpression(VoidExpressionSyntax node)
         => node.Update(VisitToken(node.VoidKeyword), (ExpressionSyntax?)Visit(node.Expression) ?? throw new ArgumentNullException("expression"));
+
+    public override SyntaxNode? VisitConditionalExpression(ConditionalExpressionSyntax node)
+        => node.Update((ExpressionSyntax?)Visit(node.Condition) ?? throw new ArgumentNullException("condition"), VisitToken(node.QuestionToken), (ExpressionSyntax?)Visit(node.WhenTrue) ?? throw new ArgumentNullException("whenTrue"), VisitToken(node.ColonToken), (ExpressionSyntax?)Visit(node.WhenFalse) ?? throw new ArgumentNullException("whenFalse"));
 
     public override SyntaxNode? VisitThisExpression(ThisExpressionSyntax node)
         => node.Update(VisitToken(node.ThisKeyword));
@@ -695,7 +704,13 @@ public static partial class SyntaxFactory
             case SyntaxKind.GreaterThanOrEqualExpression:
             case SyntaxKind.LogicalAndExpression:
             case SyntaxKind.LogicalOrExpression:
-            case SyntaxKind.AssignmentExpression: break;
+            case SyntaxKind.AssignmentExpression:
+            case SyntaxKind.BitwiseAndExpression:
+            case SyntaxKind.BitwiseOrExpression:
+            case SyntaxKind.ExclusiveOrExpression:
+            case SyntaxKind.LeftShiftExpression:
+            case SyntaxKind.RightShiftExpression:
+            case SyntaxKind.UnsignedRightShiftExpression: break;
             default: throw new ArgumentException(nameof(kind));
         }
         if (left == null) throw new ArgumentNullException(nameof(left));
@@ -769,6 +784,21 @@ public static partial class SyntaxFactory
     /// <summary>Creates a new VoidExpressionSyntax instance.</summary>
     public static VoidExpressionSyntax VoidExpression(ExpressionSyntax expression)
         => SyntaxFactory.VoidExpression(SyntaxFactory.Token(SyntaxKind.VoidKeyword), expression);
+
+    /// <summary>Creates a new ConditionalExpressionSyntax instance.</summary>
+    public static ConditionalExpressionSyntax ConditionalExpression(ExpressionSyntax condition, SyntaxToken questionToken, ExpressionSyntax whenTrue, SyntaxToken colonToken, ExpressionSyntax whenFalse)
+    {
+        if (condition == null) throw new ArgumentNullException(nameof(condition));
+        if (questionToken.Kind() != SyntaxKind.QuestionToken) throw new ArgumentException(nameof(questionToken));
+        if (whenTrue == null) throw new ArgumentNullException(nameof(whenTrue));
+        if (colonToken.Kind() != SyntaxKind.ColonToken) throw new ArgumentException(nameof(colonToken));
+        if (whenFalse == null) throw new ArgumentNullException(nameof(whenFalse));
+        return (ConditionalExpressionSyntax)Syntax.InternalSyntax.SyntaxFactory.ConditionalExpression((Syntax.InternalSyntax.ExpressionSyntax)condition.Green, (Syntax.InternalSyntax.SyntaxToken)questionToken.Node!, (Syntax.InternalSyntax.ExpressionSyntax)whenTrue.Green, (Syntax.InternalSyntax.SyntaxToken)colonToken.Node!, (Syntax.InternalSyntax.ExpressionSyntax)whenFalse.Green).CreateRed();
+    }
+
+    /// <summary>Creates a new ConditionalExpressionSyntax instance.</summary>
+    public static ConditionalExpressionSyntax ConditionalExpression(ExpressionSyntax condition, ExpressionSyntax whenTrue, ExpressionSyntax whenFalse)
+        => SyntaxFactory.ConditionalExpression(condition, SyntaxFactory.Token(SyntaxKind.QuestionToken), whenTrue, SyntaxFactory.Token(SyntaxKind.ColonToken), whenFalse);
 
     /// <summary>Creates a new ThisExpressionSyntax instance.</summary>
     public static ThisExpressionSyntax ThisExpression(SyntaxToken thisKeyword)

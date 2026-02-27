@@ -945,12 +945,12 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
         internal ExpressionSyntax ParseExpression()
         {
-            return ParseBinaryExpression(0);
+            return ParseAssignmentExpression();
         }
 
-        internal ExpressionSyntax ParseBinaryExpression(int parentPrecedence)
+        internal ExpressionSyntax ParseAssignmentExpression()
         {
-            var left = ParseUnaryExpression();
+            var left = ParseConditionalExpression();
 
             if (_currentToken.Kind == SyntaxKind.EqualsGreaterThanToken && IsSimpleParameter(left))
             {
@@ -959,6 +959,34 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                 var paramList = ConvertToParameterList(left);
                 return SyntaxFactory.ArrowFunctionExpression(null, null, paramList, null, arrow, body);
             }
+
+            if (IsAssignmentOperator(_currentToken.Kind))
+            {
+                var opToken = EatToken();
+                var right = ParseAssignmentExpression();
+                return SyntaxFactory.BinaryExpression(SyntaxKind.AssignmentExpression, left, opToken, right);
+            }
+
+            return left;
+        }
+
+        internal ExpressionSyntax ParseConditionalExpression()
+        {
+            var condition = ParseBinaryExpression(0);
+            if (_currentToken.Kind == SyntaxKind.QuestionToken)
+            {
+                var question = EatToken();
+                var whenTrue = ParseAssignmentExpression();
+                var colon = EatToken(SyntaxKind.ColonToken);
+                var whenFalse = ParseAssignmentExpression();
+                return SyntaxFactory.ConditionalExpression(condition, question, whenTrue, colon, whenFalse);
+            }
+            return condition;
+        }
+
+        internal ExpressionSyntax ParseBinaryExpression(int parentPrecedence)
+        {
+            var left = ParseUnaryExpression();
 
             while (true)
             {
@@ -976,6 +1004,28 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             return left;
         }
 
+        private bool IsAssignmentOperator(SyntaxKind kind)
+        {
+            switch (kind)
+            {
+                case SyntaxKind.EqualsToken:
+                case SyntaxKind.PlusEqualsToken:
+                case SyntaxKind.MinusEqualsToken:
+                case SyntaxKind.AsteriskEqualsToken:
+                case SyntaxKind.SlashEqualsToken:
+                case SyntaxKind.PercentEqualsToken:
+                case SyntaxKind.AmpersandEqualsToken:
+                case SyntaxKind.BarEqualsToken:
+                case SyntaxKind.CaretEqualsToken:
+                case SyntaxKind.LessThanLessThanEqualsToken:
+                case SyntaxKind.GreaterThanGreaterThanEqualsToken:
+                case SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         private int GetBinaryOperatorPrecedence(SyntaxKind kind)
         {
             switch (kind)
@@ -987,20 +1037,28 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                 case SyntaxKind.PlusToken:
                 case SyntaxKind.MinusToken:
                     return 9;
+                case SyntaxKind.LessThanLessThanToken:
+                case SyntaxKind.GreaterThanGreaterThanToken:
+                case SyntaxKind.GreaterThanGreaterThanGreaterThanToken:
+                    return 8;
                 case SyntaxKind.LessThanToken:
                 case SyntaxKind.GreaterThanToken:
                 case SyntaxKind.LessThanEqualsToken:
                 case SyntaxKind.GreaterThanEqualsToken:
-                    return 8;
+                    return 7;
                 case SyntaxKind.EqualsEqualsToken:
                 case SyntaxKind.ExclamationEqualsToken:
-                    return 7;
-                case SyntaxKind.AmpersandAmpersandToken:
                     return 6;
-                case SyntaxKind.BarBarToken:
+                case SyntaxKind.AmpersandToken:
                     return 5;
-                case SyntaxKind.EqualsToken:
+                case SyntaxKind.CaretToken:
                     return 4;
+                case SyntaxKind.BarToken:
+                    return 3;
+                case SyntaxKind.AmpersandAmpersandToken:
+                    return 2;
+                case SyntaxKind.BarBarToken:
+                    return 1;
                 default:
                     return 0;
             }
@@ -1023,6 +1081,12 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                 case SyntaxKind.AmpersandAmpersandToken: return SyntaxKind.LogicalAndExpression;
                 case SyntaxKind.BarBarToken: return SyntaxKind.LogicalOrExpression;
                 case SyntaxKind.EqualsToken: return SyntaxKind.AssignmentExpression;
+                case SyntaxKind.AmpersandToken: return SyntaxKind.BitwiseAndExpression;
+                case SyntaxKind.BarToken: return SyntaxKind.BitwiseOrExpression;
+                case SyntaxKind.CaretToken: return SyntaxKind.ExclusiveOrExpression;
+                case SyntaxKind.LessThanLessThanToken: return SyntaxKind.LeftShiftExpression;
+                case SyntaxKind.GreaterThanGreaterThanToken: return SyntaxKind.RightShiftExpression;
+                case SyntaxKind.GreaterThanGreaterThanGreaterThanToken: return SyntaxKind.UnsignedRightShiftExpression;
                 default: return SyntaxKind.None;
             }
         }
