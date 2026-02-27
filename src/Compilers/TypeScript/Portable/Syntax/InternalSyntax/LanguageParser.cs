@@ -85,6 +85,10 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         {
             switch (_currentToken.Kind)
             {
+                case SyntaxKind.ImportKeyword:
+                    return ParseImportDeclaration();
+                case SyntaxKind.ExportKeyword:
+                    return ParseExportDeclaration();
                 case SyntaxKind.ClassKeyword:
                     return ParseClassDeclaration();
                 case SyntaxKind.InterfaceKeyword:
@@ -126,6 +130,143 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                 default:
                     return ParseExpressionStatement();
             }
+        }
+
+        internal ImportDeclarationSyntax ParseImportDeclaration()
+        {
+            var importKeyword = EatToken(SyntaxKind.ImportKeyword);
+            ImportClauseSyntax? importClause = null;
+            SyntaxToken? fromKeyword = null;
+            ExpressionSyntax? moduleSpecifier = null;
+
+            if (_currentToken.Kind == SyntaxKind.StringLiteralToken)
+            {
+                moduleSpecifier = ParseExpression();
+            }
+            else
+            {
+                importClause = ParseImportClause();
+                fromKeyword = EatToken(SyntaxKind.FromKeyword);
+                moduleSpecifier = ParseExpression();
+            }
+
+            var semicolon = EatOptionalToken(SyntaxKind.SemicolonToken);
+            return SyntaxFactory.ImportDeclaration(importKeyword, importClause, fromKeyword, moduleSpecifier, semicolon);
+        }
+
+        internal ImportClauseSyntax ParseImportClause()
+        {
+             IdentifierNameSyntax? name = null;
+             if (_currentToken.Kind == SyntaxKind.IdentifierToken)
+             {
+                 name = ParseIdentifierName();
+                 if (_currentToken.Kind == SyntaxKind.CommaToken)
+                 {
+                     var comma = EatToken();
+                     var bindings = ParseNamedImportBindings();
+                     return SyntaxFactory.ImportClause(name, comma, bindings);
+                 }
+                 return SyntaxFactory.ImportClause(name, null, null);
+             }
+
+             var bindingsOnly = ParseNamedImportBindings();
+             return SyntaxFactory.ImportClause(null, null, bindingsOnly);
+        }
+
+        internal NamedImportBindingsSyntax ParseNamedImportBindings()
+        {
+            if (_currentToken.Kind == SyntaxKind.AsteriskToken)
+            {
+                return ParseNamespaceImport();
+            }
+            return ParseNamedImports();
+        }
+
+        internal NamespaceImportSyntax ParseNamespaceImport()
+        {
+            var asterisk = EatToken(SyntaxKind.AsteriskToken);
+            var asKeyword = EatToken(SyntaxKind.AsKeyword);
+            var name = ParseIdentifierName();
+            return SyntaxFactory.NamespaceImport(asterisk, asKeyword, name);
+        }
+
+        internal NamedImportsSyntax ParseNamedImports()
+        {
+             var open = EatToken(SyntaxKind.OpenBraceToken);
+             var elements = new SeparatedSyntaxListBuilder<ImportSpecifierSyntax>(8);
+             if (_currentToken.Kind != SyntaxKind.CloseBraceToken)
+             {
+                 while (_currentToken.Kind != SyntaxKind.CloseBraceToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
+                 {
+                     elements.Add(ParseImportSpecifier());
+                     if (_currentToken.Kind == SyntaxKind.CommaToken)
+                         elements.AddSeparator(EatToken());
+                     else
+                         break;
+                 }
+             }
+             var close = EatToken(SyntaxKind.CloseBraceToken);
+             return SyntaxFactory.NamedImports(open, elements.ToList(), close);
+        }
+
+        internal ImportSpecifierSyntax ParseImportSpecifier()
+        {
+             var nameOrProp = ParseIdentifierName();
+             if (_currentToken.Kind == SyntaxKind.AsKeyword)
+             {
+                 var asKeyword = EatToken();
+                 var name = ParseIdentifierName();
+                 return SyntaxFactory.ImportSpecifier(nameOrProp, asKeyword, name);
+             }
+             return SyntaxFactory.ImportSpecifier(null, null, nameOrProp);
+        }
+
+        internal ExportDeclarationSyntax ParseExportDeclaration()
+        {
+             var exportKeyword = EatToken(SyntaxKind.ExportKeyword);
+             var clause = ParseExportClause();
+             SyntaxToken? from = null;
+             ExpressionSyntax? module = null;
+
+             if (_currentToken.Kind == SyntaxKind.FromKeyword)
+             {
+                 from = EatToken();
+                 module = ParseExpression();
+             }
+
+             var semi = EatOptionalToken(SyntaxKind.SemicolonToken);
+             return SyntaxFactory.ExportDeclaration(exportKeyword, clause, from, module, semi);
+        }
+
+        internal ExportClauseSyntax ParseExportClause()
+        {
+             var open = EatToken(SyntaxKind.OpenBraceToken);
+             var elements = new SeparatedSyntaxListBuilder<ExportSpecifierSyntax>(8);
+             if (_currentToken.Kind != SyntaxKind.CloseBraceToken)
+             {
+                 while (_currentToken.Kind != SyntaxKind.CloseBraceToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
+                 {
+                     elements.Add(ParseExportSpecifier());
+                     if (_currentToken.Kind == SyntaxKind.CommaToken)
+                         elements.AddSeparator(EatToken());
+                     else
+                         break;
+                 }
+             }
+             var close = EatToken(SyntaxKind.CloseBraceToken);
+             return SyntaxFactory.ExportClause(open, elements.ToList(), close);
+        }
+
+        internal ExportSpecifierSyntax ParseExportSpecifier()
+        {
+             var nameOrProp = ParseIdentifierName();
+             if (_currentToken.Kind == SyntaxKind.AsKeyword)
+             {
+                 var asKeyword = EatToken();
+                 var name = ParseIdentifierName();
+                 return SyntaxFactory.ExportSpecifier(nameOrProp, asKeyword, name);
+             }
+             return SyntaxFactory.ExportSpecifier(null, null, nameOrProp);
         }
 
         internal SwitchStatementSyntax ParseSwitchStatement()
@@ -740,6 +881,14 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         {
             var left = ParseUnaryExpression();
 
+            if (_currentToken.Kind == SyntaxKind.EqualsGreaterThanToken && IsSimpleParameter(left))
+            {
+                var arrow = EatToken();
+                var body = ParseArrowFunctionBody();
+                var paramList = ConvertToParameterList(left);
+                return SyntaxFactory.ArrowFunctionExpression(null, paramList, null, arrow, body);
+            }
+
             while (true)
             {
                 int precedence = GetBinaryOperatorPrecedence(_currentToken.Kind);
@@ -1046,19 +1195,75 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                 case SyntaxKind.OpenBraceToken:
                     return ParseObjectLiteralExpression();
                 case SyntaxKind.OpenParenToken:
-                    return ParseParenthesizedExpression();
+                    return ParseParenthesizedOrArrowExpression();
                 default:
                     // Error recovery
                     return SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken));
             }
         }
 
-        internal ExpressionSyntax ParseParenthesizedExpression()
+        internal ExpressionSyntax ParseParenthesizedOrArrowExpression()
         {
             var open = EatToken(SyntaxKind.OpenParenToken);
+            if (_currentToken.Kind == SyntaxKind.CloseParenToken)
+            {
+                var closeParen = EatToken();
+                if (_currentToken.Kind == SyntaxKind.EqualsGreaterThanToken)
+                {
+                    var arrow = EatToken();
+                    var body = ParseArrowFunctionBody();
+                    var paramList = SyntaxFactory.ParameterList(open, default(Microsoft.CodeAnalysis.Syntax.InternalSyntax.SeparatedSyntaxList<ParameterSyntax>), closeParen);
+                    return SyntaxFactory.ArrowFunctionExpression(null, paramList, null, arrow, body);
+                }
+                return SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken));
+            }
+
             var expr = ParseExpression();
             var close = EatToken(SyntaxKind.CloseParenToken);
+
+            if (_currentToken.Kind == SyntaxKind.EqualsGreaterThanToken)
+            {
+                var arrow = EatToken();
+                var body = ParseArrowFunctionBody();
+                var paramList = ConvertToParameterList(open, expr, close);
+                return SyntaxFactory.ArrowFunctionExpression(null, paramList, null, arrow, body);
+            }
+
             return expr;
+        }
+
+        internal TypeScriptSyntaxNode ParseArrowFunctionBody()
+        {
+            if (_currentToken.Kind == SyntaxKind.OpenBraceToken)
+            {
+                return ParseBlock();
+            }
+            return ParseExpression();
+        }
+
+        internal ParameterListSyntax ConvertToParameterList(SyntaxToken open, ExpressionSyntax expr, SyntaxToken close)
+        {
+            var list = new SeparatedSyntaxListBuilder<ParameterSyntax>(4);
+            if (expr is IdentifierNameSyntax id)
+            {
+                list.Add(SyntaxFactory.Parameter(id.Identifier, null));
+            }
+            return SyntaxFactory.ParameterList(open, list.ToList(), close);
+        }
+
+        internal ParameterListSyntax ConvertToParameterList(ExpressionSyntax expr)
+        {
+            var list = new SeparatedSyntaxListBuilder<ParameterSyntax>(4);
+            if (expr is IdentifierNameSyntax id)
+            {
+                list.Add(SyntaxFactory.Parameter(id.Identifier, null));
+            }
+            return SyntaxFactory.ParameterList(CreateMissingToken(SyntaxKind.OpenParenToken), list.ToList(), CreateMissingToken(SyntaxKind.CloseParenToken));
+        }
+
+        private bool IsSimpleParameter(ExpressionSyntax expr)
+        {
+            return expr is IdentifierNameSyntax;
         }
 
         internal ArrayLiteralExpressionSyntax ParseArrayLiteralExpression()

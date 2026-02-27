@@ -852,6 +852,83 @@ public sealed partial class ObjectLiteralExpressionSyntax : ExpressionSyntax
 /// <remarks>
 /// <para>This node is associated with the following syntax kinds:</para>
 /// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.ArrowFunctionExpression"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ArrowFunctionExpressionSyntax : ExpressionSyntax
+{
+    private TypeParameterListSyntax? typeParameters;
+    private ParameterListSyntax? parameterList;
+    private TypeAnnotationSyntax? typeAnnotation;
+    private TypeScriptSyntaxNode? body;
+
+    internal ArrowFunctionExpressionSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public TypeParameterListSyntax? TypeParameters => GetRedAtZero(ref this.typeParameters);
+
+    public ParameterListSyntax ParameterList => GetRed(ref this.parameterList, 1)!;
+
+    public TypeAnnotationSyntax? TypeAnnotation => GetRed(ref this.typeAnnotation, 2);
+
+    public SyntaxToken EqualsGreaterThanToken => new SyntaxToken(this, ((InternalSyntax.ArrowFunctionExpressionSyntax)this.Green).equalsGreaterThanToken, GetChildPosition(3), GetChildIndex(3));
+
+    public TypeScriptSyntaxNode Body => GetRed(ref this.body, 4)!;
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            0 => GetRedAtZero(ref this.typeParameters),
+            1 => GetRed(ref this.parameterList, 1)!,
+            2 => GetRed(ref this.typeAnnotation, 2),
+            4 => GetRed(ref this.body, 4)!,
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            0 => this.typeParameters,
+            1 => this.parameterList,
+            2 => this.typeAnnotation,
+            4 => this.body,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitArrowFunctionExpression(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitArrowFunctionExpression(this);
+
+    public ArrowFunctionExpressionSyntax Update(TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, SyntaxToken equalsGreaterThanToken, TypeScriptSyntaxNode body)
+    {
+        if (typeParameters != this.TypeParameters || parameterList != this.ParameterList || typeAnnotation != this.TypeAnnotation || equalsGreaterThanToken != this.EqualsGreaterThanToken || body != this.Body)
+        {
+            var newNode = SyntaxFactory.ArrowFunctionExpression(typeParameters, parameterList, typeAnnotation, equalsGreaterThanToken, body);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ArrowFunctionExpressionSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ArrowFunctionExpressionSyntax WithTypeParameters(TypeParameterListSyntax? typeParameters) => Update(typeParameters, this.ParameterList, this.TypeAnnotation, this.EqualsGreaterThanToken, this.Body);
+    public ArrowFunctionExpressionSyntax WithParameterList(ParameterListSyntax parameterList) => Update(this.TypeParameters, parameterList, this.TypeAnnotation, this.EqualsGreaterThanToken, this.Body);
+    public ArrowFunctionExpressionSyntax WithTypeAnnotation(TypeAnnotationSyntax? typeAnnotation) => Update(this.TypeParameters, this.ParameterList, typeAnnotation, this.EqualsGreaterThanToken, this.Body);
+    public ArrowFunctionExpressionSyntax WithEqualsGreaterThanToken(SyntaxToken equalsGreaterThanToken) => Update(this.TypeParameters, this.ParameterList, this.TypeAnnotation, equalsGreaterThanToken, this.Body);
+    public ArrowFunctionExpressionSyntax WithBody(TypeScriptSyntaxNode body) => Update(this.TypeParameters, this.ParameterList, this.TypeAnnotation, this.EqualsGreaterThanToken, body);
+
+    public ArrowFunctionExpressionSyntax AddTypeParametersParameters(params TypeParameterSyntax[] items)
+    {
+        var typeParameters = this.TypeParameters ?? SyntaxFactory.TypeParameterList();
+        return WithTypeParameters(typeParameters.WithParameters(typeParameters.Parameters.AddRange(items)));
+    }
+    public ArrowFunctionExpressionSyntax AddParameterListParameters(params ParameterSyntax[] items) => WithParameterList(this.ParameterList.WithParameters(this.ParameterList.Parameters.AddRange(items)));
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
 /// <item><description><see cref="SyntaxKind.PropertyAssignment"/></description></item>
 /// </list>
 /// </remarks>
@@ -3368,6 +3445,524 @@ public sealed partial class ConstructorDeclarationSyntax : ClassElementSyntax
         var body = this.Body ?? SyntaxFactory.Block();
         return WithBody(body.WithStatements(body.Statements.AddRange(items)));
     }
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.ImportDeclaration"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ImportDeclarationSyntax : StatementSyntax
+{
+    private ImportClauseSyntax? importClause;
+    private ExpressionSyntax? moduleSpecifier;
+
+    internal ImportDeclarationSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken ImportKeyword => new SyntaxToken(this, ((InternalSyntax.ImportDeclarationSyntax)this.Green).importKeyword, Position, 0);
+
+    public ImportClauseSyntax? ImportClause => GetRed(ref this.importClause, 1);
+
+    public SyntaxToken FromKeyword
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.ImportDeclarationSyntax)this.Green).fromKeyword;
+            return slot != null ? new SyntaxToken(this, slot, GetChildPosition(2), GetChildIndex(2)) : default;
+        }
+    }
+
+    public ExpressionSyntax ModuleSpecifier => GetRed(ref this.moduleSpecifier, 3)!;
+
+    public SyntaxToken SemicolonToken
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.ImportDeclarationSyntax)this.Green).semicolonToken;
+            return slot != null ? new SyntaxToken(this, slot, GetChildPosition(4), GetChildIndex(4)) : default;
+        }
+    }
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            1 => GetRed(ref this.importClause, 1),
+            3 => GetRed(ref this.moduleSpecifier, 3)!,
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            1 => this.importClause,
+            3 => this.moduleSpecifier,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitImportDeclaration(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitImportDeclaration(this);
+
+    public ImportDeclarationSyntax Update(SyntaxToken importKeyword, ImportClauseSyntax? importClause, SyntaxToken fromKeyword, ExpressionSyntax moduleSpecifier, SyntaxToken semicolonToken)
+    {
+        if (importKeyword != this.ImportKeyword || importClause != this.ImportClause || fromKeyword != this.FromKeyword || moduleSpecifier != this.ModuleSpecifier || semicolonToken != this.SemicolonToken)
+        {
+            var newNode = SyntaxFactory.ImportDeclaration(importKeyword, importClause, fromKeyword, moduleSpecifier, semicolonToken);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ImportDeclarationSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ImportDeclarationSyntax WithImportKeyword(SyntaxToken importKeyword) => Update(importKeyword, this.ImportClause, this.FromKeyword, this.ModuleSpecifier, this.SemicolonToken);
+    public ImportDeclarationSyntax WithImportClause(ImportClauseSyntax? importClause) => Update(this.ImportKeyword, importClause, this.FromKeyword, this.ModuleSpecifier, this.SemicolonToken);
+    public ImportDeclarationSyntax WithFromKeyword(SyntaxToken fromKeyword) => Update(this.ImportKeyword, this.ImportClause, fromKeyword, this.ModuleSpecifier, this.SemicolonToken);
+    public ImportDeclarationSyntax WithModuleSpecifier(ExpressionSyntax moduleSpecifier) => Update(this.ImportKeyword, this.ImportClause, this.FromKeyword, moduleSpecifier, this.SemicolonToken);
+    public ImportDeclarationSyntax WithSemicolonToken(SyntaxToken semicolonToken) => Update(this.ImportKeyword, this.ImportClause, this.FromKeyword, this.ModuleSpecifier, semicolonToken);
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.ImportClause"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ImportClauseSyntax : TypeScriptSyntaxNode
+{
+    private IdentifierNameSyntax? name;
+    private NamedImportBindingsSyntax? namedBindings;
+
+    internal ImportClauseSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public IdentifierNameSyntax? Name => GetRedAtZero(ref this.name);
+
+    public SyntaxToken CommaToken
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.ImportClauseSyntax)this.Green).commaToken;
+            return slot != null ? new SyntaxToken(this, slot, GetChildPosition(1), GetChildIndex(1)) : default;
+        }
+    }
+
+    public NamedImportBindingsSyntax? NamedBindings => GetRed(ref this.namedBindings, 2);
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            0 => GetRedAtZero(ref this.name),
+            2 => GetRed(ref this.namedBindings, 2),
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            0 => this.name,
+            2 => this.namedBindings,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitImportClause(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitImportClause(this);
+
+    public ImportClauseSyntax Update(IdentifierNameSyntax? name, SyntaxToken commaToken, NamedImportBindingsSyntax? namedBindings)
+    {
+        if (name != this.Name || commaToken != this.CommaToken || namedBindings != this.NamedBindings)
+        {
+            var newNode = SyntaxFactory.ImportClause(name, commaToken, namedBindings);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ImportClauseSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ImportClauseSyntax WithName(IdentifierNameSyntax? name) => Update(name, this.CommaToken, this.NamedBindings);
+    public ImportClauseSyntax WithCommaToken(SyntaxToken commaToken) => Update(this.Name, commaToken, this.NamedBindings);
+    public ImportClauseSyntax WithNamedBindings(NamedImportBindingsSyntax? namedBindings) => Update(this.Name, this.CommaToken, namedBindings);
+}
+
+public abstract partial class NamedImportBindingsSyntax : TypeScriptSyntaxNode
+{
+    internal NamedImportBindingsSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.NamespaceImport"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class NamespaceImportSyntax : NamedImportBindingsSyntax
+{
+    private IdentifierNameSyntax? name;
+
+    internal NamespaceImportSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken AsteriskToken => new SyntaxToken(this, ((InternalSyntax.NamespaceImportSyntax)this.Green).asteriskToken, Position, 0);
+
+    public SyntaxToken AsKeyword => new SyntaxToken(this, ((InternalSyntax.NamespaceImportSyntax)this.Green).asKeyword, GetChildPosition(1), GetChildIndex(1));
+
+    public IdentifierNameSyntax Name => GetRed(ref this.name, 2)!;
+
+    internal override SyntaxNode? GetNodeSlot(int index) => index == 2 ? GetRed(ref this.name, 2)! : null;
+
+    internal override SyntaxNode? GetCachedSlot(int index) => index == 2 ? this.name : null;
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitNamespaceImport(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitNamespaceImport(this);
+
+    public NamespaceImportSyntax Update(SyntaxToken asteriskToken, SyntaxToken asKeyword, IdentifierNameSyntax name)
+    {
+        if (asteriskToken != this.AsteriskToken || asKeyword != this.AsKeyword || name != this.Name)
+        {
+            var newNode = SyntaxFactory.NamespaceImport(asteriskToken, asKeyword, name);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (NamespaceImportSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public NamespaceImportSyntax WithAsteriskToken(SyntaxToken asteriskToken) => Update(asteriskToken, this.AsKeyword, this.Name);
+    public NamespaceImportSyntax WithAsKeyword(SyntaxToken asKeyword) => Update(this.AsteriskToken, asKeyword, this.Name);
+    public NamespaceImportSyntax WithName(IdentifierNameSyntax name) => Update(this.AsteriskToken, this.AsKeyword, name);
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.NamedImports"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class NamedImportsSyntax : NamedImportBindingsSyntax
+{
+    private SyntaxNode? elements;
+
+    internal NamedImportsSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken OpenBraceToken => new SyntaxToken(this, ((InternalSyntax.NamedImportsSyntax)this.Green).openBraceToken, Position, 0);
+
+    public SeparatedSyntaxList<ImportSpecifierSyntax> Elements
+    {
+        get
+        {
+            var red = GetRed(ref this.elements, 1);
+            return red != null ? new SeparatedSyntaxList<ImportSpecifierSyntax>(red, GetChildIndex(1)) : default;
+        }
+    }
+
+    public SyntaxToken CloseBraceToken => new SyntaxToken(this, ((InternalSyntax.NamedImportsSyntax)this.Green).closeBraceToken, GetChildPosition(2), GetChildIndex(2));
+
+    internal override SyntaxNode? GetNodeSlot(int index) => index == 1 ? GetRed(ref this.elements, 1)! : null;
+
+    internal override SyntaxNode? GetCachedSlot(int index) => index == 1 ? this.elements : null;
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitNamedImports(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitNamedImports(this);
+
+    public NamedImportsSyntax Update(SyntaxToken openBraceToken, SeparatedSyntaxList<ImportSpecifierSyntax> elements, SyntaxToken closeBraceToken)
+    {
+        if (openBraceToken != this.OpenBraceToken || elements != this.Elements || closeBraceToken != this.CloseBraceToken)
+        {
+            var newNode = SyntaxFactory.NamedImports(openBraceToken, elements, closeBraceToken);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (NamedImportsSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public NamedImportsSyntax WithOpenBraceToken(SyntaxToken openBraceToken) => Update(openBraceToken, this.Elements, this.CloseBraceToken);
+    public NamedImportsSyntax WithElements(SeparatedSyntaxList<ImportSpecifierSyntax> elements) => Update(this.OpenBraceToken, elements, this.CloseBraceToken);
+    public NamedImportsSyntax WithCloseBraceToken(SyntaxToken closeBraceToken) => Update(this.OpenBraceToken, this.Elements, closeBraceToken);
+
+    public NamedImportsSyntax AddElements(params ImportSpecifierSyntax[] items) => WithElements(this.Elements.AddRange(items));
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.ImportSpecifier"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ImportSpecifierSyntax : TypeScriptSyntaxNode
+{
+    private IdentifierNameSyntax? propertyName;
+    private IdentifierNameSyntax? name;
+
+    internal ImportSpecifierSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public IdentifierNameSyntax? PropertyName => GetRedAtZero(ref this.propertyName);
+
+    public SyntaxToken AsKeyword
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.ImportSpecifierSyntax)this.Green).asKeyword;
+            return slot != null ? new SyntaxToken(this, slot, GetChildPosition(1), GetChildIndex(1)) : default;
+        }
+    }
+
+    public IdentifierNameSyntax Name => GetRed(ref this.name, 2)!;
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            0 => GetRedAtZero(ref this.propertyName),
+            2 => GetRed(ref this.name, 2)!,
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            0 => this.propertyName,
+            2 => this.name,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitImportSpecifier(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitImportSpecifier(this);
+
+    public ImportSpecifierSyntax Update(IdentifierNameSyntax? propertyName, SyntaxToken asKeyword, IdentifierNameSyntax name)
+    {
+        if (propertyName != this.PropertyName || asKeyword != this.AsKeyword || name != this.Name)
+        {
+            var newNode = SyntaxFactory.ImportSpecifier(propertyName, asKeyword, name);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ImportSpecifierSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ImportSpecifierSyntax WithPropertyName(IdentifierNameSyntax? propertyName) => Update(propertyName, this.AsKeyword, this.Name);
+    public ImportSpecifierSyntax WithAsKeyword(SyntaxToken asKeyword) => Update(this.PropertyName, asKeyword, this.Name);
+    public ImportSpecifierSyntax WithName(IdentifierNameSyntax name) => Update(this.PropertyName, this.AsKeyword, name);
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.ExportDeclaration"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ExportDeclarationSyntax : StatementSyntax
+{
+    private ExportClauseSyntax? exportClause;
+    private ExpressionSyntax? moduleSpecifier;
+
+    internal ExportDeclarationSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken ExportKeyword => new SyntaxToken(this, ((InternalSyntax.ExportDeclarationSyntax)this.Green).exportKeyword, Position, 0);
+
+    public ExportClauseSyntax? ExportClause => GetRed(ref this.exportClause, 1);
+
+    public SyntaxToken FromKeyword
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.ExportDeclarationSyntax)this.Green).fromKeyword;
+            return slot != null ? new SyntaxToken(this, slot, GetChildPosition(2), GetChildIndex(2)) : default;
+        }
+    }
+
+    public ExpressionSyntax? ModuleSpecifier => GetRed(ref this.moduleSpecifier, 3);
+
+    public SyntaxToken SemicolonToken
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.ExportDeclarationSyntax)this.Green).semicolonToken;
+            return slot != null ? new SyntaxToken(this, slot, GetChildPosition(4), GetChildIndex(4)) : default;
+        }
+    }
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            1 => GetRed(ref this.exportClause, 1),
+            3 => GetRed(ref this.moduleSpecifier, 3),
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            1 => this.exportClause,
+            3 => this.moduleSpecifier,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitExportDeclaration(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitExportDeclaration(this);
+
+    public ExportDeclarationSyntax Update(SyntaxToken exportKeyword, ExportClauseSyntax? exportClause, SyntaxToken fromKeyword, ExpressionSyntax? moduleSpecifier, SyntaxToken semicolonToken)
+    {
+        if (exportKeyword != this.ExportKeyword || exportClause != this.ExportClause || fromKeyword != this.FromKeyword || moduleSpecifier != this.ModuleSpecifier || semicolonToken != this.SemicolonToken)
+        {
+            var newNode = SyntaxFactory.ExportDeclaration(exportKeyword, exportClause, fromKeyword, moduleSpecifier, semicolonToken);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ExportDeclarationSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ExportDeclarationSyntax WithExportKeyword(SyntaxToken exportKeyword) => Update(exportKeyword, this.ExportClause, this.FromKeyword, this.ModuleSpecifier, this.SemicolonToken);
+    public ExportDeclarationSyntax WithExportClause(ExportClauseSyntax? exportClause) => Update(this.ExportKeyword, exportClause, this.FromKeyword, this.ModuleSpecifier, this.SemicolonToken);
+    public ExportDeclarationSyntax WithFromKeyword(SyntaxToken fromKeyword) => Update(this.ExportKeyword, this.ExportClause, fromKeyword, this.ModuleSpecifier, this.SemicolonToken);
+    public ExportDeclarationSyntax WithModuleSpecifier(ExpressionSyntax? moduleSpecifier) => Update(this.ExportKeyword, this.ExportClause, this.FromKeyword, moduleSpecifier, this.SemicolonToken);
+    public ExportDeclarationSyntax WithSemicolonToken(SyntaxToken semicolonToken) => Update(this.ExportKeyword, this.ExportClause, this.FromKeyword, this.ModuleSpecifier, semicolonToken);
+
+    public ExportDeclarationSyntax AddExportClauseElements(params ExportSpecifierSyntax[] items)
+    {
+        var exportClause = this.ExportClause ?? SyntaxFactory.ExportClause();
+        return WithExportClause(exportClause.WithElements(exportClause.Elements.AddRange(items)));
+    }
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.ExportClause"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ExportClauseSyntax : TypeScriptSyntaxNode
+{
+    private SyntaxNode? elements;
+
+    internal ExportClauseSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken OpenBraceToken => new SyntaxToken(this, ((InternalSyntax.ExportClauseSyntax)this.Green).openBraceToken, Position, 0);
+
+    public SeparatedSyntaxList<ExportSpecifierSyntax> Elements
+    {
+        get
+        {
+            var red = GetRed(ref this.elements, 1);
+            return red != null ? new SeparatedSyntaxList<ExportSpecifierSyntax>(red, GetChildIndex(1)) : default;
+        }
+    }
+
+    public SyntaxToken CloseBraceToken => new SyntaxToken(this, ((InternalSyntax.ExportClauseSyntax)this.Green).closeBraceToken, GetChildPosition(2), GetChildIndex(2));
+
+    internal override SyntaxNode? GetNodeSlot(int index) => index == 1 ? GetRed(ref this.elements, 1)! : null;
+
+    internal override SyntaxNode? GetCachedSlot(int index) => index == 1 ? this.elements : null;
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitExportClause(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitExportClause(this);
+
+    public ExportClauseSyntax Update(SyntaxToken openBraceToken, SeparatedSyntaxList<ExportSpecifierSyntax> elements, SyntaxToken closeBraceToken)
+    {
+        if (openBraceToken != this.OpenBraceToken || elements != this.Elements || closeBraceToken != this.CloseBraceToken)
+        {
+            var newNode = SyntaxFactory.ExportClause(openBraceToken, elements, closeBraceToken);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ExportClauseSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ExportClauseSyntax WithOpenBraceToken(SyntaxToken openBraceToken) => Update(openBraceToken, this.Elements, this.CloseBraceToken);
+    public ExportClauseSyntax WithElements(SeparatedSyntaxList<ExportSpecifierSyntax> elements) => Update(this.OpenBraceToken, elements, this.CloseBraceToken);
+    public ExportClauseSyntax WithCloseBraceToken(SyntaxToken closeBraceToken) => Update(this.OpenBraceToken, this.Elements, closeBraceToken);
+
+    public ExportClauseSyntax AddElements(params ExportSpecifierSyntax[] items) => WithElements(this.Elements.AddRange(items));
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.ExportSpecifier"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ExportSpecifierSyntax : TypeScriptSyntaxNode
+{
+    private IdentifierNameSyntax? propertyName;
+    private IdentifierNameSyntax? name;
+
+    internal ExportSpecifierSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public IdentifierNameSyntax? PropertyName => GetRedAtZero(ref this.propertyName);
+
+    public SyntaxToken AsKeyword
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.ExportSpecifierSyntax)this.Green).asKeyword;
+            return slot != null ? new SyntaxToken(this, slot, GetChildPosition(1), GetChildIndex(1)) : default;
+        }
+    }
+
+    public IdentifierNameSyntax Name => GetRed(ref this.name, 2)!;
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            0 => GetRedAtZero(ref this.propertyName),
+            2 => GetRed(ref this.name, 2)!,
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            0 => this.propertyName,
+            2 => this.name,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitExportSpecifier(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitExportSpecifier(this);
+
+    public ExportSpecifierSyntax Update(IdentifierNameSyntax? propertyName, SyntaxToken asKeyword, IdentifierNameSyntax name)
+    {
+        if (propertyName != this.PropertyName || asKeyword != this.AsKeyword || name != this.Name)
+        {
+            var newNode = SyntaxFactory.ExportSpecifier(propertyName, asKeyword, name);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ExportSpecifierSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ExportSpecifierSyntax WithPropertyName(IdentifierNameSyntax? propertyName) => Update(propertyName, this.AsKeyword, this.Name);
+    public ExportSpecifierSyntax WithAsKeyword(SyntaxToken asKeyword) => Update(this.PropertyName, asKeyword, this.Name);
+    public ExportSpecifierSyntax WithName(IdentifierNameSyntax name) => Update(this.PropertyName, this.AsKeyword, name);
 }
 
 /// <remarks>

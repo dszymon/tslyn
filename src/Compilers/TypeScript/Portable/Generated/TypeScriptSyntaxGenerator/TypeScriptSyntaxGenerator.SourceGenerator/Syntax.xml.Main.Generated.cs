@@ -64,6 +64,9 @@ public partial class TypeScriptSyntaxVisitor<TResult>
     /// <summary>Called when the visitor visits a ObjectLiteralExpressionSyntax node.</summary>
     public virtual TResult? VisitObjectLiteralExpression(ObjectLiteralExpressionSyntax node) => this.DefaultVisit(node);
 
+    /// <summary>Called when the visitor visits a ArrowFunctionExpressionSyntax node.</summary>
+    public virtual TResult? VisitArrowFunctionExpression(ArrowFunctionExpressionSyntax node) => this.DefaultVisit(node);
+
     /// <summary>Called when the visitor visits a PropertyAssignmentSyntax node.</summary>
     public virtual TResult? VisitPropertyAssignment(PropertyAssignmentSyntax node) => this.DefaultVisit(node);
 
@@ -193,6 +196,30 @@ public partial class TypeScriptSyntaxVisitor<TResult>
     /// <summary>Called when the visitor visits a ConstructorDeclarationSyntax node.</summary>
     public virtual TResult? VisitConstructorDeclaration(ConstructorDeclarationSyntax node) => this.DefaultVisit(node);
 
+    /// <summary>Called when the visitor visits a ImportDeclarationSyntax node.</summary>
+    public virtual TResult? VisitImportDeclaration(ImportDeclarationSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a ImportClauseSyntax node.</summary>
+    public virtual TResult? VisitImportClause(ImportClauseSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a NamespaceImportSyntax node.</summary>
+    public virtual TResult? VisitNamespaceImport(NamespaceImportSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a NamedImportsSyntax node.</summary>
+    public virtual TResult? VisitNamedImports(NamedImportsSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a ImportSpecifierSyntax node.</summary>
+    public virtual TResult? VisitImportSpecifier(ImportSpecifierSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a ExportDeclarationSyntax node.</summary>
+    public virtual TResult? VisitExportDeclaration(ExportDeclarationSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a ExportClauseSyntax node.</summary>
+    public virtual TResult? VisitExportClause(ExportClauseSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a ExportSpecifierSyntax node.</summary>
+    public virtual TResult? VisitExportSpecifier(ExportSpecifierSyntax node) => this.DefaultVisit(node);
+
     /// <summary>Called when the visitor visits a CompilationUnitSyntax node.</summary>
     public virtual TResult? VisitCompilationUnit(CompilationUnitSyntax node) => this.DefaultVisit(node);
 }
@@ -246,6 +273,9 @@ public partial class TypeScriptSyntaxVisitor
 
     /// <summary>Called when the visitor visits a ObjectLiteralExpressionSyntax node.</summary>
     public virtual void VisitObjectLiteralExpression(ObjectLiteralExpressionSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a ArrowFunctionExpressionSyntax node.</summary>
+    public virtual void VisitArrowFunctionExpression(ArrowFunctionExpressionSyntax node) => this.DefaultVisit(node);
 
     /// <summary>Called when the visitor visits a PropertyAssignmentSyntax node.</summary>
     public virtual void VisitPropertyAssignment(PropertyAssignmentSyntax node) => this.DefaultVisit(node);
@@ -376,6 +406,30 @@ public partial class TypeScriptSyntaxVisitor
     /// <summary>Called when the visitor visits a ConstructorDeclarationSyntax node.</summary>
     public virtual void VisitConstructorDeclaration(ConstructorDeclarationSyntax node) => this.DefaultVisit(node);
 
+    /// <summary>Called when the visitor visits a ImportDeclarationSyntax node.</summary>
+    public virtual void VisitImportDeclaration(ImportDeclarationSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a ImportClauseSyntax node.</summary>
+    public virtual void VisitImportClause(ImportClauseSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a NamespaceImportSyntax node.</summary>
+    public virtual void VisitNamespaceImport(NamespaceImportSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a NamedImportsSyntax node.</summary>
+    public virtual void VisitNamedImports(NamedImportsSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a ImportSpecifierSyntax node.</summary>
+    public virtual void VisitImportSpecifier(ImportSpecifierSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a ExportDeclarationSyntax node.</summary>
+    public virtual void VisitExportDeclaration(ExportDeclarationSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a ExportClauseSyntax node.</summary>
+    public virtual void VisitExportClause(ExportClauseSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a ExportSpecifierSyntax node.</summary>
+    public virtual void VisitExportSpecifier(ExportSpecifierSyntax node) => this.DefaultVisit(node);
+
     /// <summary>Called when the visitor visits a CompilationUnitSyntax node.</summary>
     public virtual void VisitCompilationUnit(CompilationUnitSyntax node) => this.DefaultVisit(node);
 }
@@ -429,6 +483,9 @@ public partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<SyntaxNo
 
     public override SyntaxNode? VisitObjectLiteralExpression(ObjectLiteralExpressionSyntax node)
         => node.Update(VisitToken(node.OpenBraceToken), VisitList(node.Properties), VisitToken(node.CloseBraceToken));
+
+    public override SyntaxNode? VisitArrowFunctionExpression(ArrowFunctionExpressionSyntax node)
+        => node.Update((TypeParameterListSyntax?)Visit(node.TypeParameters), (ParameterListSyntax?)Visit(node.ParameterList) ?? throw new ArgumentNullException("parameterList"), (TypeAnnotationSyntax?)Visit(node.TypeAnnotation), VisitToken(node.EqualsGreaterThanToken), (TypeScriptSyntaxNode?)Visit(node.Body) ?? throw new ArgumentNullException("body"));
 
     public override SyntaxNode? VisitPropertyAssignment(PropertyAssignmentSyntax node)
         => node.Update((IdentifierNameSyntax?)Visit(node.Name) ?? throw new ArgumentNullException("name"), VisitToken(node.ColonToken), (ExpressionSyntax?)Visit(node.Expression) ?? throw new ArgumentNullException("expression"));
@@ -558,6 +615,30 @@ public partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<SyntaxNo
 
     public override SyntaxNode? VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
         => node.Update(VisitToken(node.ConstructorKeyword), (ParameterListSyntax?)Visit(node.ParameterList) ?? throw new ArgumentNullException("parameterList"), (BlockSyntax?)Visit(node.Body));
+
+    public override SyntaxNode? VisitImportDeclaration(ImportDeclarationSyntax node)
+        => node.Update(VisitToken(node.ImportKeyword), (ImportClauseSyntax?)Visit(node.ImportClause), VisitToken(node.FromKeyword), (ExpressionSyntax?)Visit(node.ModuleSpecifier) ?? throw new ArgumentNullException("moduleSpecifier"), VisitToken(node.SemicolonToken));
+
+    public override SyntaxNode? VisitImportClause(ImportClauseSyntax node)
+        => node.Update((IdentifierNameSyntax?)Visit(node.Name), VisitToken(node.CommaToken), (NamedImportBindingsSyntax?)Visit(node.NamedBindings));
+
+    public override SyntaxNode? VisitNamespaceImport(NamespaceImportSyntax node)
+        => node.Update(VisitToken(node.AsteriskToken), VisitToken(node.AsKeyword), (IdentifierNameSyntax?)Visit(node.Name) ?? throw new ArgumentNullException("name"));
+
+    public override SyntaxNode? VisitNamedImports(NamedImportsSyntax node)
+        => node.Update(VisitToken(node.OpenBraceToken), VisitList(node.Elements), VisitToken(node.CloseBraceToken));
+
+    public override SyntaxNode? VisitImportSpecifier(ImportSpecifierSyntax node)
+        => node.Update((IdentifierNameSyntax?)Visit(node.PropertyName), VisitToken(node.AsKeyword), (IdentifierNameSyntax?)Visit(node.Name) ?? throw new ArgumentNullException("name"));
+
+    public override SyntaxNode? VisitExportDeclaration(ExportDeclarationSyntax node)
+        => node.Update(VisitToken(node.ExportKeyword), (ExportClauseSyntax?)Visit(node.ExportClause), VisitToken(node.FromKeyword), (ExpressionSyntax?)Visit(node.ModuleSpecifier), VisitToken(node.SemicolonToken));
+
+    public override SyntaxNode? VisitExportClause(ExportClauseSyntax node)
+        => node.Update(VisitToken(node.OpenBraceToken), VisitList(node.Elements), VisitToken(node.CloseBraceToken));
+
+    public override SyntaxNode? VisitExportSpecifier(ExportSpecifierSyntax node)
+        => node.Update((IdentifierNameSyntax?)Visit(node.PropertyName), VisitToken(node.AsKeyword), (IdentifierNameSyntax?)Visit(node.Name) ?? throw new ArgumentNullException("name"));
 
     public override SyntaxNode? VisitCompilationUnit(CompilationUnitSyntax node)
         => node.Update(VisitList(node.Statements), VisitToken(node.EndOfFileToken));
@@ -761,6 +842,23 @@ public static partial class SyntaxFactory
     /// <summary>Creates a new ObjectLiteralExpressionSyntax instance.</summary>
     public static ObjectLiteralExpressionSyntax ObjectLiteralExpression(SeparatedSyntaxList<PropertyAssignmentSyntax> properties = default)
         => SyntaxFactory.ObjectLiteralExpression(SyntaxFactory.Token(SyntaxKind.OpenBraceToken), properties, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
+
+    /// <summary>Creates a new ArrowFunctionExpressionSyntax instance.</summary>
+    public static ArrowFunctionExpressionSyntax ArrowFunctionExpression(TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, SyntaxToken equalsGreaterThanToken, TypeScriptSyntaxNode body)
+    {
+        if (parameterList == null) throw new ArgumentNullException(nameof(parameterList));
+        if (equalsGreaterThanToken.Kind() != SyntaxKind.EqualsGreaterThanToken) throw new ArgumentException(nameof(equalsGreaterThanToken));
+        if (body == null) throw new ArgumentNullException(nameof(body));
+        return (ArrowFunctionExpressionSyntax)Syntax.InternalSyntax.SyntaxFactory.ArrowFunctionExpression(typeParameters == null ? null : (Syntax.InternalSyntax.TypeParameterListSyntax)typeParameters.Green, (Syntax.InternalSyntax.ParameterListSyntax)parameterList.Green, typeAnnotation == null ? null : (Syntax.InternalSyntax.TypeAnnotationSyntax)typeAnnotation.Green, (Syntax.InternalSyntax.SyntaxToken)equalsGreaterThanToken.Node!, (Syntax.InternalSyntax.TypeScriptSyntaxNode)body.Green).CreateRed();
+    }
+
+    /// <summary>Creates a new ArrowFunctionExpressionSyntax instance.</summary>
+    public static ArrowFunctionExpressionSyntax ArrowFunctionExpression(TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, TypeScriptSyntaxNode body)
+        => SyntaxFactory.ArrowFunctionExpression(typeParameters, parameterList, typeAnnotation, SyntaxFactory.Token(SyntaxKind.EqualsGreaterThanToken), body);
+
+    /// <summary>Creates a new ArrowFunctionExpressionSyntax instance.</summary>
+    public static ArrowFunctionExpressionSyntax ArrowFunctionExpression(TypeScriptSyntaxNode body)
+        => SyntaxFactory.ArrowFunctionExpression(default, SyntaxFactory.ParameterList(), default, SyntaxFactory.Token(SyntaxKind.EqualsGreaterThanToken), body);
 
     /// <summary>Creates a new PropertyAssignmentSyntax instance.</summary>
     public static PropertyAssignmentSyntax PropertyAssignment(IdentifierNameSyntax name, SyntaxToken colonToken, ExpressionSyntax expression)
@@ -1479,6 +1577,172 @@ public static partial class SyntaxFactory
     /// <summary>Creates a new ConstructorDeclarationSyntax instance.</summary>
     public static ConstructorDeclarationSyntax ConstructorDeclaration()
         => SyntaxFactory.ConstructorDeclaration(SyntaxFactory.Token(SyntaxKind.ConstructorKeyword), SyntaxFactory.ParameterList(), default);
+
+    /// <summary>Creates a new ImportDeclarationSyntax instance.</summary>
+    public static ImportDeclarationSyntax ImportDeclaration(SyntaxToken importKeyword, ImportClauseSyntax? importClause, SyntaxToken fromKeyword, ExpressionSyntax moduleSpecifier, SyntaxToken semicolonToken)
+    {
+        if (importKeyword.Kind() != SyntaxKind.ImportKeyword) throw new ArgumentException(nameof(importKeyword));
+        switch (fromKeyword.Kind())
+        {
+            case SyntaxKind.FromKeyword:
+            case SyntaxKind.None: break;
+            default: throw new ArgumentException(nameof(fromKeyword));
+        }
+        if (moduleSpecifier == null) throw new ArgumentNullException(nameof(moduleSpecifier));
+        switch (semicolonToken.Kind())
+        {
+            case SyntaxKind.SemicolonToken:
+            case SyntaxKind.None: break;
+            default: throw new ArgumentException(nameof(semicolonToken));
+        }
+        return (ImportDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.ImportDeclaration((Syntax.InternalSyntax.SyntaxToken)importKeyword.Node!, importClause == null ? null : (Syntax.InternalSyntax.ImportClauseSyntax)importClause.Green, (Syntax.InternalSyntax.SyntaxToken?)fromKeyword.Node, (Syntax.InternalSyntax.ExpressionSyntax)moduleSpecifier.Green, (Syntax.InternalSyntax.SyntaxToken?)semicolonToken.Node).CreateRed();
+    }
+
+    /// <summary>Creates a new ImportDeclarationSyntax instance.</summary>
+    public static ImportDeclarationSyntax ImportDeclaration(ImportClauseSyntax? importClause, ExpressionSyntax moduleSpecifier)
+        => SyntaxFactory.ImportDeclaration(SyntaxFactory.Token(SyntaxKind.ImportKeyword), importClause, default, moduleSpecifier, default);
+
+    /// <summary>Creates a new ImportDeclarationSyntax instance.</summary>
+    public static ImportDeclarationSyntax ImportDeclaration(ExpressionSyntax moduleSpecifier)
+        => SyntaxFactory.ImportDeclaration(SyntaxFactory.Token(SyntaxKind.ImportKeyword), default, default, moduleSpecifier, default);
+
+    /// <summary>Creates a new ImportClauseSyntax instance.</summary>
+    public static ImportClauseSyntax ImportClause(IdentifierNameSyntax? name, SyntaxToken commaToken, NamedImportBindingsSyntax? namedBindings)
+    {
+        switch (commaToken.Kind())
+        {
+            case SyntaxKind.CommaToken:
+            case SyntaxKind.None: break;
+            default: throw new ArgumentException(nameof(commaToken));
+        }
+        return (ImportClauseSyntax)Syntax.InternalSyntax.SyntaxFactory.ImportClause(name == null ? null : (Syntax.InternalSyntax.IdentifierNameSyntax)name.Green, (Syntax.InternalSyntax.SyntaxToken?)commaToken.Node, namedBindings == null ? null : (Syntax.InternalSyntax.NamedImportBindingsSyntax)namedBindings.Green).CreateRed();
+    }
+
+    /// <summary>Creates a new ImportClauseSyntax instance.</summary>
+    public static ImportClauseSyntax ImportClause(IdentifierNameSyntax? name, NamedImportBindingsSyntax? namedBindings)
+        => SyntaxFactory.ImportClause(name, default, namedBindings);
+
+    /// <summary>Creates a new ImportClauseSyntax instance.</summary>
+    public static ImportClauseSyntax ImportClause()
+        => SyntaxFactory.ImportClause(default, default, default);
+
+    /// <summary>Creates a new NamespaceImportSyntax instance.</summary>
+    public static NamespaceImportSyntax NamespaceImport(SyntaxToken asteriskToken, SyntaxToken asKeyword, IdentifierNameSyntax name)
+    {
+        if (asteriskToken.Kind() != SyntaxKind.AsteriskToken) throw new ArgumentException(nameof(asteriskToken));
+        if (asKeyword.Kind() != SyntaxKind.AsKeyword) throw new ArgumentException(nameof(asKeyword));
+        if (name == null) throw new ArgumentNullException(nameof(name));
+        return (NamespaceImportSyntax)Syntax.InternalSyntax.SyntaxFactory.NamespaceImport((Syntax.InternalSyntax.SyntaxToken)asteriskToken.Node!, (Syntax.InternalSyntax.SyntaxToken)asKeyword.Node!, (Syntax.InternalSyntax.IdentifierNameSyntax)name.Green).CreateRed();
+    }
+
+    /// <summary>Creates a new NamespaceImportSyntax instance.</summary>
+    public static NamespaceImportSyntax NamespaceImport(IdentifierNameSyntax name)
+        => SyntaxFactory.NamespaceImport(SyntaxFactory.Token(SyntaxKind.AsteriskToken), SyntaxFactory.Token(SyntaxKind.AsKeyword), name);
+
+    /// <summary>Creates a new NamespaceImportSyntax instance.</summary>
+    public static NamespaceImportSyntax NamespaceImport(string name)
+        => SyntaxFactory.NamespaceImport(SyntaxFactory.Token(SyntaxKind.AsteriskToken), SyntaxFactory.Token(SyntaxKind.AsKeyword), SyntaxFactory.IdentifierName(name));
+
+    /// <summary>Creates a new NamedImportsSyntax instance.</summary>
+    public static NamedImportsSyntax NamedImports(SyntaxToken openBraceToken, SeparatedSyntaxList<ImportSpecifierSyntax> elements, SyntaxToken closeBraceToken)
+    {
+        if (openBraceToken.Kind() != SyntaxKind.OpenBraceToken) throw new ArgumentException(nameof(openBraceToken));
+        if (closeBraceToken.Kind() != SyntaxKind.CloseBraceToken) throw new ArgumentException(nameof(closeBraceToken));
+        return (NamedImportsSyntax)Syntax.InternalSyntax.SyntaxFactory.NamedImports((Syntax.InternalSyntax.SyntaxToken)openBraceToken.Node!, elements.Node.ToGreenSeparatedList<Syntax.InternalSyntax.ImportSpecifierSyntax>(), (Syntax.InternalSyntax.SyntaxToken)closeBraceToken.Node!).CreateRed();
+    }
+
+    /// <summary>Creates a new NamedImportsSyntax instance.</summary>
+    public static NamedImportsSyntax NamedImports(SeparatedSyntaxList<ImportSpecifierSyntax> elements = default)
+        => SyntaxFactory.NamedImports(SyntaxFactory.Token(SyntaxKind.OpenBraceToken), elements, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
+
+    /// <summary>Creates a new ImportSpecifierSyntax instance.</summary>
+    public static ImportSpecifierSyntax ImportSpecifier(IdentifierNameSyntax? propertyName, SyntaxToken asKeyword, IdentifierNameSyntax name)
+    {
+        switch (asKeyword.Kind())
+        {
+            case SyntaxKind.AsKeyword:
+            case SyntaxKind.None: break;
+            default: throw new ArgumentException(nameof(asKeyword));
+        }
+        if (name == null) throw new ArgumentNullException(nameof(name));
+        return (ImportSpecifierSyntax)Syntax.InternalSyntax.SyntaxFactory.ImportSpecifier(propertyName == null ? null : (Syntax.InternalSyntax.IdentifierNameSyntax)propertyName.Green, (Syntax.InternalSyntax.SyntaxToken?)asKeyword.Node, (Syntax.InternalSyntax.IdentifierNameSyntax)name.Green).CreateRed();
+    }
+
+    /// <summary>Creates a new ImportSpecifierSyntax instance.</summary>
+    public static ImportSpecifierSyntax ImportSpecifier(IdentifierNameSyntax? propertyName, IdentifierNameSyntax name)
+        => SyntaxFactory.ImportSpecifier(propertyName, default, name);
+
+    /// <summary>Creates a new ImportSpecifierSyntax instance.</summary>
+    public static ImportSpecifierSyntax ImportSpecifier(IdentifierNameSyntax name)
+        => SyntaxFactory.ImportSpecifier(default, default, name);
+
+    /// <summary>Creates a new ImportSpecifierSyntax instance.</summary>
+    public static ImportSpecifierSyntax ImportSpecifier(string name)
+        => SyntaxFactory.ImportSpecifier(default, default, SyntaxFactory.IdentifierName(name));
+
+    /// <summary>Creates a new ExportDeclarationSyntax instance.</summary>
+    public static ExportDeclarationSyntax ExportDeclaration(SyntaxToken exportKeyword, ExportClauseSyntax? exportClause, SyntaxToken fromKeyword, ExpressionSyntax? moduleSpecifier, SyntaxToken semicolonToken)
+    {
+        if (exportKeyword.Kind() != SyntaxKind.ExportKeyword) throw new ArgumentException(nameof(exportKeyword));
+        switch (fromKeyword.Kind())
+        {
+            case SyntaxKind.FromKeyword:
+            case SyntaxKind.None: break;
+            default: throw new ArgumentException(nameof(fromKeyword));
+        }
+        switch (semicolonToken.Kind())
+        {
+            case SyntaxKind.SemicolonToken:
+            case SyntaxKind.None: break;
+            default: throw new ArgumentException(nameof(semicolonToken));
+        }
+        return (ExportDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.ExportDeclaration((Syntax.InternalSyntax.SyntaxToken)exportKeyword.Node!, exportClause == null ? null : (Syntax.InternalSyntax.ExportClauseSyntax)exportClause.Green, (Syntax.InternalSyntax.SyntaxToken?)fromKeyword.Node, moduleSpecifier == null ? null : (Syntax.InternalSyntax.ExpressionSyntax)moduleSpecifier.Green, (Syntax.InternalSyntax.SyntaxToken?)semicolonToken.Node).CreateRed();
+    }
+
+    /// <summary>Creates a new ExportDeclarationSyntax instance.</summary>
+    public static ExportDeclarationSyntax ExportDeclaration(ExportClauseSyntax? exportClause, ExpressionSyntax? moduleSpecifier)
+        => SyntaxFactory.ExportDeclaration(SyntaxFactory.Token(SyntaxKind.ExportKeyword), exportClause, default, moduleSpecifier, default);
+
+    /// <summary>Creates a new ExportDeclarationSyntax instance.</summary>
+    public static ExportDeclarationSyntax ExportDeclaration()
+        => SyntaxFactory.ExportDeclaration(SyntaxFactory.Token(SyntaxKind.ExportKeyword), default, default, default, default);
+
+    /// <summary>Creates a new ExportClauseSyntax instance.</summary>
+    public static ExportClauseSyntax ExportClause(SyntaxToken openBraceToken, SeparatedSyntaxList<ExportSpecifierSyntax> elements, SyntaxToken closeBraceToken)
+    {
+        if (openBraceToken.Kind() != SyntaxKind.OpenBraceToken) throw new ArgumentException(nameof(openBraceToken));
+        if (closeBraceToken.Kind() != SyntaxKind.CloseBraceToken) throw new ArgumentException(nameof(closeBraceToken));
+        return (ExportClauseSyntax)Syntax.InternalSyntax.SyntaxFactory.ExportClause((Syntax.InternalSyntax.SyntaxToken)openBraceToken.Node!, elements.Node.ToGreenSeparatedList<Syntax.InternalSyntax.ExportSpecifierSyntax>(), (Syntax.InternalSyntax.SyntaxToken)closeBraceToken.Node!).CreateRed();
+    }
+
+    /// <summary>Creates a new ExportClauseSyntax instance.</summary>
+    public static ExportClauseSyntax ExportClause(SeparatedSyntaxList<ExportSpecifierSyntax> elements = default)
+        => SyntaxFactory.ExportClause(SyntaxFactory.Token(SyntaxKind.OpenBraceToken), elements, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
+
+    /// <summary>Creates a new ExportSpecifierSyntax instance.</summary>
+    public static ExportSpecifierSyntax ExportSpecifier(IdentifierNameSyntax? propertyName, SyntaxToken asKeyword, IdentifierNameSyntax name)
+    {
+        switch (asKeyword.Kind())
+        {
+            case SyntaxKind.AsKeyword:
+            case SyntaxKind.None: break;
+            default: throw new ArgumentException(nameof(asKeyword));
+        }
+        if (name == null) throw new ArgumentNullException(nameof(name));
+        return (ExportSpecifierSyntax)Syntax.InternalSyntax.SyntaxFactory.ExportSpecifier(propertyName == null ? null : (Syntax.InternalSyntax.IdentifierNameSyntax)propertyName.Green, (Syntax.InternalSyntax.SyntaxToken?)asKeyword.Node, (Syntax.InternalSyntax.IdentifierNameSyntax)name.Green).CreateRed();
+    }
+
+    /// <summary>Creates a new ExportSpecifierSyntax instance.</summary>
+    public static ExportSpecifierSyntax ExportSpecifier(IdentifierNameSyntax? propertyName, IdentifierNameSyntax name)
+        => SyntaxFactory.ExportSpecifier(propertyName, default, name);
+
+    /// <summary>Creates a new ExportSpecifierSyntax instance.</summary>
+    public static ExportSpecifierSyntax ExportSpecifier(IdentifierNameSyntax name)
+        => SyntaxFactory.ExportSpecifier(default, default, name);
+
+    /// <summary>Creates a new ExportSpecifierSyntax instance.</summary>
+    public static ExportSpecifierSyntax ExportSpecifier(string name)
+        => SyntaxFactory.ExportSpecifier(default, default, SyntaxFactory.IdentifierName(name));
 
     /// <summary>Creates a new CompilationUnitSyntax instance.</summary>
     public static CompilationUnitSyntax CompilationUnit(SyntaxList<StatementSyntax> statements, SyntaxToken endOfFileToken)

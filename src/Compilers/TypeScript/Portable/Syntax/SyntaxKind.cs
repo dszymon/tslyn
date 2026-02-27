@@ -43,7 +43,7 @@ namespace Microsoft.CodeAnalysis.TypeScript
         IdentifierToken = 8216,
 
         // Compound Punctuators
-        PlusPlusToken,
+        PlusPlusToken = 8219,
         MinusMinusToken,
         PlusEqualsToken,
         MinusEqualsToken,
@@ -236,6 +236,19 @@ namespace Microsoft.CodeAnalysis.TypeScript
         TypeParameterDefaultClause,
         TypeParameterList,
         TypeArgumentList,
+
+        // Module
+        ImportDeclaration,
+        ImportClause,
+        NamespaceImport,
+        NamedImports,
+        ImportSpecifier,
+        ExportDeclaration,
+        ExportClause,
+        ExportSpecifier,
+
+        // Arrow Function
+        ArrowFunctionExpression,
 
         // Structured Trivia
         StructuredTrivia = 9000,

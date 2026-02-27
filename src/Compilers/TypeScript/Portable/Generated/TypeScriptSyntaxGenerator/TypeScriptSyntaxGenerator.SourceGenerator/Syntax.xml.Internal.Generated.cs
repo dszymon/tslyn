@@ -1362,6 +1362,127 @@ internal sealed partial class ObjectLiteralExpressionSyntax : ExpressionSyntax
         => new ObjectLiteralExpressionSyntax(this.Kind, this.openBraceToken, this.properties, this.closeBraceToken, GetDiagnostics(), annotations);
 }
 
+internal sealed partial class ArrowFunctionExpressionSyntax : ExpressionSyntax
+{
+    internal readonly TypeParameterListSyntax? typeParameters;
+    internal readonly ParameterListSyntax parameterList;
+    internal readonly TypeAnnotationSyntax? typeAnnotation;
+    internal readonly SyntaxToken equalsGreaterThanToken;
+    internal readonly TypeScriptSyntaxNode body;
+
+    internal ArrowFunctionExpressionSyntax(SyntaxKind kind, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, SyntaxToken equalsGreaterThanToken, TypeScriptSyntaxNode body, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 5;
+        if (typeParameters != null)
+        {
+            this.AdjustFlagsAndWidth(typeParameters);
+            this.typeParameters = typeParameters;
+        }
+        this.AdjustFlagsAndWidth(parameterList);
+        this.parameterList = parameterList;
+        if (typeAnnotation != null)
+        {
+            this.AdjustFlagsAndWidth(typeAnnotation);
+            this.typeAnnotation = typeAnnotation;
+        }
+        this.AdjustFlagsAndWidth(equalsGreaterThanToken);
+        this.equalsGreaterThanToken = equalsGreaterThanToken;
+        this.AdjustFlagsAndWidth(body);
+        this.body = body;
+    }
+
+    internal ArrowFunctionExpressionSyntax(SyntaxKind kind, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, SyntaxToken equalsGreaterThanToken, TypeScriptSyntaxNode body, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 5;
+        if (typeParameters != null)
+        {
+            this.AdjustFlagsAndWidth(typeParameters);
+            this.typeParameters = typeParameters;
+        }
+        this.AdjustFlagsAndWidth(parameterList);
+        this.parameterList = parameterList;
+        if (typeAnnotation != null)
+        {
+            this.AdjustFlagsAndWidth(typeAnnotation);
+            this.typeAnnotation = typeAnnotation;
+        }
+        this.AdjustFlagsAndWidth(equalsGreaterThanToken);
+        this.equalsGreaterThanToken = equalsGreaterThanToken;
+        this.AdjustFlagsAndWidth(body);
+        this.body = body;
+    }
+
+    internal ArrowFunctionExpressionSyntax(SyntaxKind kind, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, SyntaxToken equalsGreaterThanToken, TypeScriptSyntaxNode body)
+      : base(kind)
+    {
+        this.SlotCount = 5;
+        if (typeParameters != null)
+        {
+            this.AdjustFlagsAndWidth(typeParameters);
+            this.typeParameters = typeParameters;
+        }
+        this.AdjustFlagsAndWidth(parameterList);
+        this.parameterList = parameterList;
+        if (typeAnnotation != null)
+        {
+            this.AdjustFlagsAndWidth(typeAnnotation);
+            this.typeAnnotation = typeAnnotation;
+        }
+        this.AdjustFlagsAndWidth(equalsGreaterThanToken);
+        this.equalsGreaterThanToken = equalsGreaterThanToken;
+        this.AdjustFlagsAndWidth(body);
+        this.body = body;
+    }
+
+    public TypeParameterListSyntax? TypeParameters => this.typeParameters;
+    public ParameterListSyntax ParameterList => this.parameterList;
+    public TypeAnnotationSyntax? TypeAnnotation => this.typeAnnotation;
+    public SyntaxToken EqualsGreaterThanToken => this.equalsGreaterThanToken;
+    public TypeScriptSyntaxNode Body => this.body;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.typeParameters,
+            1 => this.parameterList,
+            2 => this.typeAnnotation,
+            3 => this.equalsGreaterThanToken,
+            4 => this.body,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.ArrowFunctionExpressionSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitArrowFunctionExpression(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitArrowFunctionExpression(this);
+
+    public ArrowFunctionExpressionSyntax Update(TypeParameterListSyntax typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax typeAnnotation, SyntaxToken equalsGreaterThanToken, TypeScriptSyntaxNode body)
+    {
+        if (typeParameters != this.TypeParameters || parameterList != this.ParameterList || typeAnnotation != this.TypeAnnotation || equalsGreaterThanToken != this.EqualsGreaterThanToken || body != this.Body)
+        {
+            var newNode = SyntaxFactory.ArrowFunctionExpression(typeParameters, parameterList, typeAnnotation, equalsGreaterThanToken, body);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new ArrowFunctionExpressionSyntax(this.Kind, this.typeParameters, this.parameterList, this.typeAnnotation, this.equalsGreaterThanToken, this.body, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new ArrowFunctionExpressionSyntax(this.Kind, this.typeParameters, this.parameterList, this.typeAnnotation, this.equalsGreaterThanToken, this.body, GetDiagnostics(), annotations);
+}
+
 internal sealed partial class PropertyAssignmentSyntax : TypeScriptSyntaxNode
 {
     internal readonly IdentifierNameSyntax name;
@@ -5751,6 +5872,879 @@ internal sealed partial class ConstructorDeclarationSyntax : ClassElementSyntax
         => new ConstructorDeclarationSyntax(this.Kind, this.constructorKeyword, this.parameterList, this.body, GetDiagnostics(), annotations);
 }
 
+internal sealed partial class ImportDeclarationSyntax : StatementSyntax
+{
+    internal readonly SyntaxToken importKeyword;
+    internal readonly ImportClauseSyntax? importClause;
+    internal readonly SyntaxToken? fromKeyword;
+    internal readonly ExpressionSyntax moduleSpecifier;
+    internal readonly SyntaxToken? semicolonToken;
+
+    internal ImportDeclarationSyntax(SyntaxKind kind, SyntaxToken importKeyword, ImportClauseSyntax? importClause, SyntaxToken? fromKeyword, ExpressionSyntax moduleSpecifier, SyntaxToken? semicolonToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 5;
+        this.AdjustFlagsAndWidth(importKeyword);
+        this.importKeyword = importKeyword;
+        if (importClause != null)
+        {
+            this.AdjustFlagsAndWidth(importClause);
+            this.importClause = importClause;
+        }
+        if (fromKeyword != null)
+        {
+            this.AdjustFlagsAndWidth(fromKeyword);
+            this.fromKeyword = fromKeyword;
+        }
+        this.AdjustFlagsAndWidth(moduleSpecifier);
+        this.moduleSpecifier = moduleSpecifier;
+        if (semicolonToken != null)
+        {
+            this.AdjustFlagsAndWidth(semicolonToken);
+            this.semicolonToken = semicolonToken;
+        }
+    }
+
+    internal ImportDeclarationSyntax(SyntaxKind kind, SyntaxToken importKeyword, ImportClauseSyntax? importClause, SyntaxToken? fromKeyword, ExpressionSyntax moduleSpecifier, SyntaxToken? semicolonToken, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 5;
+        this.AdjustFlagsAndWidth(importKeyword);
+        this.importKeyword = importKeyword;
+        if (importClause != null)
+        {
+            this.AdjustFlagsAndWidth(importClause);
+            this.importClause = importClause;
+        }
+        if (fromKeyword != null)
+        {
+            this.AdjustFlagsAndWidth(fromKeyword);
+            this.fromKeyword = fromKeyword;
+        }
+        this.AdjustFlagsAndWidth(moduleSpecifier);
+        this.moduleSpecifier = moduleSpecifier;
+        if (semicolonToken != null)
+        {
+            this.AdjustFlagsAndWidth(semicolonToken);
+            this.semicolonToken = semicolonToken;
+        }
+    }
+
+    internal ImportDeclarationSyntax(SyntaxKind kind, SyntaxToken importKeyword, ImportClauseSyntax? importClause, SyntaxToken? fromKeyword, ExpressionSyntax moduleSpecifier, SyntaxToken? semicolonToken)
+      : base(kind)
+    {
+        this.SlotCount = 5;
+        this.AdjustFlagsAndWidth(importKeyword);
+        this.importKeyword = importKeyword;
+        if (importClause != null)
+        {
+            this.AdjustFlagsAndWidth(importClause);
+            this.importClause = importClause;
+        }
+        if (fromKeyword != null)
+        {
+            this.AdjustFlagsAndWidth(fromKeyword);
+            this.fromKeyword = fromKeyword;
+        }
+        this.AdjustFlagsAndWidth(moduleSpecifier);
+        this.moduleSpecifier = moduleSpecifier;
+        if (semicolonToken != null)
+        {
+            this.AdjustFlagsAndWidth(semicolonToken);
+            this.semicolonToken = semicolonToken;
+        }
+    }
+
+    public SyntaxToken ImportKeyword => this.importKeyword;
+    public ImportClauseSyntax? ImportClause => this.importClause;
+    public SyntaxToken? FromKeyword => this.fromKeyword;
+    public ExpressionSyntax ModuleSpecifier => this.moduleSpecifier;
+    public SyntaxToken? SemicolonToken => this.semicolonToken;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.importKeyword,
+            1 => this.importClause,
+            2 => this.fromKeyword,
+            3 => this.moduleSpecifier,
+            4 => this.semicolonToken,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.ImportDeclarationSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitImportDeclaration(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitImportDeclaration(this);
+
+    public ImportDeclarationSyntax Update(SyntaxToken importKeyword, ImportClauseSyntax importClause, SyntaxToken fromKeyword, ExpressionSyntax moduleSpecifier, SyntaxToken semicolonToken)
+    {
+        if (importKeyword != this.ImportKeyword || importClause != this.ImportClause || fromKeyword != this.FromKeyword || moduleSpecifier != this.ModuleSpecifier || semicolonToken != this.SemicolonToken)
+        {
+            var newNode = SyntaxFactory.ImportDeclaration(importKeyword, importClause, fromKeyword, moduleSpecifier, semicolonToken);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new ImportDeclarationSyntax(this.Kind, this.importKeyword, this.importClause, this.fromKeyword, this.moduleSpecifier, this.semicolonToken, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new ImportDeclarationSyntax(this.Kind, this.importKeyword, this.importClause, this.fromKeyword, this.moduleSpecifier, this.semicolonToken, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class ImportClauseSyntax : TypeScriptSyntaxNode
+{
+    internal readonly IdentifierNameSyntax? name;
+    internal readonly SyntaxToken? commaToken;
+    internal readonly NamedImportBindingsSyntax? namedBindings;
+
+    internal ImportClauseSyntax(SyntaxKind kind, IdentifierNameSyntax? name, SyntaxToken? commaToken, NamedImportBindingsSyntax? namedBindings, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        if (name != null)
+        {
+            this.AdjustFlagsAndWidth(name);
+            this.name = name;
+        }
+        if (commaToken != null)
+        {
+            this.AdjustFlagsAndWidth(commaToken);
+            this.commaToken = commaToken;
+        }
+        if (namedBindings != null)
+        {
+            this.AdjustFlagsAndWidth(namedBindings);
+            this.namedBindings = namedBindings;
+        }
+    }
+
+    internal ImportClauseSyntax(SyntaxKind kind, IdentifierNameSyntax? name, SyntaxToken? commaToken, NamedImportBindingsSyntax? namedBindings, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        if (name != null)
+        {
+            this.AdjustFlagsAndWidth(name);
+            this.name = name;
+        }
+        if (commaToken != null)
+        {
+            this.AdjustFlagsAndWidth(commaToken);
+            this.commaToken = commaToken;
+        }
+        if (namedBindings != null)
+        {
+            this.AdjustFlagsAndWidth(namedBindings);
+            this.namedBindings = namedBindings;
+        }
+    }
+
+    internal ImportClauseSyntax(SyntaxKind kind, IdentifierNameSyntax? name, SyntaxToken? commaToken, NamedImportBindingsSyntax? namedBindings)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        if (name != null)
+        {
+            this.AdjustFlagsAndWidth(name);
+            this.name = name;
+        }
+        if (commaToken != null)
+        {
+            this.AdjustFlagsAndWidth(commaToken);
+            this.commaToken = commaToken;
+        }
+        if (namedBindings != null)
+        {
+            this.AdjustFlagsAndWidth(namedBindings);
+            this.namedBindings = namedBindings;
+        }
+    }
+
+    public IdentifierNameSyntax? Name => this.name;
+    public SyntaxToken? CommaToken => this.commaToken;
+    public NamedImportBindingsSyntax? NamedBindings => this.namedBindings;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.name,
+            1 => this.commaToken,
+            2 => this.namedBindings,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.ImportClauseSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitImportClause(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitImportClause(this);
+
+    public ImportClauseSyntax Update(IdentifierNameSyntax name, SyntaxToken commaToken, NamedImportBindingsSyntax namedBindings)
+    {
+        if (name != this.Name || commaToken != this.CommaToken || namedBindings != this.NamedBindings)
+        {
+            var newNode = SyntaxFactory.ImportClause(name, commaToken, namedBindings);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new ImportClauseSyntax(this.Kind, this.name, this.commaToken, this.namedBindings, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new ImportClauseSyntax(this.Kind, this.name, this.commaToken, this.namedBindings, GetDiagnostics(), annotations);
+}
+
+internal abstract partial class NamedImportBindingsSyntax : TypeScriptSyntaxNode
+{
+    internal NamedImportBindingsSyntax(SyntaxKind kind, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+    }
+
+    internal NamedImportBindingsSyntax(SyntaxKind kind)
+      : base(kind)
+    {
+    }
+}
+
+internal sealed partial class NamespaceImportSyntax : NamedImportBindingsSyntax
+{
+    internal readonly SyntaxToken asteriskToken;
+    internal readonly SyntaxToken asKeyword;
+    internal readonly IdentifierNameSyntax name;
+
+    internal NamespaceImportSyntax(SyntaxKind kind, SyntaxToken asteriskToken, SyntaxToken asKeyword, IdentifierNameSyntax name, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(asteriskToken);
+        this.asteriskToken = asteriskToken;
+        this.AdjustFlagsAndWidth(asKeyword);
+        this.asKeyword = asKeyword;
+        this.AdjustFlagsAndWidth(name);
+        this.name = name;
+    }
+
+    internal NamespaceImportSyntax(SyntaxKind kind, SyntaxToken asteriskToken, SyntaxToken asKeyword, IdentifierNameSyntax name, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(asteriskToken);
+        this.asteriskToken = asteriskToken;
+        this.AdjustFlagsAndWidth(asKeyword);
+        this.asKeyword = asKeyword;
+        this.AdjustFlagsAndWidth(name);
+        this.name = name;
+    }
+
+    internal NamespaceImportSyntax(SyntaxKind kind, SyntaxToken asteriskToken, SyntaxToken asKeyword, IdentifierNameSyntax name)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(asteriskToken);
+        this.asteriskToken = asteriskToken;
+        this.AdjustFlagsAndWidth(asKeyword);
+        this.asKeyword = asKeyword;
+        this.AdjustFlagsAndWidth(name);
+        this.name = name;
+    }
+
+    public SyntaxToken AsteriskToken => this.asteriskToken;
+    public SyntaxToken AsKeyword => this.asKeyword;
+    public IdentifierNameSyntax Name => this.name;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.asteriskToken,
+            1 => this.asKeyword,
+            2 => this.name,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.NamespaceImportSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitNamespaceImport(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitNamespaceImport(this);
+
+    public NamespaceImportSyntax Update(SyntaxToken asteriskToken, SyntaxToken asKeyword, IdentifierNameSyntax name)
+    {
+        if (asteriskToken != this.AsteriskToken || asKeyword != this.AsKeyword || name != this.Name)
+        {
+            var newNode = SyntaxFactory.NamespaceImport(asteriskToken, asKeyword, name);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new NamespaceImportSyntax(this.Kind, this.asteriskToken, this.asKeyword, this.name, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new NamespaceImportSyntax(this.Kind, this.asteriskToken, this.asKeyword, this.name, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class NamedImportsSyntax : NamedImportBindingsSyntax
+{
+    internal readonly SyntaxToken openBraceToken;
+    internal readonly GreenNode? elements;
+    internal readonly SyntaxToken closeBraceToken;
+
+    internal NamedImportsSyntax(SyntaxKind kind, SyntaxToken openBraceToken, GreenNode? elements, SyntaxToken closeBraceToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(openBraceToken);
+        this.openBraceToken = openBraceToken;
+        if (elements != null)
+        {
+            this.AdjustFlagsAndWidth(elements);
+            this.elements = elements;
+        }
+        this.AdjustFlagsAndWidth(closeBraceToken);
+        this.closeBraceToken = closeBraceToken;
+    }
+
+    internal NamedImportsSyntax(SyntaxKind kind, SyntaxToken openBraceToken, GreenNode? elements, SyntaxToken closeBraceToken, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(openBraceToken);
+        this.openBraceToken = openBraceToken;
+        if (elements != null)
+        {
+            this.AdjustFlagsAndWidth(elements);
+            this.elements = elements;
+        }
+        this.AdjustFlagsAndWidth(closeBraceToken);
+        this.closeBraceToken = closeBraceToken;
+    }
+
+    internal NamedImportsSyntax(SyntaxKind kind, SyntaxToken openBraceToken, GreenNode? elements, SyntaxToken closeBraceToken)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(openBraceToken);
+        this.openBraceToken = openBraceToken;
+        if (elements != null)
+        {
+            this.AdjustFlagsAndWidth(elements);
+            this.elements = elements;
+        }
+        this.AdjustFlagsAndWidth(closeBraceToken);
+        this.closeBraceToken = closeBraceToken;
+    }
+
+    public SyntaxToken OpenBraceToken => this.openBraceToken;
+    public CoreSyntax.SeparatedSyntaxList<ImportSpecifierSyntax> Elements => new CoreSyntax.SeparatedSyntaxList<ImportSpecifierSyntax>(new CoreSyntax.SyntaxList<TypeScriptSyntaxNode>(this.elements));
+    public SyntaxToken CloseBraceToken => this.closeBraceToken;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.openBraceToken,
+            1 => this.elements,
+            2 => this.closeBraceToken,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.NamedImportsSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitNamedImports(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitNamedImports(this);
+
+    public NamedImportsSyntax Update(SyntaxToken openBraceToken, CoreSyntax.SeparatedSyntaxList<ImportSpecifierSyntax> elements, SyntaxToken closeBraceToken)
+    {
+        if (openBraceToken != this.OpenBraceToken || elements != this.Elements || closeBraceToken != this.CloseBraceToken)
+        {
+            var newNode = SyntaxFactory.NamedImports(openBraceToken, elements, closeBraceToken);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new NamedImportsSyntax(this.Kind, this.openBraceToken, this.elements, this.closeBraceToken, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new NamedImportsSyntax(this.Kind, this.openBraceToken, this.elements, this.closeBraceToken, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class ImportSpecifierSyntax : TypeScriptSyntaxNode
+{
+    internal readonly IdentifierNameSyntax? propertyName;
+    internal readonly SyntaxToken? asKeyword;
+    internal readonly IdentifierNameSyntax name;
+
+    internal ImportSpecifierSyntax(SyntaxKind kind, IdentifierNameSyntax? propertyName, SyntaxToken? asKeyword, IdentifierNameSyntax name, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        if (propertyName != null)
+        {
+            this.AdjustFlagsAndWidth(propertyName);
+            this.propertyName = propertyName;
+        }
+        if (asKeyword != null)
+        {
+            this.AdjustFlagsAndWidth(asKeyword);
+            this.asKeyword = asKeyword;
+        }
+        this.AdjustFlagsAndWidth(name);
+        this.name = name;
+    }
+
+    internal ImportSpecifierSyntax(SyntaxKind kind, IdentifierNameSyntax? propertyName, SyntaxToken? asKeyword, IdentifierNameSyntax name, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        if (propertyName != null)
+        {
+            this.AdjustFlagsAndWidth(propertyName);
+            this.propertyName = propertyName;
+        }
+        if (asKeyword != null)
+        {
+            this.AdjustFlagsAndWidth(asKeyword);
+            this.asKeyword = asKeyword;
+        }
+        this.AdjustFlagsAndWidth(name);
+        this.name = name;
+    }
+
+    internal ImportSpecifierSyntax(SyntaxKind kind, IdentifierNameSyntax? propertyName, SyntaxToken? asKeyword, IdentifierNameSyntax name)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        if (propertyName != null)
+        {
+            this.AdjustFlagsAndWidth(propertyName);
+            this.propertyName = propertyName;
+        }
+        if (asKeyword != null)
+        {
+            this.AdjustFlagsAndWidth(asKeyword);
+            this.asKeyword = asKeyword;
+        }
+        this.AdjustFlagsAndWidth(name);
+        this.name = name;
+    }
+
+    public IdentifierNameSyntax? PropertyName => this.propertyName;
+    public SyntaxToken? AsKeyword => this.asKeyword;
+    public IdentifierNameSyntax Name => this.name;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.propertyName,
+            1 => this.asKeyword,
+            2 => this.name,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.ImportSpecifierSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitImportSpecifier(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitImportSpecifier(this);
+
+    public ImportSpecifierSyntax Update(IdentifierNameSyntax propertyName, SyntaxToken asKeyword, IdentifierNameSyntax name)
+    {
+        if (propertyName != this.PropertyName || asKeyword != this.AsKeyword || name != this.Name)
+        {
+            var newNode = SyntaxFactory.ImportSpecifier(propertyName, asKeyword, name);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new ImportSpecifierSyntax(this.Kind, this.propertyName, this.asKeyword, this.name, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new ImportSpecifierSyntax(this.Kind, this.propertyName, this.asKeyword, this.name, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class ExportDeclarationSyntax : StatementSyntax
+{
+    internal readonly SyntaxToken exportKeyword;
+    internal readonly ExportClauseSyntax? exportClause;
+    internal readonly SyntaxToken? fromKeyword;
+    internal readonly ExpressionSyntax? moduleSpecifier;
+    internal readonly SyntaxToken? semicolonToken;
+
+    internal ExportDeclarationSyntax(SyntaxKind kind, SyntaxToken exportKeyword, ExportClauseSyntax? exportClause, SyntaxToken? fromKeyword, ExpressionSyntax? moduleSpecifier, SyntaxToken? semicolonToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 5;
+        this.AdjustFlagsAndWidth(exportKeyword);
+        this.exportKeyword = exportKeyword;
+        if (exportClause != null)
+        {
+            this.AdjustFlagsAndWidth(exportClause);
+            this.exportClause = exportClause;
+        }
+        if (fromKeyword != null)
+        {
+            this.AdjustFlagsAndWidth(fromKeyword);
+            this.fromKeyword = fromKeyword;
+        }
+        if (moduleSpecifier != null)
+        {
+            this.AdjustFlagsAndWidth(moduleSpecifier);
+            this.moduleSpecifier = moduleSpecifier;
+        }
+        if (semicolonToken != null)
+        {
+            this.AdjustFlagsAndWidth(semicolonToken);
+            this.semicolonToken = semicolonToken;
+        }
+    }
+
+    internal ExportDeclarationSyntax(SyntaxKind kind, SyntaxToken exportKeyword, ExportClauseSyntax? exportClause, SyntaxToken? fromKeyword, ExpressionSyntax? moduleSpecifier, SyntaxToken? semicolonToken, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 5;
+        this.AdjustFlagsAndWidth(exportKeyword);
+        this.exportKeyword = exportKeyword;
+        if (exportClause != null)
+        {
+            this.AdjustFlagsAndWidth(exportClause);
+            this.exportClause = exportClause;
+        }
+        if (fromKeyword != null)
+        {
+            this.AdjustFlagsAndWidth(fromKeyword);
+            this.fromKeyword = fromKeyword;
+        }
+        if (moduleSpecifier != null)
+        {
+            this.AdjustFlagsAndWidth(moduleSpecifier);
+            this.moduleSpecifier = moduleSpecifier;
+        }
+        if (semicolonToken != null)
+        {
+            this.AdjustFlagsAndWidth(semicolonToken);
+            this.semicolonToken = semicolonToken;
+        }
+    }
+
+    internal ExportDeclarationSyntax(SyntaxKind kind, SyntaxToken exportKeyword, ExportClauseSyntax? exportClause, SyntaxToken? fromKeyword, ExpressionSyntax? moduleSpecifier, SyntaxToken? semicolonToken)
+      : base(kind)
+    {
+        this.SlotCount = 5;
+        this.AdjustFlagsAndWidth(exportKeyword);
+        this.exportKeyword = exportKeyword;
+        if (exportClause != null)
+        {
+            this.AdjustFlagsAndWidth(exportClause);
+            this.exportClause = exportClause;
+        }
+        if (fromKeyword != null)
+        {
+            this.AdjustFlagsAndWidth(fromKeyword);
+            this.fromKeyword = fromKeyword;
+        }
+        if (moduleSpecifier != null)
+        {
+            this.AdjustFlagsAndWidth(moduleSpecifier);
+            this.moduleSpecifier = moduleSpecifier;
+        }
+        if (semicolonToken != null)
+        {
+            this.AdjustFlagsAndWidth(semicolonToken);
+            this.semicolonToken = semicolonToken;
+        }
+    }
+
+    public SyntaxToken ExportKeyword => this.exportKeyword;
+    public ExportClauseSyntax? ExportClause => this.exportClause;
+    public SyntaxToken? FromKeyword => this.fromKeyword;
+    public ExpressionSyntax? ModuleSpecifier => this.moduleSpecifier;
+    public SyntaxToken? SemicolonToken => this.semicolonToken;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.exportKeyword,
+            1 => this.exportClause,
+            2 => this.fromKeyword,
+            3 => this.moduleSpecifier,
+            4 => this.semicolonToken,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.ExportDeclarationSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitExportDeclaration(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitExportDeclaration(this);
+
+    public ExportDeclarationSyntax Update(SyntaxToken exportKeyword, ExportClauseSyntax exportClause, SyntaxToken fromKeyword, ExpressionSyntax moduleSpecifier, SyntaxToken semicolonToken)
+    {
+        if (exportKeyword != this.ExportKeyword || exportClause != this.ExportClause || fromKeyword != this.FromKeyword || moduleSpecifier != this.ModuleSpecifier || semicolonToken != this.SemicolonToken)
+        {
+            var newNode = SyntaxFactory.ExportDeclaration(exportKeyword, exportClause, fromKeyword, moduleSpecifier, semicolonToken);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new ExportDeclarationSyntax(this.Kind, this.exportKeyword, this.exportClause, this.fromKeyword, this.moduleSpecifier, this.semicolonToken, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new ExportDeclarationSyntax(this.Kind, this.exportKeyword, this.exportClause, this.fromKeyword, this.moduleSpecifier, this.semicolonToken, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class ExportClauseSyntax : TypeScriptSyntaxNode
+{
+    internal readonly SyntaxToken openBraceToken;
+    internal readonly GreenNode? elements;
+    internal readonly SyntaxToken closeBraceToken;
+
+    internal ExportClauseSyntax(SyntaxKind kind, SyntaxToken openBraceToken, GreenNode? elements, SyntaxToken closeBraceToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(openBraceToken);
+        this.openBraceToken = openBraceToken;
+        if (elements != null)
+        {
+            this.AdjustFlagsAndWidth(elements);
+            this.elements = elements;
+        }
+        this.AdjustFlagsAndWidth(closeBraceToken);
+        this.closeBraceToken = closeBraceToken;
+    }
+
+    internal ExportClauseSyntax(SyntaxKind kind, SyntaxToken openBraceToken, GreenNode? elements, SyntaxToken closeBraceToken, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(openBraceToken);
+        this.openBraceToken = openBraceToken;
+        if (elements != null)
+        {
+            this.AdjustFlagsAndWidth(elements);
+            this.elements = elements;
+        }
+        this.AdjustFlagsAndWidth(closeBraceToken);
+        this.closeBraceToken = closeBraceToken;
+    }
+
+    internal ExportClauseSyntax(SyntaxKind kind, SyntaxToken openBraceToken, GreenNode? elements, SyntaxToken closeBraceToken)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(openBraceToken);
+        this.openBraceToken = openBraceToken;
+        if (elements != null)
+        {
+            this.AdjustFlagsAndWidth(elements);
+            this.elements = elements;
+        }
+        this.AdjustFlagsAndWidth(closeBraceToken);
+        this.closeBraceToken = closeBraceToken;
+    }
+
+    public SyntaxToken OpenBraceToken => this.openBraceToken;
+    public CoreSyntax.SeparatedSyntaxList<ExportSpecifierSyntax> Elements => new CoreSyntax.SeparatedSyntaxList<ExportSpecifierSyntax>(new CoreSyntax.SyntaxList<TypeScriptSyntaxNode>(this.elements));
+    public SyntaxToken CloseBraceToken => this.closeBraceToken;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.openBraceToken,
+            1 => this.elements,
+            2 => this.closeBraceToken,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.ExportClauseSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitExportClause(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitExportClause(this);
+
+    public ExportClauseSyntax Update(SyntaxToken openBraceToken, CoreSyntax.SeparatedSyntaxList<ExportSpecifierSyntax> elements, SyntaxToken closeBraceToken)
+    {
+        if (openBraceToken != this.OpenBraceToken || elements != this.Elements || closeBraceToken != this.CloseBraceToken)
+        {
+            var newNode = SyntaxFactory.ExportClause(openBraceToken, elements, closeBraceToken);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new ExportClauseSyntax(this.Kind, this.openBraceToken, this.elements, this.closeBraceToken, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new ExportClauseSyntax(this.Kind, this.openBraceToken, this.elements, this.closeBraceToken, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class ExportSpecifierSyntax : TypeScriptSyntaxNode
+{
+    internal readonly IdentifierNameSyntax? propertyName;
+    internal readonly SyntaxToken? asKeyword;
+    internal readonly IdentifierNameSyntax name;
+
+    internal ExportSpecifierSyntax(SyntaxKind kind, IdentifierNameSyntax? propertyName, SyntaxToken? asKeyword, IdentifierNameSyntax name, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        if (propertyName != null)
+        {
+            this.AdjustFlagsAndWidth(propertyName);
+            this.propertyName = propertyName;
+        }
+        if (asKeyword != null)
+        {
+            this.AdjustFlagsAndWidth(asKeyword);
+            this.asKeyword = asKeyword;
+        }
+        this.AdjustFlagsAndWidth(name);
+        this.name = name;
+    }
+
+    internal ExportSpecifierSyntax(SyntaxKind kind, IdentifierNameSyntax? propertyName, SyntaxToken? asKeyword, IdentifierNameSyntax name, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        if (propertyName != null)
+        {
+            this.AdjustFlagsAndWidth(propertyName);
+            this.propertyName = propertyName;
+        }
+        if (asKeyword != null)
+        {
+            this.AdjustFlagsAndWidth(asKeyword);
+            this.asKeyword = asKeyword;
+        }
+        this.AdjustFlagsAndWidth(name);
+        this.name = name;
+    }
+
+    internal ExportSpecifierSyntax(SyntaxKind kind, IdentifierNameSyntax? propertyName, SyntaxToken? asKeyword, IdentifierNameSyntax name)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        if (propertyName != null)
+        {
+            this.AdjustFlagsAndWidth(propertyName);
+            this.propertyName = propertyName;
+        }
+        if (asKeyword != null)
+        {
+            this.AdjustFlagsAndWidth(asKeyword);
+            this.asKeyword = asKeyword;
+        }
+        this.AdjustFlagsAndWidth(name);
+        this.name = name;
+    }
+
+    public IdentifierNameSyntax? PropertyName => this.propertyName;
+    public SyntaxToken? AsKeyword => this.asKeyword;
+    public IdentifierNameSyntax Name => this.name;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.propertyName,
+            1 => this.asKeyword,
+            2 => this.name,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.ExportSpecifierSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitExportSpecifier(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitExportSpecifier(this);
+
+    public ExportSpecifierSyntax Update(IdentifierNameSyntax propertyName, SyntaxToken asKeyword, IdentifierNameSyntax name)
+    {
+        if (propertyName != this.PropertyName || asKeyword != this.AsKeyword || name != this.Name)
+        {
+            var newNode = SyntaxFactory.ExportSpecifier(propertyName, asKeyword, name);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new ExportSpecifierSyntax(this.Kind, this.propertyName, this.asKeyword, this.name, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new ExportSpecifierSyntax(this.Kind, this.propertyName, this.asKeyword, this.name, GetDiagnostics(), annotations);
+}
+
 internal sealed partial class CompilationUnitSyntax : TypeScriptSyntaxNode
 {
     internal readonly GreenNode? statements;
@@ -5854,6 +6848,7 @@ internal partial class TypeScriptSyntaxVisitor<TResult>
     public virtual TResult VisitNewExpression(NewExpressionSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitArrayLiteralExpression(ArrayLiteralExpressionSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitObjectLiteralExpression(ObjectLiteralExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitArrowFunctionExpression(ArrowFunctionExpressionSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitPropertyAssignment(PropertyAssignmentSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitPredefinedType(PredefinedTypeSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitTypeReference(TypeReferenceSyntax node) => this.DefaultVisit(node);
@@ -5897,6 +6892,14 @@ internal partial class TypeScriptSyntaxVisitor<TResult>
     public virtual TResult VisitMethodDeclaration(MethodDeclarationSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitPropertyDeclaration(PropertyDeclarationSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitConstructorDeclaration(ConstructorDeclarationSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitImportDeclaration(ImportDeclarationSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitImportClause(ImportClauseSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitNamespaceImport(NamespaceImportSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitNamedImports(NamedImportsSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitImportSpecifier(ImportSpecifierSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitExportDeclaration(ExportDeclarationSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitExportClause(ExportClauseSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitExportSpecifier(ExportSpecifierSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitCompilationUnit(CompilationUnitSyntax node) => this.DefaultVisit(node);
 }
 
@@ -5918,6 +6921,7 @@ internal partial class TypeScriptSyntaxVisitor
     public virtual void VisitNewExpression(NewExpressionSyntax node) => this.DefaultVisit(node);
     public virtual void VisitArrayLiteralExpression(ArrayLiteralExpressionSyntax node) => this.DefaultVisit(node);
     public virtual void VisitObjectLiteralExpression(ObjectLiteralExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitArrowFunctionExpression(ArrowFunctionExpressionSyntax node) => this.DefaultVisit(node);
     public virtual void VisitPropertyAssignment(PropertyAssignmentSyntax node) => this.DefaultVisit(node);
     public virtual void VisitPredefinedType(PredefinedTypeSyntax node) => this.DefaultVisit(node);
     public virtual void VisitTypeReference(TypeReferenceSyntax node) => this.DefaultVisit(node);
@@ -5961,6 +6965,14 @@ internal partial class TypeScriptSyntaxVisitor
     public virtual void VisitMethodDeclaration(MethodDeclarationSyntax node) => this.DefaultVisit(node);
     public virtual void VisitPropertyDeclaration(PropertyDeclarationSyntax node) => this.DefaultVisit(node);
     public virtual void VisitConstructorDeclaration(ConstructorDeclarationSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitImportDeclaration(ImportDeclarationSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitImportClause(ImportClauseSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitNamespaceImport(NamespaceImportSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitNamedImports(NamedImportsSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitImportSpecifier(ImportSpecifierSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitExportDeclaration(ExportDeclarationSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitExportClause(ExportClauseSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitExportSpecifier(ExportSpecifierSyntax node) => this.DefaultVisit(node);
     public virtual void VisitCompilationUnit(CompilationUnitSyntax node) => this.DefaultVisit(node);
 }
 
@@ -6013,6 +7025,9 @@ internal partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<TypeSc
 
     public override TypeScriptSyntaxNode VisitObjectLiteralExpression(ObjectLiteralExpressionSyntax node)
         => node.Update((SyntaxToken)Visit(node.OpenBraceToken), VisitList(node.Properties), (SyntaxToken)Visit(node.CloseBraceToken));
+
+    public override TypeScriptSyntaxNode VisitArrowFunctionExpression(ArrowFunctionExpressionSyntax node)
+        => node.Update((TypeParameterListSyntax)Visit(node.TypeParameters), (ParameterListSyntax)Visit(node.ParameterList), (TypeAnnotationSyntax)Visit(node.TypeAnnotation), (SyntaxToken)Visit(node.EqualsGreaterThanToken), (TypeScriptSyntaxNode)Visit(node.Body));
 
     public override TypeScriptSyntaxNode VisitPropertyAssignment(PropertyAssignmentSyntax node)
         => node.Update((IdentifierNameSyntax)Visit(node.Name), (SyntaxToken)Visit(node.ColonToken), (ExpressionSyntax)Visit(node.Expression));
@@ -6142,6 +7157,30 @@ internal partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<TypeSc
 
     public override TypeScriptSyntaxNode VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
         => node.Update((SyntaxToken)Visit(node.ConstructorKeyword), (ParameterListSyntax)Visit(node.ParameterList), (BlockSyntax)Visit(node.Body));
+
+    public override TypeScriptSyntaxNode VisitImportDeclaration(ImportDeclarationSyntax node)
+        => node.Update((SyntaxToken)Visit(node.ImportKeyword), (ImportClauseSyntax)Visit(node.ImportClause), (SyntaxToken)Visit(node.FromKeyword), (ExpressionSyntax)Visit(node.ModuleSpecifier), (SyntaxToken)Visit(node.SemicolonToken));
+
+    public override TypeScriptSyntaxNode VisitImportClause(ImportClauseSyntax node)
+        => node.Update((IdentifierNameSyntax)Visit(node.Name), (SyntaxToken)Visit(node.CommaToken), (NamedImportBindingsSyntax)Visit(node.NamedBindings));
+
+    public override TypeScriptSyntaxNode VisitNamespaceImport(NamespaceImportSyntax node)
+        => node.Update((SyntaxToken)Visit(node.AsteriskToken), (SyntaxToken)Visit(node.AsKeyword), (IdentifierNameSyntax)Visit(node.Name));
+
+    public override TypeScriptSyntaxNode VisitNamedImports(NamedImportsSyntax node)
+        => node.Update((SyntaxToken)Visit(node.OpenBraceToken), VisitList(node.Elements), (SyntaxToken)Visit(node.CloseBraceToken));
+
+    public override TypeScriptSyntaxNode VisitImportSpecifier(ImportSpecifierSyntax node)
+        => node.Update((IdentifierNameSyntax)Visit(node.PropertyName), (SyntaxToken)Visit(node.AsKeyword), (IdentifierNameSyntax)Visit(node.Name));
+
+    public override TypeScriptSyntaxNode VisitExportDeclaration(ExportDeclarationSyntax node)
+        => node.Update((SyntaxToken)Visit(node.ExportKeyword), (ExportClauseSyntax)Visit(node.ExportClause), (SyntaxToken)Visit(node.FromKeyword), (ExpressionSyntax)Visit(node.ModuleSpecifier), (SyntaxToken)Visit(node.SemicolonToken));
+
+    public override TypeScriptSyntaxNode VisitExportClause(ExportClauseSyntax node)
+        => node.Update((SyntaxToken)Visit(node.OpenBraceToken), VisitList(node.Elements), (SyntaxToken)Visit(node.CloseBraceToken));
+
+    public override TypeScriptSyntaxNode VisitExportSpecifier(ExportSpecifierSyntax node)
+        => node.Update((IdentifierNameSyntax)Visit(node.PropertyName), (SyntaxToken)Visit(node.AsKeyword), (IdentifierNameSyntax)Visit(node.Name));
 
     public override TypeScriptSyntaxNode VisitCompilationUnit(CompilationUnitSyntax node)
         => node.Update(VisitList(node.Statements), (SyntaxToken)Visit(node.EndOfFileToken));
@@ -6510,6 +7549,18 @@ internal partial class ContextAwareSyntax
         }
 
         return result;
+    }
+
+    public ArrowFunctionExpressionSyntax ArrowFunctionExpression(TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, SyntaxToken equalsGreaterThanToken, TypeScriptSyntaxNode body)
+    {
+#if DEBUG
+        if (parameterList == null) throw new ArgumentNullException(nameof(parameterList));
+        if (equalsGreaterThanToken == null) throw new ArgumentNullException(nameof(equalsGreaterThanToken));
+        if (equalsGreaterThanToken.Kind != SyntaxKind.EqualsGreaterThanToken) throw new ArgumentException(nameof(equalsGreaterThanToken));
+        if (body == null) throw new ArgumentNullException(nameof(body));
+#endif
+
+        return new ArrowFunctionExpressionSyntax(SyntaxKind.ArrowFunctionExpression, typeParameters, parameterList, typeAnnotation, equalsGreaterThanToken, body, this.context);
     }
 
     public PropertyAssignmentSyntax PropertyAssignment(IdentifierNameSyntax name, SyntaxToken colonToken, ExpressionSyntax expression)
@@ -7428,6 +8479,213 @@ internal partial class ContextAwareSyntax
         return result;
     }
 
+    public ImportDeclarationSyntax ImportDeclaration(SyntaxToken importKeyword, ImportClauseSyntax? importClause, SyntaxToken? fromKeyword, ExpressionSyntax moduleSpecifier, SyntaxToken? semicolonToken)
+    {
+#if DEBUG
+        if (importKeyword == null) throw new ArgumentNullException(nameof(importKeyword));
+        if (importKeyword.Kind != SyntaxKind.ImportKeyword) throw new ArgumentException(nameof(importKeyword));
+        if (fromKeyword != null)
+        {
+            switch (fromKeyword.Kind)
+            {
+                case SyntaxKind.FromKeyword:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(fromKeyword));
+            }
+        }
+        if (moduleSpecifier == null) throw new ArgumentNullException(nameof(moduleSpecifier));
+        if (semicolonToken != null)
+        {
+            switch (semicolonToken.Kind)
+            {
+                case SyntaxKind.SemicolonToken:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(semicolonToken));
+            }
+        }
+#endif
+
+        return new ImportDeclarationSyntax(SyntaxKind.ImportDeclaration, importKeyword, importClause, fromKeyword, moduleSpecifier, semicolonToken, this.context);
+    }
+
+    public ImportClauseSyntax ImportClause(IdentifierNameSyntax? name, SyntaxToken? commaToken, NamedImportBindingsSyntax? namedBindings)
+    {
+#if DEBUG
+        if (commaToken != null)
+        {
+            switch (commaToken.Kind)
+            {
+                case SyntaxKind.CommaToken:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(commaToken));
+            }
+        }
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.ImportClause, name, commaToken, namedBindings, this.context, out hash);
+        if (cached != null) return (ImportClauseSyntax)cached;
+
+        var result = new ImportClauseSyntax(SyntaxKind.ImportClause, name, commaToken, namedBindings, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public NamespaceImportSyntax NamespaceImport(SyntaxToken asteriskToken, SyntaxToken asKeyword, IdentifierNameSyntax name)
+    {
+#if DEBUG
+        if (asteriskToken == null) throw new ArgumentNullException(nameof(asteriskToken));
+        if (asteriskToken.Kind != SyntaxKind.AsteriskToken) throw new ArgumentException(nameof(asteriskToken));
+        if (asKeyword == null) throw new ArgumentNullException(nameof(asKeyword));
+        if (asKeyword.Kind != SyntaxKind.AsKeyword) throw new ArgumentException(nameof(asKeyword));
+        if (name == null) throw new ArgumentNullException(nameof(name));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.NamespaceImport, asteriskToken, asKeyword, name, this.context, out hash);
+        if (cached != null) return (NamespaceImportSyntax)cached;
+
+        var result = new NamespaceImportSyntax(SyntaxKind.NamespaceImport, asteriskToken, asKeyword, name, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public NamedImportsSyntax NamedImports(SyntaxToken openBraceToken, CoreSyntax.SeparatedSyntaxList<ImportSpecifierSyntax> elements, SyntaxToken closeBraceToken)
+    {
+#if DEBUG
+        if (openBraceToken == null) throw new ArgumentNullException(nameof(openBraceToken));
+        if (openBraceToken.Kind != SyntaxKind.OpenBraceToken) throw new ArgumentException(nameof(openBraceToken));
+        if (closeBraceToken == null) throw new ArgumentNullException(nameof(closeBraceToken));
+        if (closeBraceToken.Kind != SyntaxKind.CloseBraceToken) throw new ArgumentException(nameof(closeBraceToken));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.NamedImports, openBraceToken, elements.Node, closeBraceToken, this.context, out hash);
+        if (cached != null) return (NamedImportsSyntax)cached;
+
+        var result = new NamedImportsSyntax(SyntaxKind.NamedImports, openBraceToken, elements.Node, closeBraceToken, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public ImportSpecifierSyntax ImportSpecifier(IdentifierNameSyntax? propertyName, SyntaxToken? asKeyword, IdentifierNameSyntax name)
+    {
+#if DEBUG
+        if (asKeyword != null)
+        {
+            switch (asKeyword.Kind)
+            {
+                case SyntaxKind.AsKeyword:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(asKeyword));
+            }
+        }
+        if (name == null) throw new ArgumentNullException(nameof(name));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.ImportSpecifier, propertyName, asKeyword, name, this.context, out hash);
+        if (cached != null) return (ImportSpecifierSyntax)cached;
+
+        var result = new ImportSpecifierSyntax(SyntaxKind.ImportSpecifier, propertyName, asKeyword, name, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public ExportDeclarationSyntax ExportDeclaration(SyntaxToken exportKeyword, ExportClauseSyntax? exportClause, SyntaxToken? fromKeyword, ExpressionSyntax? moduleSpecifier, SyntaxToken? semicolonToken)
+    {
+#if DEBUG
+        if (exportKeyword == null) throw new ArgumentNullException(nameof(exportKeyword));
+        if (exportKeyword.Kind != SyntaxKind.ExportKeyword) throw new ArgumentException(nameof(exportKeyword));
+        if (fromKeyword != null)
+        {
+            switch (fromKeyword.Kind)
+            {
+                case SyntaxKind.FromKeyword:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(fromKeyword));
+            }
+        }
+        if (semicolonToken != null)
+        {
+            switch (semicolonToken.Kind)
+            {
+                case SyntaxKind.SemicolonToken:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(semicolonToken));
+            }
+        }
+#endif
+
+        return new ExportDeclarationSyntax(SyntaxKind.ExportDeclaration, exportKeyword, exportClause, fromKeyword, moduleSpecifier, semicolonToken, this.context);
+    }
+
+    public ExportClauseSyntax ExportClause(SyntaxToken openBraceToken, CoreSyntax.SeparatedSyntaxList<ExportSpecifierSyntax> elements, SyntaxToken closeBraceToken)
+    {
+#if DEBUG
+        if (openBraceToken == null) throw new ArgumentNullException(nameof(openBraceToken));
+        if (openBraceToken.Kind != SyntaxKind.OpenBraceToken) throw new ArgumentException(nameof(openBraceToken));
+        if (closeBraceToken == null) throw new ArgumentNullException(nameof(closeBraceToken));
+        if (closeBraceToken.Kind != SyntaxKind.CloseBraceToken) throw new ArgumentException(nameof(closeBraceToken));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.ExportClause, openBraceToken, elements.Node, closeBraceToken, this.context, out hash);
+        if (cached != null) return (ExportClauseSyntax)cached;
+
+        var result = new ExportClauseSyntax(SyntaxKind.ExportClause, openBraceToken, elements.Node, closeBraceToken, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public ExportSpecifierSyntax ExportSpecifier(IdentifierNameSyntax? propertyName, SyntaxToken? asKeyword, IdentifierNameSyntax name)
+    {
+#if DEBUG
+        if (asKeyword != null)
+        {
+            switch (asKeyword.Kind)
+            {
+                case SyntaxKind.AsKeyword:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(asKeyword));
+            }
+        }
+        if (name == null) throw new ArgumentNullException(nameof(name));
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.ExportSpecifier, propertyName, asKeyword, name, this.context, out hash);
+        if (cached != null) return (ExportSpecifierSyntax)cached;
+
+        var result = new ExportSpecifierSyntax(SyntaxKind.ExportSpecifier, propertyName, asKeyword, name, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
     public CompilationUnitSyntax CompilationUnit(CoreSyntax.SyntaxList<StatementSyntax> statements, SyntaxToken endOfFileToken)
     {
 #if DEBUG
@@ -7807,6 +9065,18 @@ internal static partial class SyntaxFactory
         }
 
         return result;
+    }
+
+    public static ArrowFunctionExpressionSyntax ArrowFunctionExpression(TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, SyntaxToken equalsGreaterThanToken, TypeScriptSyntaxNode body)
+    {
+#if DEBUG
+        if (parameterList == null) throw new ArgumentNullException(nameof(parameterList));
+        if (equalsGreaterThanToken == null) throw new ArgumentNullException(nameof(equalsGreaterThanToken));
+        if (equalsGreaterThanToken.Kind != SyntaxKind.EqualsGreaterThanToken) throw new ArgumentException(nameof(equalsGreaterThanToken));
+        if (body == null) throw new ArgumentNullException(nameof(body));
+#endif
+
+        return new ArrowFunctionExpressionSyntax(SyntaxKind.ArrowFunctionExpression, typeParameters, parameterList, typeAnnotation, equalsGreaterThanToken, body);
     }
 
     public static PropertyAssignmentSyntax PropertyAssignment(IdentifierNameSyntax name, SyntaxToken colonToken, ExpressionSyntax expression)
@@ -8717,6 +9987,213 @@ internal static partial class SyntaxFactory
         if (cached != null) return (ConstructorDeclarationSyntax)cached;
 
         var result = new ConstructorDeclarationSyntax(SyntaxKind.ConstructorDeclaration, constructorKeyword, parameterList, body);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static ImportDeclarationSyntax ImportDeclaration(SyntaxToken importKeyword, ImportClauseSyntax? importClause, SyntaxToken? fromKeyword, ExpressionSyntax moduleSpecifier, SyntaxToken? semicolonToken)
+    {
+#if DEBUG
+        if (importKeyword == null) throw new ArgumentNullException(nameof(importKeyword));
+        if (importKeyword.Kind != SyntaxKind.ImportKeyword) throw new ArgumentException(nameof(importKeyword));
+        if (fromKeyword != null)
+        {
+            switch (fromKeyword.Kind)
+            {
+                case SyntaxKind.FromKeyword:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(fromKeyword));
+            }
+        }
+        if (moduleSpecifier == null) throw new ArgumentNullException(nameof(moduleSpecifier));
+        if (semicolonToken != null)
+        {
+            switch (semicolonToken.Kind)
+            {
+                case SyntaxKind.SemicolonToken:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(semicolonToken));
+            }
+        }
+#endif
+
+        return new ImportDeclarationSyntax(SyntaxKind.ImportDeclaration, importKeyword, importClause, fromKeyword, moduleSpecifier, semicolonToken);
+    }
+
+    public static ImportClauseSyntax ImportClause(IdentifierNameSyntax? name, SyntaxToken? commaToken, NamedImportBindingsSyntax? namedBindings)
+    {
+#if DEBUG
+        if (commaToken != null)
+        {
+            switch (commaToken.Kind)
+            {
+                case SyntaxKind.CommaToken:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(commaToken));
+            }
+        }
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.ImportClause, name, commaToken, namedBindings, out hash);
+        if (cached != null) return (ImportClauseSyntax)cached;
+
+        var result = new ImportClauseSyntax(SyntaxKind.ImportClause, name, commaToken, namedBindings);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static NamespaceImportSyntax NamespaceImport(SyntaxToken asteriskToken, SyntaxToken asKeyword, IdentifierNameSyntax name)
+    {
+#if DEBUG
+        if (asteriskToken == null) throw new ArgumentNullException(nameof(asteriskToken));
+        if (asteriskToken.Kind != SyntaxKind.AsteriskToken) throw new ArgumentException(nameof(asteriskToken));
+        if (asKeyword == null) throw new ArgumentNullException(nameof(asKeyword));
+        if (asKeyword.Kind != SyntaxKind.AsKeyword) throw new ArgumentException(nameof(asKeyword));
+        if (name == null) throw new ArgumentNullException(nameof(name));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.NamespaceImport, asteriskToken, asKeyword, name, out hash);
+        if (cached != null) return (NamespaceImportSyntax)cached;
+
+        var result = new NamespaceImportSyntax(SyntaxKind.NamespaceImport, asteriskToken, asKeyword, name);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static NamedImportsSyntax NamedImports(SyntaxToken openBraceToken, CoreSyntax.SeparatedSyntaxList<ImportSpecifierSyntax> elements, SyntaxToken closeBraceToken)
+    {
+#if DEBUG
+        if (openBraceToken == null) throw new ArgumentNullException(nameof(openBraceToken));
+        if (openBraceToken.Kind != SyntaxKind.OpenBraceToken) throw new ArgumentException(nameof(openBraceToken));
+        if (closeBraceToken == null) throw new ArgumentNullException(nameof(closeBraceToken));
+        if (closeBraceToken.Kind != SyntaxKind.CloseBraceToken) throw new ArgumentException(nameof(closeBraceToken));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.NamedImports, openBraceToken, elements.Node, closeBraceToken, out hash);
+        if (cached != null) return (NamedImportsSyntax)cached;
+
+        var result = new NamedImportsSyntax(SyntaxKind.NamedImports, openBraceToken, elements.Node, closeBraceToken);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static ImportSpecifierSyntax ImportSpecifier(IdentifierNameSyntax? propertyName, SyntaxToken? asKeyword, IdentifierNameSyntax name)
+    {
+#if DEBUG
+        if (asKeyword != null)
+        {
+            switch (asKeyword.Kind)
+            {
+                case SyntaxKind.AsKeyword:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(asKeyword));
+            }
+        }
+        if (name == null) throw new ArgumentNullException(nameof(name));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.ImportSpecifier, propertyName, asKeyword, name, out hash);
+        if (cached != null) return (ImportSpecifierSyntax)cached;
+
+        var result = new ImportSpecifierSyntax(SyntaxKind.ImportSpecifier, propertyName, asKeyword, name);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static ExportDeclarationSyntax ExportDeclaration(SyntaxToken exportKeyword, ExportClauseSyntax? exportClause, SyntaxToken? fromKeyword, ExpressionSyntax? moduleSpecifier, SyntaxToken? semicolonToken)
+    {
+#if DEBUG
+        if (exportKeyword == null) throw new ArgumentNullException(nameof(exportKeyword));
+        if (exportKeyword.Kind != SyntaxKind.ExportKeyword) throw new ArgumentException(nameof(exportKeyword));
+        if (fromKeyword != null)
+        {
+            switch (fromKeyword.Kind)
+            {
+                case SyntaxKind.FromKeyword:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(fromKeyword));
+            }
+        }
+        if (semicolonToken != null)
+        {
+            switch (semicolonToken.Kind)
+            {
+                case SyntaxKind.SemicolonToken:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(semicolonToken));
+            }
+        }
+#endif
+
+        return new ExportDeclarationSyntax(SyntaxKind.ExportDeclaration, exportKeyword, exportClause, fromKeyword, moduleSpecifier, semicolonToken);
+    }
+
+    public static ExportClauseSyntax ExportClause(SyntaxToken openBraceToken, CoreSyntax.SeparatedSyntaxList<ExportSpecifierSyntax> elements, SyntaxToken closeBraceToken)
+    {
+#if DEBUG
+        if (openBraceToken == null) throw new ArgumentNullException(nameof(openBraceToken));
+        if (openBraceToken.Kind != SyntaxKind.OpenBraceToken) throw new ArgumentException(nameof(openBraceToken));
+        if (closeBraceToken == null) throw new ArgumentNullException(nameof(closeBraceToken));
+        if (closeBraceToken.Kind != SyntaxKind.CloseBraceToken) throw new ArgumentException(nameof(closeBraceToken));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.ExportClause, openBraceToken, elements.Node, closeBraceToken, out hash);
+        if (cached != null) return (ExportClauseSyntax)cached;
+
+        var result = new ExportClauseSyntax(SyntaxKind.ExportClause, openBraceToken, elements.Node, closeBraceToken);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static ExportSpecifierSyntax ExportSpecifier(IdentifierNameSyntax? propertyName, SyntaxToken? asKeyword, IdentifierNameSyntax name)
+    {
+#if DEBUG
+        if (asKeyword != null)
+        {
+            switch (asKeyword.Kind)
+            {
+                case SyntaxKind.AsKeyword:
+                case SyntaxKind.None: break;
+                default: throw new ArgumentException(nameof(asKeyword));
+            }
+        }
+        if (name == null) throw new ArgumentNullException(nameof(name));
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.ExportSpecifier, propertyName, asKeyword, name, out hash);
+        if (cached != null) return (ExportSpecifierSyntax)cached;
+
+        var result = new ExportSpecifierSyntax(SyntaxKind.ExportSpecifier, propertyName, asKeyword, name);
         if (hash >= 0)
         {
             SyntaxNodeCache.AddNode(result, hash);
