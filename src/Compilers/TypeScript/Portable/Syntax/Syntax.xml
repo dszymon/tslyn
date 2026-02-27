@@ -154,6 +154,17 @@
     </Field>
   </Node>
 
+  <Node Name="ArrowFunctionExpressionSyntax" Base="ExpressionSyntax">
+    <Kind Name="ArrowFunctionExpression"/>
+    <Field Name="TypeParameters" Type="TypeParameterListSyntax" Optional="true"/>
+    <Field Name="ParameterList" Type="ParameterListSyntax"/>
+    <Field Name="TypeAnnotation" Type="TypeAnnotationSyntax" Optional="true"/>
+    <Field Name="EqualsGreaterThanToken" Type="SyntaxToken">
+      <Kind Name="EqualsGreaterThanToken"/>
+    </Field>
+    <Field Name="Body" Type="TypeScriptSyntaxNode"/>
+  </Node>
+
   <Node Name="PropertyAssignmentSyntax" Base="TypeScriptSyntaxNode">
     <Kind Name="PropertyAssignment"/>
     <Field Name="Name" Type="IdentifierNameSyntax"/>
@@ -650,6 +661,100 @@
     </Field>
     <Field Name="ParameterList" Type="ParameterListSyntax"/>
     <Field Name="Body" Type="BlockSyntax" Optional="true"/>
+  </Node>
+
+  <!-- Module Imports -->
+  <Node Name="ImportDeclarationSyntax" Base="StatementSyntax">
+    <Kind Name="ImportDeclaration"/>
+    <Field Name="ImportKeyword" Type="SyntaxToken">
+      <Kind Name="ImportKeyword"/>
+    </Field>
+    <Field Name="ImportClause" Type="ImportClauseSyntax" Optional="true"/>
+    <Field Name="FromKeyword" Type="SyntaxToken" Optional="true">
+      <Kind Name="FromKeyword"/>
+    </Field>
+    <Field Name="ModuleSpecifier" Type="ExpressionSyntax"/>
+    <Field Name="SemicolonToken" Type="SyntaxToken" Optional="true">
+      <Kind Name="SemicolonToken"/>
+    </Field>
+  </Node>
+
+  <Node Name="ImportClauseSyntax" Base="TypeScriptSyntaxNode">
+    <Kind Name="ImportClause"/>
+    <Field Name="Name" Type="IdentifierNameSyntax" Optional="true"/>
+    <Field Name="CommaToken" Type="SyntaxToken" Optional="true">
+      <Kind Name="CommaToken"/>
+    </Field>
+    <Field Name="NamedBindings" Type="NamedImportBindingsSyntax" Optional="true"/>
+  </Node>
+
+  <AbstractNode Name="NamedImportBindingsSyntax" Base="TypeScriptSyntaxNode"/>
+
+  <Node Name="NamespaceImportSyntax" Base="NamedImportBindingsSyntax">
+    <Kind Name="NamespaceImport"/>
+    <Field Name="AsteriskToken" Type="SyntaxToken">
+      <Kind Name="AsteriskToken"/>
+    </Field>
+    <Field Name="AsKeyword" Type="SyntaxToken">
+      <Kind Name="AsKeyword"/>
+    </Field>
+    <Field Name="Name" Type="IdentifierNameSyntax"/>
+  </Node>
+
+  <Node Name="NamedImportsSyntax" Base="NamedImportBindingsSyntax">
+    <Kind Name="NamedImports"/>
+    <Field Name="OpenBraceToken" Type="SyntaxToken">
+      <Kind Name="OpenBraceToken"/>
+    </Field>
+    <Field Name="Elements" Type="SeparatedSyntaxList&lt;ImportSpecifierSyntax&gt;"/>
+    <Field Name="CloseBraceToken" Type="SyntaxToken">
+      <Kind Name="CloseBraceToken"/>
+    </Field>
+  </Node>
+
+  <Node Name="ImportSpecifierSyntax" Base="TypeScriptSyntaxNode">
+    <Kind Name="ImportSpecifier"/>
+    <Field Name="PropertyName" Type="IdentifierNameSyntax" Optional="true"/>
+    <Field Name="AsKeyword" Type="SyntaxToken" Optional="true">
+        <Kind Name="AsKeyword"/>
+    </Field>
+    <Field Name="Name" Type="IdentifierNameSyntax"/>
+  </Node>
+
+  <!-- Module Exports -->
+  <Node Name="ExportDeclarationSyntax" Base="StatementSyntax">
+    <Kind Name="ExportDeclaration"/>
+    <Field Name="ExportKeyword" Type="SyntaxToken">
+      <Kind Name="ExportKeyword"/>
+    </Field>
+    <Field Name="ExportClause" Type="ExportClauseSyntax" Optional="true"/>
+    <Field Name="FromKeyword" Type="SyntaxToken" Optional="true">
+      <Kind Name="FromKeyword"/>
+    </Field>
+    <Field Name="ModuleSpecifier" Type="ExpressionSyntax" Optional="true"/>
+    <Field Name="SemicolonToken" Type="SyntaxToken" Optional="true">
+      <Kind Name="SemicolonToken"/>
+    </Field>
+  </Node>
+
+  <Node Name="ExportClauseSyntax" Base="TypeScriptSyntaxNode">
+    <Kind Name="ExportClause"/>
+    <Field Name="OpenBraceToken" Type="SyntaxToken">
+      <Kind Name="OpenBraceToken"/>
+    </Field>
+    <Field Name="Elements" Type="SeparatedSyntaxList&lt;ExportSpecifierSyntax&gt;"/>
+    <Field Name="CloseBraceToken" Type="SyntaxToken">
+      <Kind Name="CloseBraceToken"/>
+    </Field>
+  </Node>
+
+  <Node Name="ExportSpecifierSyntax" Base="TypeScriptSyntaxNode">
+    <Kind Name="ExportSpecifier"/>
+    <Field Name="PropertyName" Type="IdentifierNameSyntax" Optional="true"/>
+    <Field Name="AsKeyword" Type="SyntaxToken" Optional="true">
+        <Kind Name="AsKeyword"/>
+    </Field>
+    <Field Name="Name" Type="IdentifierNameSyntax"/>
   </Node>
 
   <!-- Compilation Unit -->
