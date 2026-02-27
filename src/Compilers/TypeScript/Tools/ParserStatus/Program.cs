@@ -32,28 +32,66 @@ namespace Microsoft.CodeAnalysis.TypeScript.ParserStatus
             int totalFiles = files.Length;
             int successfulParses = 0;
             int failedParses = 0;
+            int timedOutParses = 0;
 
-            Parallel.ForEach(files, file =>
+            // Configure parallelism to avoid overwhelming the system
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+
+            Parallel.ForEach(files, parallelOptions, file =>
             {
-                try
+                // Use a cancellation token source for timeout
+                using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
                 {
-                    var sourceText = File.ReadAllText(file);
-                    var tree = TypeScriptSyntaxTree.ParseText(sourceText);
-                    var diagnostics = tree.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToList();
-
-                    if (diagnostics.Count == 0)
+                    try
                     {
-                        Interlocked.Increment(ref successfulParses);
+                        var sourceText = File.ReadAllText(file);
+                        var task = Task.Run(() =>
+                        {
+                            var tree = TypeScriptSyntaxTree.ParseText(sourceText, cancellationToken: cts.Token);
+                            var diagnostics = tree.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToList();
+                            return diagnostics.Count == 0;
+                        }, cts.Token);
+
+                        if (task.Wait(TimeSpan.FromSeconds(6))) // Wait slightly longer than CTS to allow graceful cancellation
+                        {
+                            if (task.Result)
+                            {
+                                Interlocked.Increment(ref successfulParses);
+                            }
+                            else
+                            {
+                                Interlocked.Increment(ref failedParses);
+                            }
+                        }
+                        else
+                        {
+                            Interlocked.Increment(ref failedParses);
+                            Interlocked.Increment(ref timedOutParses);
+                            Console.WriteLine($"Timeout processing file: {file}");
+                        }
                     }
-                    else
+                    catch (AggregateException ae)
+                    {
+                        foreach (var e in ae.InnerExceptions)
+                        {
+                            if (e is TaskCanceledException)
+                            {
+                                Interlocked.Increment(ref failedParses);
+                                Interlocked.Increment(ref timedOutParses);
+                                Console.WriteLine($"Timeout (cancelled) processing file: {file}");
+                            }
+                            else
+                            {
+                                Interlocked.Increment(ref failedParses);
+                                Console.WriteLine($"Error processing file {file}: {e.Message}");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
                     {
                         Interlocked.Increment(ref failedParses);
+                        Console.WriteLine($"Error processing file {file}: {ex.Message}");
                     }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error processing file {file}: {ex.Message}");
-                    Interlocked.Increment(ref failedParses);
                 }
             });
 
@@ -63,6 +101,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.ParserStatus
             Console.WriteLine($"Total Files: {totalFiles}");
             Console.WriteLine($"Successful Parses: {successfulParses}");
             Console.WriteLine($"Failed Parses: {failedParses}");
+            Console.WriteLine($"  Timeouts: {timedOutParses}");
             Console.WriteLine($"Success Rate: {successRate:F2}%");
 
             // GitHub Actions Summary
@@ -75,6 +114,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.ParserStatus
 - **Total Files**: {totalFiles}
 - **Successful Parses**: {successfulParses}
 - **Failed Parses**: {failedParses}
+  - **Timeouts**: {timedOutParses}
 - **Success Rate**: {successRate:F2}%
 ");
             }
