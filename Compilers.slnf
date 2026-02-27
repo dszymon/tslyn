@@ -36,6 +36,8 @@
       "src\\Compilers\\Test\\Resources\\Core\\Microsoft.CodeAnalysis.Compiler.Test.Resources.csproj",
       "src\\Compilers\\Test\\Utilities\\CSharp\\Microsoft.CodeAnalysis.CSharp.Test.Utilities.csproj",
       "src\\Compilers\\Test\\Utilities\\VisualBasic\\Microsoft.CodeAnalysis.VisualBasic.Test.Utilities.vbproj",
+      "src\\Compilers\\TypeScript\\Portable\\Microsoft.CodeAnalysis.TypeScript.csproj",
+      "src\\Compilers\\TypeScript\\Test\\Microsoft.CodeAnalysis.TypeScript.UnitTests.csproj",
       "src\\Compilers\\VisualBasic\\BasicAnalyzerDriver\\BasicAnalyzerDriver.shproj",
       "src\\Compilers\\VisualBasic\\Portable\\Microsoft.CodeAnalysis.VisualBasic.vbproj",
       "src\\Compilers\\VisualBasic\\Test\\CommandLine\\Microsoft.CodeAnalysis.VisualBasic.CommandLine.UnitTests.vbproj",

@@ -1,0 +1,32 @@
+name: TypeScript Tests
+
+on:
+  push:
+    branches: [ main, feature/* ]
+    paths:
+      - 'src/Compilers/TypeScript/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/Compilers/TypeScript/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore src/Compilers/TypeScript/Test/Microsoft.CodeAnalysis.TypeScript.UnitTests.csproj
+
+    - name: Build
+      run: dotnet build src/Compilers/TypeScript/Test/Microsoft.CodeAnalysis.TypeScript.UnitTests.csproj --no-restore
+
+    - name: Test
+      run: dotnet test src/Compilers/TypeScript/Test/Microsoft.CodeAnalysis.TypeScript.UnitTests.csproj --no-build --verbosity normal
