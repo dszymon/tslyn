@@ -156,6 +156,11 @@ namespace Microsoft.CodeAnalysis.TypeScript.ParserStatus
 - **Success Rate**: {successRate:F2}%
 ");
             }
+
+            if (failedParses > 0)
+            {
+                Environment.Exit(1);
+            }
         }
     }
 }
