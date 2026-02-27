@@ -34,28 +34,40 @@ namespace Microsoft.CodeAnalysis.TypeScript.ParserStatus
             int failedParses = 0;
             int timedOutParses = 0;
 
-            // Configure parallelism. Reduce slightly to be safe on smaller CI runners.
-            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount - 1) };
+            // Short timeout since real files should parse in milliseconds.
+            // A 3-second timeout catches infinite loops gracefully.
+            var timeout = TimeSpan.FromSeconds(3);
 
-            Parallel.ForEach(files, parallelOptions, file =>
+            // Give the entire parallel loop a maximum global time budget (e.g. 5 minutes)
+            var globalTimeout = TimeSpan.FromMinutes(5);
+
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+
+            try
             {
-                // Increase timeout to 60 seconds. TypeScript compiler files can be very large (checker.ts is >2MB).
-                var timeout = TimeSpan.FromSeconds(60);
-
-                // Use a cancellation token source for timeout
-                using (var cts = new CancellationTokenSource(timeout))
+                using (var ctsGlobal = new CancellationTokenSource(globalTimeout))
                 {
-                    try
+                    parallelOptions.CancellationToken = ctsGlobal.Token;
+
+                    Parallel.ForEach(files, parallelOptions, file =>
                     {
                         var sourceText = File.ReadAllText(file);
+
                         var task = Task.Run(() =>
                         {
-                            var tree = TypeScriptSyntaxTree.ParseText(sourceText, cancellationToken: cts.Token);
-                            var diagnostics = tree.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToList();
-                            return diagnostics.Count == 0;
-                        }, cts.Token);
+                            try
+                            {
+                                var tree = TypeScriptSyntaxTree.ParseText(sourceText);
+                                var diagnostics = tree.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToList();
+                                return diagnostics.Count == 0;
+                            }
+                            catch
+                            {
+                                return false;
+                            }
+                        });
 
-                        if (task.Wait(timeout.Add(TimeSpan.FromSeconds(5)))) // Wait slightly longer than CTS to allow graceful cancellation
+                        if (task.Wait(timeout))
                         {
                             if (task.Result)
                             {
@@ -70,33 +82,27 @@ namespace Microsoft.CodeAnalysis.TypeScript.ParserStatus
                         {
                             Interlocked.Increment(ref failedParses);
                             Interlocked.Increment(ref timedOutParses);
-                            Console.WriteLine($"Timeout processing file: {file} (Size: {new FileInfo(file).Length} bytes)");
+                            Console.WriteLine($"Timeout processing file: {file}");
                         }
-                    }
-                    catch (AggregateException ae)
-                    {
-                        foreach (var e in ae.InnerExceptions)
-                        {
-                            if (e is TaskCanceledException)
-                            {
-                                Interlocked.Increment(ref failedParses);
-                                Interlocked.Increment(ref timedOutParses);
-                                Console.WriteLine($"Timeout (cancelled) processing file: {file} (Size: {new FileInfo(file).Length} bytes)");
-                            }
-                            else
-                            {
-                                Interlocked.Increment(ref failedParses);
-                                Console.WriteLine($"Error processing file {file}: {e.Message}");
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Interlocked.Increment(ref failedParses);
-                        Console.WriteLine($"Error processing file {file}: {ex.Message}");
-                    }
+                    });
                 }
-            });
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine($"\nWARNING: Global timeout of {globalTimeout.TotalMinutes} minutes reached. Terminating early.");
+                // Count remaining unvisited files as failed.
+                int unvisited = totalFiles - (successfulParses + failedParses);
+                if (unvisited > 0)
+                {
+                    failedParses += unvisited;
+                    timedOutParses += unvisited;
+                    Console.WriteLine($"{unvisited} files abandoned due to global timeout.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Fatal Error: {ex.Message}");
+            }
 
             double successRate = totalFiles > 0 ? (double)successfulParses / totalFiles * 100 : 0;
 
