@@ -1548,6 +1548,286 @@ public sealed partial class TypeAnnotationSyntax : TypeScriptSyntaxNode
 /// <remarks>
 /// <para>This node is associated with the following syntax kinds:</para>
 /// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.UnionType"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class UnionTypeSyntax : TypeSyntax
+{
+    private SyntaxNode? types;
+
+    internal UnionTypeSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SeparatedSyntaxList<TypeSyntax> Types
+    {
+        get
+        {
+            var red = GetRed(ref this.types, 0);
+            return red != null ? new SeparatedSyntaxList<TypeSyntax>(red, 0) : default;
+        }
+    }
+
+    internal override SyntaxNode? GetNodeSlot(int index) => index == 0 ? GetRedAtZero(ref this.types)! : null;
+
+    internal override SyntaxNode? GetCachedSlot(int index) => index == 0 ? this.types : null;
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitUnionType(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitUnionType(this);
+
+    public UnionTypeSyntax Update(SeparatedSyntaxList<TypeSyntax> types)
+    {
+        if (types != this.Types)
+        {
+            var newNode = SyntaxFactory.UnionType(types);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (UnionTypeSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public UnionTypeSyntax WithTypes(SeparatedSyntaxList<TypeSyntax> types) => Update(types);
+
+    public UnionTypeSyntax AddTypes(params TypeSyntax[] items) => WithTypes(this.Types.AddRange(items));
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.IntersectionType"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class IntersectionTypeSyntax : TypeSyntax
+{
+    private SyntaxNode? types;
+
+    internal IntersectionTypeSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SeparatedSyntaxList<TypeSyntax> Types
+    {
+        get
+        {
+            var red = GetRed(ref this.types, 0);
+            return red != null ? new SeparatedSyntaxList<TypeSyntax>(red, 0) : default;
+        }
+    }
+
+    internal override SyntaxNode? GetNodeSlot(int index) => index == 0 ? GetRedAtZero(ref this.types)! : null;
+
+    internal override SyntaxNode? GetCachedSlot(int index) => index == 0 ? this.types : null;
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitIntersectionType(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitIntersectionType(this);
+
+    public IntersectionTypeSyntax Update(SeparatedSyntaxList<TypeSyntax> types)
+    {
+        if (types != this.Types)
+        {
+            var newNode = SyntaxFactory.IntersectionType(types);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (IntersectionTypeSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public IntersectionTypeSyntax WithTypes(SeparatedSyntaxList<TypeSyntax> types) => Update(types);
+
+    public IntersectionTypeSyntax AddTypes(params TypeSyntax[] items) => WithTypes(this.Types.AddRange(items));
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.TupleType"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class TupleTypeSyntax : TypeSyntax
+{
+    private SyntaxNode? elements;
+
+    internal TupleTypeSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken OpenBracketToken => new SyntaxToken(this, ((InternalSyntax.TupleTypeSyntax)this.Green).openBracketToken, Position, 0);
+
+    public SeparatedSyntaxList<TupleElementSyntax> Elements
+    {
+        get
+        {
+            var red = GetRed(ref this.elements, 1);
+            return red != null ? new SeparatedSyntaxList<TupleElementSyntax>(red, GetChildIndex(1)) : default;
+        }
+    }
+
+    public SyntaxToken CloseBracketToken => new SyntaxToken(this, ((InternalSyntax.TupleTypeSyntax)this.Green).closeBracketToken, GetChildPosition(2), GetChildIndex(2));
+
+    internal override SyntaxNode? GetNodeSlot(int index) => index == 1 ? GetRed(ref this.elements, 1)! : null;
+
+    internal override SyntaxNode? GetCachedSlot(int index) => index == 1 ? this.elements : null;
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitTupleType(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitTupleType(this);
+
+    public TupleTypeSyntax Update(SyntaxToken openBracketToken, SeparatedSyntaxList<TupleElementSyntax> elements, SyntaxToken closeBracketToken)
+    {
+        if (openBracketToken != this.OpenBracketToken || elements != this.Elements || closeBracketToken != this.CloseBracketToken)
+        {
+            var newNode = SyntaxFactory.TupleType(openBracketToken, elements, closeBracketToken);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (TupleTypeSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public TupleTypeSyntax WithOpenBracketToken(SyntaxToken openBracketToken) => Update(openBracketToken, this.Elements, this.CloseBracketToken);
+    public TupleTypeSyntax WithElements(SeparatedSyntaxList<TupleElementSyntax> elements) => Update(this.OpenBracketToken, elements, this.CloseBracketToken);
+    public TupleTypeSyntax WithCloseBracketToken(SyntaxToken closeBracketToken) => Update(this.OpenBracketToken, this.Elements, closeBracketToken);
+
+    public TupleTypeSyntax AddElements(params TupleElementSyntax[] items) => WithElements(this.Elements.AddRange(items));
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.TupleElement"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class TupleElementSyntax : TypeScriptSyntaxNode
+{
+    private IdentifierNameSyntax? name;
+    private TypeSyntax? type;
+
+    internal TupleElementSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken DotDotDotToken
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.TupleElementSyntax)this.Green).dotDotDotToken;
+            return slot != null ? new SyntaxToken(this, slot, Position, 0) : default;
+        }
+    }
+
+    public IdentifierNameSyntax? Name => GetRed(ref this.name, 1);
+
+    public SyntaxToken QuestionToken
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.TupleElementSyntax)this.Green).questionToken;
+            return slot != null ? new SyntaxToken(this, slot, GetChildPosition(2), GetChildIndex(2)) : default;
+        }
+    }
+
+    public SyntaxToken ColonToken
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.TupleElementSyntax)this.Green).colonToken;
+            return slot != null ? new SyntaxToken(this, slot, GetChildPosition(3), GetChildIndex(3)) : default;
+        }
+    }
+
+    public TypeSyntax Type => GetRed(ref this.type, 4)!;
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            1 => GetRed(ref this.name, 1),
+            4 => GetRed(ref this.type, 4)!,
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            1 => this.name,
+            4 => this.type,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitTupleElement(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitTupleElement(this);
+
+    public TupleElementSyntax Update(SyntaxToken dotDotDotToken, IdentifierNameSyntax? name, SyntaxToken questionToken, SyntaxToken colonToken, TypeSyntax type)
+    {
+        if (dotDotDotToken != this.DotDotDotToken || name != this.Name || questionToken != this.QuestionToken || colonToken != this.ColonToken || type != this.Type)
+        {
+            var newNode = SyntaxFactory.TupleElement(dotDotDotToken, name, questionToken, colonToken, type);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (TupleElementSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public TupleElementSyntax WithDotDotDotToken(SyntaxToken dotDotDotToken) => Update(dotDotDotToken, this.Name, this.QuestionToken, this.ColonToken, this.Type);
+    public TupleElementSyntax WithName(IdentifierNameSyntax? name) => Update(this.DotDotDotToken, name, this.QuestionToken, this.ColonToken, this.Type);
+    public TupleElementSyntax WithQuestionToken(SyntaxToken questionToken) => Update(this.DotDotDotToken, this.Name, questionToken, this.ColonToken, this.Type);
+    public TupleElementSyntax WithColonToken(SyntaxToken colonToken) => Update(this.DotDotDotToken, this.Name, this.QuestionToken, colonToken, this.Type);
+    public TupleElementSyntax WithType(TypeSyntax type) => Update(this.DotDotDotToken, this.Name, this.QuestionToken, this.ColonToken, type);
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.ParenthesizedType"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ParenthesizedTypeSyntax : TypeSyntax
+{
+    private TypeSyntax? type;
+
+    internal ParenthesizedTypeSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken OpenParenToken => new SyntaxToken(this, ((InternalSyntax.ParenthesizedTypeSyntax)this.Green).openParenToken, Position, 0);
+
+    public TypeSyntax Type => GetRed(ref this.type, 1)!;
+
+    public SyntaxToken CloseParenToken => new SyntaxToken(this, ((InternalSyntax.ParenthesizedTypeSyntax)this.Green).closeParenToken, GetChildPosition(2), GetChildIndex(2));
+
+    internal override SyntaxNode? GetNodeSlot(int index) => index == 1 ? GetRed(ref this.type, 1)! : null;
+
+    internal override SyntaxNode? GetCachedSlot(int index) => index == 1 ? this.type : null;
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitParenthesizedType(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitParenthesizedType(this);
+
+    public ParenthesizedTypeSyntax Update(SyntaxToken openParenToken, TypeSyntax type, SyntaxToken closeParenToken)
+    {
+        if (openParenToken != this.OpenParenToken || type != this.Type || closeParenToken != this.CloseParenToken)
+        {
+            var newNode = SyntaxFactory.ParenthesizedType(openParenToken, type, closeParenToken);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ParenthesizedTypeSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ParenthesizedTypeSyntax WithOpenParenToken(SyntaxToken openParenToken) => Update(openParenToken, this.Type, this.CloseParenToken);
+    public ParenthesizedTypeSyntax WithType(TypeSyntax type) => Update(this.OpenParenToken, type, this.CloseParenToken);
+    public ParenthesizedTypeSyntax WithCloseParenToken(SyntaxToken closeParenToken) => Update(this.OpenParenToken, this.Type, closeParenToken);
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
 /// <item><description><see cref="SyntaxKind.PropertySignature"/></description></item>
 /// </list>
 /// </remarks>

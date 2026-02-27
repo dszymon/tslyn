@@ -67,6 +67,7 @@ namespace Microsoft.CodeAnalysis.TypeScript
         LessThanLessThanEqualsToken,
         GreaterThanGreaterThanEqualsToken,
         GreaterThanGreaterThanGreaterThanEqualsToken,
+        DotDotDotToken,
 
         // Literals
         NumericLiteralToken = 8217,
@@ -263,6 +264,13 @@ namespace Microsoft.CodeAnalysis.TypeScript
         // Arrow Function
         ArrowFunctionExpression,
         AwaitExpression,
+
+        // Complex Types
+        UnionType,
+        IntersectionType,
+        TupleType,
+        TupleElement,
+        ParenthesizedType,
 
         // Structured Trivia
         StructuredTrivia = 9000,
