@@ -34,13 +34,16 @@ namespace Microsoft.CodeAnalysis.TypeScript.ParserStatus
             int failedParses = 0;
             int timedOutParses = 0;
 
-            // Configure parallelism to avoid overwhelming the system
-            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+            // Configure parallelism. Reduce slightly to be safe on smaller CI runners.
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount - 1) };
 
             Parallel.ForEach(files, parallelOptions, file =>
             {
+                // Increase timeout to 60 seconds. TypeScript compiler files can be very large (checker.ts is >2MB).
+                var timeout = TimeSpan.FromSeconds(60);
+
                 // Use a cancellation token source for timeout
-                using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
+                using (var cts = new CancellationTokenSource(timeout))
                 {
                     try
                     {
@@ -52,7 +55,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.ParserStatus
                             return diagnostics.Count == 0;
                         }, cts.Token);
 
-                        if (task.Wait(TimeSpan.FromSeconds(6))) // Wait slightly longer than CTS to allow graceful cancellation
+                        if (task.Wait(timeout.Add(TimeSpan.FromSeconds(5)))) // Wait slightly longer than CTS to allow graceful cancellation
                         {
                             if (task.Result)
                             {
@@ -67,7 +70,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.ParserStatus
                         {
                             Interlocked.Increment(ref failedParses);
                             Interlocked.Increment(ref timedOutParses);
-                            Console.WriteLine($"Timeout processing file: {file}");
+                            Console.WriteLine($"Timeout processing file: {file} (Size: {new FileInfo(file).Length} bytes)");
                         }
                     }
                     catch (AggregateException ae)
@@ -78,7 +81,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.ParserStatus
                             {
                                 Interlocked.Increment(ref failedParses);
                                 Interlocked.Increment(ref timedOutParses);
-                                Console.WriteLine($"Timeout (cancelled) processing file: {file}");
+                                Console.WriteLine($"Timeout (cancelled) processing file: {file} (Size: {new FileInfo(file).Length} bytes)");
                             }
                             else
                             {
