@@ -169,6 +169,8 @@ namespace Microsoft.CodeAnalysis.TypeScript
         MethodDeclaration,
         PropertyDeclaration,
         ConstructorDeclaration,
+        GetAccessor,
+        SetAccessor,
 
         // Expressions
         NumericLiteralExpression,
@@ -222,6 +224,8 @@ namespace Microsoft.CodeAnalysis.TypeScript
         ElseClause,
         WhileStatement,
         ForStatement,
+        ForInStatement,
+        ForOfStatement,
         EmptyStatement,
         SwitchStatement,
         CaseClause,

@@ -175,6 +175,12 @@ public partial class TypeScriptSyntaxVisitor<TResult>
     /// <summary>Called when the visitor visits a ForStatementSyntax node.</summary>
     public virtual TResult? VisitForStatement(ForStatementSyntax node) => this.DefaultVisit(node);
 
+    /// <summary>Called when the visitor visits a ForInStatementSyntax node.</summary>
+    public virtual TResult? VisitForInStatement(ForInStatementSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a ForOfStatementSyntax node.</summary>
+    public virtual TResult? VisitForOfStatement(ForOfStatementSyntax node) => this.DefaultVisit(node);
+
     /// <summary>Called when the visitor visits a VariableDeclarationSyntax node.</summary>
     public virtual TResult? VisitVariableDeclaration(VariableDeclarationSyntax node) => this.DefaultVisit(node);
 
@@ -216,6 +222,12 @@ public partial class TypeScriptSyntaxVisitor<TResult>
 
     /// <summary>Called when the visitor visits a ConstructorDeclarationSyntax node.</summary>
     public virtual TResult? VisitConstructorDeclaration(ConstructorDeclarationSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a GetAccessorDeclarationSyntax node.</summary>
+    public virtual TResult? VisitGetAccessorDeclaration(GetAccessorDeclarationSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a SetAccessorDeclarationSyntax node.</summary>
+    public virtual TResult? VisitSetAccessorDeclaration(SetAccessorDeclarationSyntax node) => this.DefaultVisit(node);
 
     /// <summary>Called when the visitor visits a ImportDeclarationSyntax node.</summary>
     public virtual TResult? VisitImportDeclaration(ImportDeclarationSyntax node) => this.DefaultVisit(node);
@@ -406,6 +418,12 @@ public partial class TypeScriptSyntaxVisitor
     /// <summary>Called when the visitor visits a ForStatementSyntax node.</summary>
     public virtual void VisitForStatement(ForStatementSyntax node) => this.DefaultVisit(node);
 
+    /// <summary>Called when the visitor visits a ForInStatementSyntax node.</summary>
+    public virtual void VisitForInStatement(ForInStatementSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a ForOfStatementSyntax node.</summary>
+    public virtual void VisitForOfStatement(ForOfStatementSyntax node) => this.DefaultVisit(node);
+
     /// <summary>Called when the visitor visits a VariableDeclarationSyntax node.</summary>
     public virtual void VisitVariableDeclaration(VariableDeclarationSyntax node) => this.DefaultVisit(node);
 
@@ -447,6 +465,12 @@ public partial class TypeScriptSyntaxVisitor
 
     /// <summary>Called when the visitor visits a ConstructorDeclarationSyntax node.</summary>
     public virtual void VisitConstructorDeclaration(ConstructorDeclarationSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a GetAccessorDeclarationSyntax node.</summary>
+    public virtual void VisitGetAccessorDeclaration(GetAccessorDeclarationSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a SetAccessorDeclarationSyntax node.</summary>
+    public virtual void VisitSetAccessorDeclaration(SetAccessorDeclarationSyntax node) => this.DefaultVisit(node);
 
     /// <summary>Called when the visitor visits a ImportDeclarationSyntax node.</summary>
     public virtual void VisitImportDeclaration(ImportDeclarationSyntax node) => this.DefaultVisit(node);
@@ -637,6 +661,12 @@ public partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<SyntaxNo
     public override SyntaxNode? VisitForStatement(ForStatementSyntax node)
         => node.Update(VisitToken(node.ForKeyword), VisitToken(node.OpenParenToken), (StatementSyntax?)Visit(node.Initializer), (ExpressionSyntax?)Visit(node.Condition), VisitToken(node.SecondSemicolonToken), (ExpressionSyntax?)Visit(node.Increment), VisitToken(node.CloseParenToken), (StatementSyntax?)Visit(node.Statement) ?? throw new ArgumentNullException("statement"));
 
+    public override SyntaxNode? VisitForInStatement(ForInStatementSyntax node)
+        => node.Update(VisitToken(node.ForKeyword), VisitToken(node.OpenParenToken), (TypeScriptSyntaxNode?)Visit(node.Initializer) ?? throw new ArgumentNullException("initializer"), VisitToken(node.InKeyword), (ExpressionSyntax?)Visit(node.Expression) ?? throw new ArgumentNullException("expression"), VisitToken(node.CloseParenToken), (StatementSyntax?)Visit(node.Statement) ?? throw new ArgumentNullException("statement"));
+
+    public override SyntaxNode? VisitForOfStatement(ForOfStatementSyntax node)
+        => node.Update(VisitToken(node.ForKeyword), VisitToken(node.AwaitKeyword), VisitToken(node.OpenParenToken), (TypeScriptSyntaxNode?)Visit(node.Initializer) ?? throw new ArgumentNullException("initializer"), VisitToken(node.OfKeyword), (ExpressionSyntax?)Visit(node.Expression) ?? throw new ArgumentNullException("expression"), VisitToken(node.CloseParenToken), (StatementSyntax?)Visit(node.Statement) ?? throw new ArgumentNullException("statement"));
+
     public override SyntaxNode? VisitVariableDeclaration(VariableDeclarationSyntax node)
         => node.Update(VisitToken(node.Identifier), (TypeAnnotationSyntax?)Visit(node.TypeAnnotation), (EqualsValueClauseSyntax?)Visit(node.EqualsValueClause));
 
@@ -653,31 +683,37 @@ public partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<SyntaxNo
         => node.Update(VisitToken(node.OpenParenToken), VisitList(node.Parameters), VisitToken(node.CloseParenToken));
 
     public override SyntaxNode? VisitTypeAliasDeclaration(TypeAliasDeclarationSyntax node)
-        => node.Update(VisitToken(node.TypeKeyword), VisitToken(node.Identifier), (TypeParameterListSyntax?)Visit(node.TypeParameters), VisitToken(node.EqualsToken), (TypeSyntax?)Visit(node.Type) ?? throw new ArgumentNullException("type"), VisitToken(node.SemicolonToken));
+        => node.Update(VisitList(node.Modifiers), VisitToken(node.TypeKeyword), VisitToken(node.Identifier), (TypeParameterListSyntax?)Visit(node.TypeParameters), VisitToken(node.EqualsToken), (TypeSyntax?)Visit(node.Type) ?? throw new ArgumentNullException("type"), VisitToken(node.SemicolonToken));
 
     public override SyntaxNode? VisitEnumDeclaration(EnumDeclarationSyntax node)
-        => node.Update(VisitToken(node.EnumKeyword), VisitToken(node.Identifier), VisitToken(node.OpenBraceToken), VisitList(node.Members), VisitToken(node.CloseBraceToken));
+        => node.Update(VisitList(node.Modifiers), VisitToken(node.EnumKeyword), VisitToken(node.Identifier), VisitToken(node.OpenBraceToken), VisitList(node.Members), VisitToken(node.CloseBraceToken));
 
     public override SyntaxNode? VisitEnumMember(EnumMemberSyntax node)
         => node.Update(VisitToken(node.Identifier), (EqualsValueClauseSyntax?)Visit(node.EqualsValueClause));
 
     public override SyntaxNode? VisitFunctionDeclaration(FunctionDeclarationSyntax node)
-        => node.Update(VisitToken(node.AsyncKeyword), VisitToken(node.FunctionKeyword), VisitToken(node.Identifier), (TypeParameterListSyntax?)Visit(node.TypeParameters), (ParameterListSyntax?)Visit(node.ParameterList) ?? throw new ArgumentNullException("parameterList"), (TypeAnnotationSyntax?)Visit(node.TypeAnnotation), (BlockSyntax?)Visit(node.Body));
+        => node.Update(VisitList(node.Modifiers), VisitToken(node.FunctionKeyword), VisitToken(node.Identifier), (TypeParameterListSyntax?)Visit(node.TypeParameters), (ParameterListSyntax?)Visit(node.ParameterList) ?? throw new ArgumentNullException("parameterList"), (TypeAnnotationSyntax?)Visit(node.TypeAnnotation), (BlockSyntax?)Visit(node.Body));
 
     public override SyntaxNode? VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
-        => node.Update(VisitToken(node.InterfaceKeyword), VisitToken(node.Identifier), (TypeParameterListSyntax?)Visit(node.TypeParameters), VisitToken(node.OpenBraceToken), VisitList(node.Members), VisitToken(node.CloseBraceToken));
+        => node.Update(VisitList(node.Modifiers), VisitToken(node.InterfaceKeyword), VisitToken(node.Identifier), (TypeParameterListSyntax?)Visit(node.TypeParameters), VisitToken(node.OpenBraceToken), VisitList(node.Members), VisitToken(node.CloseBraceToken));
 
     public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node)
-        => node.Update(VisitToken(node.ClassKeyword), VisitToken(node.Identifier), (TypeParameterListSyntax?)Visit(node.TypeParameters), VisitToken(node.OpenBraceToken), VisitList(node.Members), VisitToken(node.CloseBraceToken));
+        => node.Update(VisitList(node.Modifiers), VisitToken(node.ClassKeyword), VisitToken(node.Identifier), (TypeParameterListSyntax?)Visit(node.TypeParameters), VisitToken(node.OpenBraceToken), VisitList(node.Members), VisitToken(node.CloseBraceToken));
 
     public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
-        => node.Update(VisitToken(node.AsyncKeyword), (IdentifierNameSyntax?)Visit(node.Name) ?? throw new ArgumentNullException("name"), (TypeParameterListSyntax?)Visit(node.TypeParameters), (ParameterListSyntax?)Visit(node.ParameterList) ?? throw new ArgumentNullException("parameterList"), (TypeAnnotationSyntax?)Visit(node.TypeAnnotation), (BlockSyntax?)Visit(node.Body));
+        => node.Update(VisitList(node.Modifiers), (IdentifierNameSyntax?)Visit(node.Name) ?? throw new ArgumentNullException("name"), (TypeParameterListSyntax?)Visit(node.TypeParameters), (ParameterListSyntax?)Visit(node.ParameterList) ?? throw new ArgumentNullException("parameterList"), (TypeAnnotationSyntax?)Visit(node.TypeAnnotation), (BlockSyntax?)Visit(node.Body));
 
     public override SyntaxNode? VisitPropertyDeclaration(PropertyDeclarationSyntax node)
-        => node.Update((IdentifierNameSyntax?)Visit(node.Name) ?? throw new ArgumentNullException("name"), (TypeAnnotationSyntax?)Visit(node.TypeAnnotation), (EqualsValueClauseSyntax?)Visit(node.EqualsValueClause), VisitToken(node.SemicolonToken));
+        => node.Update(VisitList(node.Modifiers), (IdentifierNameSyntax?)Visit(node.Name) ?? throw new ArgumentNullException("name"), (TypeAnnotationSyntax?)Visit(node.TypeAnnotation), (EqualsValueClauseSyntax?)Visit(node.EqualsValueClause), VisitToken(node.SemicolonToken));
 
     public override SyntaxNode? VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
-        => node.Update(VisitToken(node.ConstructorKeyword), (ParameterListSyntax?)Visit(node.ParameterList) ?? throw new ArgumentNullException("parameterList"), (BlockSyntax?)Visit(node.Body));
+        => node.Update(VisitList(node.Modifiers), VisitToken(node.ConstructorKeyword), (ParameterListSyntax?)Visit(node.ParameterList) ?? throw new ArgumentNullException("parameterList"), (BlockSyntax?)Visit(node.Body));
+
+    public override SyntaxNode? VisitGetAccessorDeclaration(GetAccessorDeclarationSyntax node)
+        => node.Update(VisitList(node.Modifiers), VisitToken(node.GetKeyword), (IdentifierNameSyntax?)Visit(node.Name) ?? throw new ArgumentNullException("name"), VisitToken(node.OpenParenToken), VisitToken(node.CloseParenToken), (TypeAnnotationSyntax?)Visit(node.TypeAnnotation), (BlockSyntax?)Visit(node.Body));
+
+    public override SyntaxNode? VisitSetAccessorDeclaration(SetAccessorDeclarationSyntax node)
+        => node.Update(VisitList(node.Modifiers), VisitToken(node.SetKeyword), (IdentifierNameSyntax?)Visit(node.Name) ?? throw new ArgumentNullException("name"), (ParameterListSyntax?)Visit(node.ParameterList) ?? throw new ArgumentNullException("parameterList"), (BlockSyntax?)Visit(node.Body));
 
     public override SyntaxNode? VisitImportDeclaration(ImportDeclarationSyntax node)
         => node.Update(VisitToken(node.ImportKeyword), (ImportClauseSyntax?)Visit(node.ImportClause), VisitToken(node.FromKeyword), (ExpressionSyntax?)Visit(node.ModuleSpecifier) ?? throw new ArgumentNullException("moduleSpecifier"), VisitToken(node.SemicolonToken));
@@ -1498,6 +1534,46 @@ public static partial class SyntaxFactory
     public static ForStatementSyntax ForStatement(StatementSyntax statement)
         => SyntaxFactory.ForStatement(SyntaxFactory.Token(SyntaxKind.ForKeyword), SyntaxFactory.Token(SyntaxKind.OpenParenToken), default, default, SyntaxFactory.Token(SyntaxKind.SemicolonToken), default, SyntaxFactory.Token(SyntaxKind.CloseParenToken), statement);
 
+    /// <summary>Creates a new ForInStatementSyntax instance.</summary>
+    public static ForInStatementSyntax ForInStatement(SyntaxToken forKeyword, SyntaxToken openParenToken, TypeScriptSyntaxNode initializer, SyntaxToken inKeyword, ExpressionSyntax expression, SyntaxToken closeParenToken, StatementSyntax statement)
+    {
+        if (forKeyword.Kind() != SyntaxKind.ForKeyword) throw new ArgumentException(nameof(forKeyword));
+        if (openParenToken.Kind() != SyntaxKind.OpenParenToken) throw new ArgumentException(nameof(openParenToken));
+        if (initializer == null) throw new ArgumentNullException(nameof(initializer));
+        if (inKeyword.Kind() != SyntaxKind.InKeyword) throw new ArgumentException(nameof(inKeyword));
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+        if (closeParenToken.Kind() != SyntaxKind.CloseParenToken) throw new ArgumentException(nameof(closeParenToken));
+        if (statement == null) throw new ArgumentNullException(nameof(statement));
+        return (ForInStatementSyntax)Syntax.InternalSyntax.SyntaxFactory.ForInStatement((Syntax.InternalSyntax.SyntaxToken)forKeyword.Node!, (Syntax.InternalSyntax.SyntaxToken)openParenToken.Node!, (Syntax.InternalSyntax.TypeScriptSyntaxNode)initializer.Green, (Syntax.InternalSyntax.SyntaxToken)inKeyword.Node!, (Syntax.InternalSyntax.ExpressionSyntax)expression.Green, (Syntax.InternalSyntax.SyntaxToken)closeParenToken.Node!, (Syntax.InternalSyntax.StatementSyntax)statement.Green).CreateRed();
+    }
+
+    /// <summary>Creates a new ForInStatementSyntax instance.</summary>
+    public static ForInStatementSyntax ForInStatement(TypeScriptSyntaxNode initializer, ExpressionSyntax expression, StatementSyntax statement)
+        => SyntaxFactory.ForInStatement(SyntaxFactory.Token(SyntaxKind.ForKeyword), SyntaxFactory.Token(SyntaxKind.OpenParenToken), initializer, SyntaxFactory.Token(SyntaxKind.InKeyword), expression, SyntaxFactory.Token(SyntaxKind.CloseParenToken), statement);
+
+    /// <summary>Creates a new ForOfStatementSyntax instance.</summary>
+    public static ForOfStatementSyntax ForOfStatement(SyntaxToken forKeyword, SyntaxToken awaitKeyword, SyntaxToken openParenToken, TypeScriptSyntaxNode initializer, SyntaxToken ofKeyword, ExpressionSyntax expression, SyntaxToken closeParenToken, StatementSyntax statement)
+    {
+        if (forKeyword.Kind() != SyntaxKind.ForKeyword) throw new ArgumentException(nameof(forKeyword));
+        switch (awaitKeyword.Kind())
+        {
+            case SyntaxKind.AwaitKeyword:
+            case SyntaxKind.None: break;
+            default: throw new ArgumentException(nameof(awaitKeyword));
+        }
+        if (openParenToken.Kind() != SyntaxKind.OpenParenToken) throw new ArgumentException(nameof(openParenToken));
+        if (initializer == null) throw new ArgumentNullException(nameof(initializer));
+        if (ofKeyword.Kind() != SyntaxKind.OfKeyword) throw new ArgumentException(nameof(ofKeyword));
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+        if (closeParenToken.Kind() != SyntaxKind.CloseParenToken) throw new ArgumentException(nameof(closeParenToken));
+        if (statement == null) throw new ArgumentNullException(nameof(statement));
+        return (ForOfStatementSyntax)Syntax.InternalSyntax.SyntaxFactory.ForOfStatement((Syntax.InternalSyntax.SyntaxToken)forKeyword.Node!, (Syntax.InternalSyntax.SyntaxToken?)awaitKeyword.Node, (Syntax.InternalSyntax.SyntaxToken)openParenToken.Node!, (Syntax.InternalSyntax.TypeScriptSyntaxNode)initializer.Green, (Syntax.InternalSyntax.SyntaxToken)ofKeyword.Node!, (Syntax.InternalSyntax.ExpressionSyntax)expression.Green, (Syntax.InternalSyntax.SyntaxToken)closeParenToken.Node!, (Syntax.InternalSyntax.StatementSyntax)statement.Green).CreateRed();
+    }
+
+    /// <summary>Creates a new ForOfStatementSyntax instance.</summary>
+    public static ForOfStatementSyntax ForOfStatement(TypeScriptSyntaxNode initializer, ExpressionSyntax expression, StatementSyntax statement)
+        => SyntaxFactory.ForOfStatement(SyntaxFactory.Token(SyntaxKind.ForKeyword), default, SyntaxFactory.Token(SyntaxKind.OpenParenToken), initializer, SyntaxFactory.Token(SyntaxKind.OfKeyword), expression, SyntaxFactory.Token(SyntaxKind.CloseParenToken), statement);
+
     /// <summary>Creates a new VariableDeclarationSyntax instance.</summary>
     public static VariableDeclarationSyntax VariableDeclaration(SyntaxToken identifier, TypeAnnotationSyntax? typeAnnotation, EqualsValueClauseSyntax? equalsValueClause)
     {
@@ -1570,7 +1646,7 @@ public static partial class SyntaxFactory
         => SyntaxFactory.ParameterList(SyntaxFactory.Token(SyntaxKind.OpenParenToken), parameters, SyntaxFactory.Token(SyntaxKind.CloseParenToken));
 
     /// <summary>Creates a new TypeAliasDeclarationSyntax instance.</summary>
-    public static TypeAliasDeclarationSyntax TypeAliasDeclaration(SyntaxToken typeKeyword, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, SyntaxToken equalsToken, TypeSyntax type, SyntaxToken semicolonToken)
+    public static TypeAliasDeclarationSyntax TypeAliasDeclaration(SyntaxTokenList modifiers, SyntaxToken typeKeyword, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, SyntaxToken equalsToken, TypeSyntax type, SyntaxToken semicolonToken)
     {
         if (typeKeyword.Kind() != SyntaxKind.TypeKeyword) throw new ArgumentException(nameof(typeKeyword));
         if (identifier.Kind() != SyntaxKind.IdentifierToken) throw new ArgumentException(nameof(identifier));
@@ -1582,42 +1658,42 @@ public static partial class SyntaxFactory
             case SyntaxKind.None: break;
             default: throw new ArgumentException(nameof(semicolonToken));
         }
-        return (TypeAliasDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.TypeAliasDeclaration((Syntax.InternalSyntax.SyntaxToken)typeKeyword.Node!, (Syntax.InternalSyntax.SyntaxToken)identifier.Node!, typeParameters == null ? null : (Syntax.InternalSyntax.TypeParameterListSyntax)typeParameters.Green, (Syntax.InternalSyntax.SyntaxToken)equalsToken.Node!, (Syntax.InternalSyntax.TypeSyntax)type.Green, (Syntax.InternalSyntax.SyntaxToken?)semicolonToken.Node).CreateRed();
+        return (TypeAliasDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.TypeAliasDeclaration(modifiers.Node.ToGreenList<Syntax.InternalSyntax.SyntaxToken>(), (Syntax.InternalSyntax.SyntaxToken)typeKeyword.Node!, (Syntax.InternalSyntax.SyntaxToken)identifier.Node!, typeParameters == null ? null : (Syntax.InternalSyntax.TypeParameterListSyntax)typeParameters.Green, (Syntax.InternalSyntax.SyntaxToken)equalsToken.Node!, (Syntax.InternalSyntax.TypeSyntax)type.Green, (Syntax.InternalSyntax.SyntaxToken?)semicolonToken.Node).CreateRed();
     }
 
     /// <summary>Creates a new TypeAliasDeclarationSyntax instance.</summary>
-    public static TypeAliasDeclarationSyntax TypeAliasDeclaration(SyntaxToken identifier, TypeParameterListSyntax? typeParameters, TypeSyntax type)
-        => SyntaxFactory.TypeAliasDeclaration(SyntaxFactory.Token(SyntaxKind.TypeKeyword), identifier, typeParameters, SyntaxFactory.Token(SyntaxKind.EqualsToken), type, default);
+    public static TypeAliasDeclarationSyntax TypeAliasDeclaration(SyntaxTokenList modifiers, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, TypeSyntax type)
+        => SyntaxFactory.TypeAliasDeclaration(modifiers, SyntaxFactory.Token(SyntaxKind.TypeKeyword), identifier, typeParameters, SyntaxFactory.Token(SyntaxKind.EqualsToken), type, default);
 
     /// <summary>Creates a new TypeAliasDeclarationSyntax instance.</summary>
     public static TypeAliasDeclarationSyntax TypeAliasDeclaration(SyntaxToken identifier, TypeSyntax type)
-        => SyntaxFactory.TypeAliasDeclaration(SyntaxFactory.Token(SyntaxKind.TypeKeyword), identifier, default, SyntaxFactory.Token(SyntaxKind.EqualsToken), type, default);
+        => SyntaxFactory.TypeAliasDeclaration(default(SyntaxTokenList), SyntaxFactory.Token(SyntaxKind.TypeKeyword), identifier, default, SyntaxFactory.Token(SyntaxKind.EqualsToken), type, default);
 
     /// <summary>Creates a new TypeAliasDeclarationSyntax instance.</summary>
     public static TypeAliasDeclarationSyntax TypeAliasDeclaration(string identifier, TypeSyntax type)
-        => SyntaxFactory.TypeAliasDeclaration(SyntaxFactory.Token(SyntaxKind.TypeKeyword), SyntaxFactory.Identifier(identifier), default, SyntaxFactory.Token(SyntaxKind.EqualsToken), type, default);
+        => SyntaxFactory.TypeAliasDeclaration(default(SyntaxTokenList), SyntaxFactory.Token(SyntaxKind.TypeKeyword), SyntaxFactory.Identifier(identifier), default, SyntaxFactory.Token(SyntaxKind.EqualsToken), type, default);
 
     /// <summary>Creates a new EnumDeclarationSyntax instance.</summary>
-    public static EnumDeclarationSyntax EnumDeclaration(SyntaxToken enumKeyword, SyntaxToken identifier, SyntaxToken openBraceToken, SeparatedSyntaxList<EnumMemberSyntax> members, SyntaxToken closeBraceToken)
+    public static EnumDeclarationSyntax EnumDeclaration(SyntaxTokenList modifiers, SyntaxToken enumKeyword, SyntaxToken identifier, SyntaxToken openBraceToken, SeparatedSyntaxList<EnumMemberSyntax> members, SyntaxToken closeBraceToken)
     {
         if (enumKeyword.Kind() != SyntaxKind.EnumKeyword) throw new ArgumentException(nameof(enumKeyword));
         if (identifier.Kind() != SyntaxKind.IdentifierToken) throw new ArgumentException(nameof(identifier));
         if (openBraceToken.Kind() != SyntaxKind.OpenBraceToken) throw new ArgumentException(nameof(openBraceToken));
         if (closeBraceToken.Kind() != SyntaxKind.CloseBraceToken) throw new ArgumentException(nameof(closeBraceToken));
-        return (EnumDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.EnumDeclaration((Syntax.InternalSyntax.SyntaxToken)enumKeyword.Node!, (Syntax.InternalSyntax.SyntaxToken)identifier.Node!, (Syntax.InternalSyntax.SyntaxToken)openBraceToken.Node!, members.Node.ToGreenSeparatedList<Syntax.InternalSyntax.EnumMemberSyntax>(), (Syntax.InternalSyntax.SyntaxToken)closeBraceToken.Node!).CreateRed();
+        return (EnumDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.EnumDeclaration(modifiers.Node.ToGreenList<Syntax.InternalSyntax.SyntaxToken>(), (Syntax.InternalSyntax.SyntaxToken)enumKeyword.Node!, (Syntax.InternalSyntax.SyntaxToken)identifier.Node!, (Syntax.InternalSyntax.SyntaxToken)openBraceToken.Node!, members.Node.ToGreenSeparatedList<Syntax.InternalSyntax.EnumMemberSyntax>(), (Syntax.InternalSyntax.SyntaxToken)closeBraceToken.Node!).CreateRed();
     }
 
     /// <summary>Creates a new EnumDeclarationSyntax instance.</summary>
-    public static EnumDeclarationSyntax EnumDeclaration(SyntaxToken identifier, SeparatedSyntaxList<EnumMemberSyntax> members)
-        => SyntaxFactory.EnumDeclaration(SyntaxFactory.Token(SyntaxKind.EnumKeyword), identifier, SyntaxFactory.Token(SyntaxKind.OpenBraceToken), members, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
+    public static EnumDeclarationSyntax EnumDeclaration(SyntaxTokenList modifiers, SyntaxToken identifier, SeparatedSyntaxList<EnumMemberSyntax> members)
+        => SyntaxFactory.EnumDeclaration(modifiers, SyntaxFactory.Token(SyntaxKind.EnumKeyword), identifier, SyntaxFactory.Token(SyntaxKind.OpenBraceToken), members, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
 
     /// <summary>Creates a new EnumDeclarationSyntax instance.</summary>
     public static EnumDeclarationSyntax EnumDeclaration(SyntaxToken identifier)
-        => SyntaxFactory.EnumDeclaration(SyntaxFactory.Token(SyntaxKind.EnumKeyword), identifier, SyntaxFactory.Token(SyntaxKind.OpenBraceToken), default, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
+        => SyntaxFactory.EnumDeclaration(default(SyntaxTokenList), SyntaxFactory.Token(SyntaxKind.EnumKeyword), identifier, SyntaxFactory.Token(SyntaxKind.OpenBraceToken), default, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
 
     /// <summary>Creates a new EnumDeclarationSyntax instance.</summary>
     public static EnumDeclarationSyntax EnumDeclaration(string identifier)
-        => SyntaxFactory.EnumDeclaration(SyntaxFactory.Token(SyntaxKind.EnumKeyword), SyntaxFactory.Identifier(identifier), SyntaxFactory.Token(SyntaxKind.OpenBraceToken), default, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
+        => SyntaxFactory.EnumDeclaration(default(SyntaxTokenList), SyntaxFactory.Token(SyntaxKind.EnumKeyword), SyntaxFactory.Identifier(identifier), SyntaxFactory.Token(SyntaxKind.OpenBraceToken), default, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
 
     /// <summary>Creates a new EnumMemberSyntax instance.</summary>
     public static EnumMemberSyntax EnumMember(SyntaxToken identifier, EqualsValueClauseSyntax? equalsValueClause)
@@ -1635,14 +1711,8 @@ public static partial class SyntaxFactory
         => SyntaxFactory.EnumMember(SyntaxFactory.Identifier(identifier), default);
 
     /// <summary>Creates a new FunctionDeclarationSyntax instance.</summary>
-    public static FunctionDeclarationSyntax FunctionDeclaration(SyntaxToken asyncKeyword, SyntaxToken functionKeyword, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
+    public static FunctionDeclarationSyntax FunctionDeclaration(SyntaxTokenList modifiers, SyntaxToken functionKeyword, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
     {
-        switch (asyncKeyword.Kind())
-        {
-            case SyntaxKind.AsyncKeyword:
-            case SyntaxKind.None: break;
-            default: throw new ArgumentException(nameof(asyncKeyword));
-        }
         if (functionKeyword.Kind() != SyntaxKind.FunctionKeyword) throw new ArgumentException(nameof(functionKeyword));
         switch (identifier.Kind())
         {
@@ -1651,41 +1721,41 @@ public static partial class SyntaxFactory
             default: throw new ArgumentException(nameof(identifier));
         }
         if (parameterList == null) throw new ArgumentNullException(nameof(parameterList));
-        return (FunctionDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.FunctionDeclaration((Syntax.InternalSyntax.SyntaxToken?)asyncKeyword.Node, (Syntax.InternalSyntax.SyntaxToken)functionKeyword.Node!, (Syntax.InternalSyntax.SyntaxToken?)identifier.Node, typeParameters == null ? null : (Syntax.InternalSyntax.TypeParameterListSyntax)typeParameters.Green, (Syntax.InternalSyntax.ParameterListSyntax)parameterList.Green, typeAnnotation == null ? null : (Syntax.InternalSyntax.TypeAnnotationSyntax)typeAnnotation.Green, body == null ? null : (Syntax.InternalSyntax.BlockSyntax)body.Green).CreateRed();
+        return (FunctionDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.FunctionDeclaration(modifiers.Node.ToGreenList<Syntax.InternalSyntax.SyntaxToken>(), (Syntax.InternalSyntax.SyntaxToken)functionKeyword.Node!, (Syntax.InternalSyntax.SyntaxToken?)identifier.Node, typeParameters == null ? null : (Syntax.InternalSyntax.TypeParameterListSyntax)typeParameters.Green, (Syntax.InternalSyntax.ParameterListSyntax)parameterList.Green, typeAnnotation == null ? null : (Syntax.InternalSyntax.TypeAnnotationSyntax)typeAnnotation.Green, body == null ? null : (Syntax.InternalSyntax.BlockSyntax)body.Green).CreateRed();
     }
 
     /// <summary>Creates a new FunctionDeclarationSyntax instance.</summary>
-    public static FunctionDeclarationSyntax FunctionDeclaration(SyntaxToken identifier, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
-        => SyntaxFactory.FunctionDeclaration(default, SyntaxFactory.Token(SyntaxKind.FunctionKeyword), identifier, typeParameters, parameterList, typeAnnotation, body);
+    public static FunctionDeclarationSyntax FunctionDeclaration(SyntaxTokenList modifiers, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
+        => SyntaxFactory.FunctionDeclaration(modifiers, SyntaxFactory.Token(SyntaxKind.FunctionKeyword), identifier, typeParameters, parameterList, typeAnnotation, body);
 
     /// <summary>Creates a new FunctionDeclarationSyntax instance.</summary>
     public static FunctionDeclarationSyntax FunctionDeclaration()
-        => SyntaxFactory.FunctionDeclaration(default, SyntaxFactory.Token(SyntaxKind.FunctionKeyword), default, default, SyntaxFactory.ParameterList(), default, default);
+        => SyntaxFactory.FunctionDeclaration(default(SyntaxTokenList), SyntaxFactory.Token(SyntaxKind.FunctionKeyword), default, default, SyntaxFactory.ParameterList(), default, default);
 
     /// <summary>Creates a new InterfaceDeclarationSyntax instance.</summary>
-    public static InterfaceDeclarationSyntax InterfaceDeclaration(SyntaxToken interfaceKeyword, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, SyntaxToken openBraceToken, SyntaxList<TypeElementSyntax> members, SyntaxToken closeBraceToken)
+    public static InterfaceDeclarationSyntax InterfaceDeclaration(SyntaxTokenList modifiers, SyntaxToken interfaceKeyword, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, SyntaxToken openBraceToken, SyntaxList<TypeElementSyntax> members, SyntaxToken closeBraceToken)
     {
         if (interfaceKeyword.Kind() != SyntaxKind.InterfaceKeyword) throw new ArgumentException(nameof(interfaceKeyword));
         if (identifier.Kind() != SyntaxKind.IdentifierToken) throw new ArgumentException(nameof(identifier));
         if (openBraceToken.Kind() != SyntaxKind.OpenBraceToken) throw new ArgumentException(nameof(openBraceToken));
         if (closeBraceToken.Kind() != SyntaxKind.CloseBraceToken) throw new ArgumentException(nameof(closeBraceToken));
-        return (InterfaceDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.InterfaceDeclaration((Syntax.InternalSyntax.SyntaxToken)interfaceKeyword.Node!, (Syntax.InternalSyntax.SyntaxToken)identifier.Node!, typeParameters == null ? null : (Syntax.InternalSyntax.TypeParameterListSyntax)typeParameters.Green, (Syntax.InternalSyntax.SyntaxToken)openBraceToken.Node!, members.Node.ToGreenList<Syntax.InternalSyntax.TypeElementSyntax>(), (Syntax.InternalSyntax.SyntaxToken)closeBraceToken.Node!).CreateRed();
+        return (InterfaceDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.InterfaceDeclaration(modifiers.Node.ToGreenList<Syntax.InternalSyntax.SyntaxToken>(), (Syntax.InternalSyntax.SyntaxToken)interfaceKeyword.Node!, (Syntax.InternalSyntax.SyntaxToken)identifier.Node!, typeParameters == null ? null : (Syntax.InternalSyntax.TypeParameterListSyntax)typeParameters.Green, (Syntax.InternalSyntax.SyntaxToken)openBraceToken.Node!, members.Node.ToGreenList<Syntax.InternalSyntax.TypeElementSyntax>(), (Syntax.InternalSyntax.SyntaxToken)closeBraceToken.Node!).CreateRed();
     }
 
     /// <summary>Creates a new InterfaceDeclarationSyntax instance.</summary>
-    public static InterfaceDeclarationSyntax InterfaceDeclaration(SyntaxToken identifier, TypeParameterListSyntax? typeParameters, SyntaxList<TypeElementSyntax> members)
-        => SyntaxFactory.InterfaceDeclaration(SyntaxFactory.Token(SyntaxKind.InterfaceKeyword), identifier, typeParameters, SyntaxFactory.Token(SyntaxKind.OpenBraceToken), members, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
+    public static InterfaceDeclarationSyntax InterfaceDeclaration(SyntaxTokenList modifiers, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, SyntaxList<TypeElementSyntax> members)
+        => SyntaxFactory.InterfaceDeclaration(modifiers, SyntaxFactory.Token(SyntaxKind.InterfaceKeyword), identifier, typeParameters, SyntaxFactory.Token(SyntaxKind.OpenBraceToken), members, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
 
     /// <summary>Creates a new InterfaceDeclarationSyntax instance.</summary>
     public static InterfaceDeclarationSyntax InterfaceDeclaration(SyntaxToken identifier)
-        => SyntaxFactory.InterfaceDeclaration(SyntaxFactory.Token(SyntaxKind.InterfaceKeyword), identifier, default, SyntaxFactory.Token(SyntaxKind.OpenBraceToken), default, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
+        => SyntaxFactory.InterfaceDeclaration(default(SyntaxTokenList), SyntaxFactory.Token(SyntaxKind.InterfaceKeyword), identifier, default, SyntaxFactory.Token(SyntaxKind.OpenBraceToken), default, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
 
     /// <summary>Creates a new InterfaceDeclarationSyntax instance.</summary>
     public static InterfaceDeclarationSyntax InterfaceDeclaration(string identifier)
-        => SyntaxFactory.InterfaceDeclaration(SyntaxFactory.Token(SyntaxKind.InterfaceKeyword), SyntaxFactory.Identifier(identifier), default, SyntaxFactory.Token(SyntaxKind.OpenBraceToken), default, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
+        => SyntaxFactory.InterfaceDeclaration(default(SyntaxTokenList), SyntaxFactory.Token(SyntaxKind.InterfaceKeyword), SyntaxFactory.Identifier(identifier), default, SyntaxFactory.Token(SyntaxKind.OpenBraceToken), default, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
 
     /// <summary>Creates a new ClassDeclarationSyntax instance.</summary>
-    public static ClassDeclarationSyntax ClassDeclaration(SyntaxToken classKeyword, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, SyntaxToken openBraceToken, SyntaxList<ClassElementSyntax> members, SyntaxToken closeBraceToken)
+    public static ClassDeclarationSyntax ClassDeclaration(SyntaxTokenList modifiers, SyntaxToken classKeyword, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, SyntaxToken openBraceToken, SyntaxList<ClassElementSyntax> members, SyntaxToken closeBraceToken)
     {
         if (classKeyword.Kind() != SyntaxKind.ClassKeyword) throw new ArgumentException(nameof(classKeyword));
         switch (identifier.Kind())
@@ -1696,45 +1766,37 @@ public static partial class SyntaxFactory
         }
         if (openBraceToken.Kind() != SyntaxKind.OpenBraceToken) throw new ArgumentException(nameof(openBraceToken));
         if (closeBraceToken.Kind() != SyntaxKind.CloseBraceToken) throw new ArgumentException(nameof(closeBraceToken));
-        return (ClassDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.ClassDeclaration((Syntax.InternalSyntax.SyntaxToken)classKeyword.Node!, (Syntax.InternalSyntax.SyntaxToken?)identifier.Node, typeParameters == null ? null : (Syntax.InternalSyntax.TypeParameterListSyntax)typeParameters.Green, (Syntax.InternalSyntax.SyntaxToken)openBraceToken.Node!, members.Node.ToGreenList<Syntax.InternalSyntax.ClassElementSyntax>(), (Syntax.InternalSyntax.SyntaxToken)closeBraceToken.Node!).CreateRed();
+        return (ClassDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.ClassDeclaration(modifiers.Node.ToGreenList<Syntax.InternalSyntax.SyntaxToken>(), (Syntax.InternalSyntax.SyntaxToken)classKeyword.Node!, (Syntax.InternalSyntax.SyntaxToken?)identifier.Node, typeParameters == null ? null : (Syntax.InternalSyntax.TypeParameterListSyntax)typeParameters.Green, (Syntax.InternalSyntax.SyntaxToken)openBraceToken.Node!, members.Node.ToGreenList<Syntax.InternalSyntax.ClassElementSyntax>(), (Syntax.InternalSyntax.SyntaxToken)closeBraceToken.Node!).CreateRed();
     }
 
     /// <summary>Creates a new ClassDeclarationSyntax instance.</summary>
-    public static ClassDeclarationSyntax ClassDeclaration(SyntaxToken identifier, TypeParameterListSyntax? typeParameters, SyntaxList<ClassElementSyntax> members)
-        => SyntaxFactory.ClassDeclaration(SyntaxFactory.Token(SyntaxKind.ClassKeyword), identifier, typeParameters, SyntaxFactory.Token(SyntaxKind.OpenBraceToken), members, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
+    public static ClassDeclarationSyntax ClassDeclaration(SyntaxTokenList modifiers, SyntaxToken identifier, TypeParameterListSyntax? typeParameters, SyntaxList<ClassElementSyntax> members)
+        => SyntaxFactory.ClassDeclaration(modifiers, SyntaxFactory.Token(SyntaxKind.ClassKeyword), identifier, typeParameters, SyntaxFactory.Token(SyntaxKind.OpenBraceToken), members, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
 
+#pragma warning disable RS0027
     /// <summary>Creates a new ClassDeclarationSyntax instance.</summary>
     public static ClassDeclarationSyntax ClassDeclaration(SyntaxList<ClassElementSyntax> members = default)
-        => SyntaxFactory.ClassDeclaration(SyntaxFactory.Token(SyntaxKind.ClassKeyword), default, default, SyntaxFactory.Token(SyntaxKind.OpenBraceToken), members, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
+        => SyntaxFactory.ClassDeclaration(default(SyntaxTokenList), SyntaxFactory.Token(SyntaxKind.ClassKeyword), default, default, SyntaxFactory.Token(SyntaxKind.OpenBraceToken), members, SyntaxFactory.Token(SyntaxKind.CloseBraceToken));
+#pragma warning restore RS0027
 
     /// <summary>Creates a new MethodDeclarationSyntax instance.</summary>
-    public static MethodDeclarationSyntax MethodDeclaration(SyntaxToken asyncKeyword, IdentifierNameSyntax name, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
+    public static MethodDeclarationSyntax MethodDeclaration(SyntaxTokenList modifiers, IdentifierNameSyntax name, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
     {
-        switch (asyncKeyword.Kind())
-        {
-            case SyntaxKind.AsyncKeyword:
-            case SyntaxKind.None: break;
-            default: throw new ArgumentException(nameof(asyncKeyword));
-        }
         if (name == null) throw new ArgumentNullException(nameof(name));
         if (parameterList == null) throw new ArgumentNullException(nameof(parameterList));
-        return (MethodDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.MethodDeclaration((Syntax.InternalSyntax.SyntaxToken?)asyncKeyword.Node, (Syntax.InternalSyntax.IdentifierNameSyntax)name.Green, typeParameters == null ? null : (Syntax.InternalSyntax.TypeParameterListSyntax)typeParameters.Green, (Syntax.InternalSyntax.ParameterListSyntax)parameterList.Green, typeAnnotation == null ? null : (Syntax.InternalSyntax.TypeAnnotationSyntax)typeAnnotation.Green, body == null ? null : (Syntax.InternalSyntax.BlockSyntax)body.Green).CreateRed();
+        return (MethodDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.MethodDeclaration(modifiers.Node.ToGreenList<Syntax.InternalSyntax.SyntaxToken>(), (Syntax.InternalSyntax.IdentifierNameSyntax)name.Green, typeParameters == null ? null : (Syntax.InternalSyntax.TypeParameterListSyntax)typeParameters.Green, (Syntax.InternalSyntax.ParameterListSyntax)parameterList.Green, typeAnnotation == null ? null : (Syntax.InternalSyntax.TypeAnnotationSyntax)typeAnnotation.Green, body == null ? null : (Syntax.InternalSyntax.BlockSyntax)body.Green).CreateRed();
     }
-
-    /// <summary>Creates a new MethodDeclarationSyntax instance.</summary>
-    public static MethodDeclarationSyntax MethodDeclaration(IdentifierNameSyntax name, TypeParameterListSyntax? typeParameters, ParameterListSyntax parameterList, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
-        => SyntaxFactory.MethodDeclaration(default, name, typeParameters, parameterList, typeAnnotation, body);
 
     /// <summary>Creates a new MethodDeclarationSyntax instance.</summary>
     public static MethodDeclarationSyntax MethodDeclaration(IdentifierNameSyntax name)
-        => SyntaxFactory.MethodDeclaration(default, name, default, SyntaxFactory.ParameterList(), default, default);
+        => SyntaxFactory.MethodDeclaration(default(SyntaxTokenList), name, default, SyntaxFactory.ParameterList(), default, default);
 
     /// <summary>Creates a new MethodDeclarationSyntax instance.</summary>
     public static MethodDeclarationSyntax MethodDeclaration(string name)
-        => SyntaxFactory.MethodDeclaration(default, SyntaxFactory.IdentifierName(name), default, SyntaxFactory.ParameterList(), default, default);
+        => SyntaxFactory.MethodDeclaration(default(SyntaxTokenList), SyntaxFactory.IdentifierName(name), default, SyntaxFactory.ParameterList(), default, default);
 
     /// <summary>Creates a new PropertyDeclarationSyntax instance.</summary>
-    public static PropertyDeclarationSyntax PropertyDeclaration(IdentifierNameSyntax name, TypeAnnotationSyntax? typeAnnotation, EqualsValueClauseSyntax? equalsValueClause, SyntaxToken semicolonToken)
+    public static PropertyDeclarationSyntax PropertyDeclaration(SyntaxTokenList modifiers, IdentifierNameSyntax name, TypeAnnotationSyntax? typeAnnotation, EqualsValueClauseSyntax? equalsValueClause, SyntaxToken semicolonToken)
     {
         if (name == null) throw new ArgumentNullException(nameof(name));
         switch (semicolonToken.Kind())
@@ -1743,36 +1805,79 @@ public static partial class SyntaxFactory
             case SyntaxKind.None: break;
             default: throw new ArgumentException(nameof(semicolonToken));
         }
-        return (PropertyDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.PropertyDeclaration((Syntax.InternalSyntax.IdentifierNameSyntax)name.Green, typeAnnotation == null ? null : (Syntax.InternalSyntax.TypeAnnotationSyntax)typeAnnotation.Green, equalsValueClause == null ? null : (Syntax.InternalSyntax.EqualsValueClauseSyntax)equalsValueClause.Green, (Syntax.InternalSyntax.SyntaxToken?)semicolonToken.Node).CreateRed();
+        return (PropertyDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.PropertyDeclaration(modifiers.Node.ToGreenList<Syntax.InternalSyntax.SyntaxToken>(), (Syntax.InternalSyntax.IdentifierNameSyntax)name.Green, typeAnnotation == null ? null : (Syntax.InternalSyntax.TypeAnnotationSyntax)typeAnnotation.Green, equalsValueClause == null ? null : (Syntax.InternalSyntax.EqualsValueClauseSyntax)equalsValueClause.Green, (Syntax.InternalSyntax.SyntaxToken?)semicolonToken.Node).CreateRed();
     }
 
     /// <summary>Creates a new PropertyDeclarationSyntax instance.</summary>
-    public static PropertyDeclarationSyntax PropertyDeclaration(IdentifierNameSyntax name, TypeAnnotationSyntax? typeAnnotation, EqualsValueClauseSyntax? equalsValueClause)
-        => SyntaxFactory.PropertyDeclaration(name, typeAnnotation, equalsValueClause, default);
+    public static PropertyDeclarationSyntax PropertyDeclaration(SyntaxTokenList modifiers, IdentifierNameSyntax name, TypeAnnotationSyntax? typeAnnotation, EqualsValueClauseSyntax? equalsValueClause)
+        => SyntaxFactory.PropertyDeclaration(modifiers, name, typeAnnotation, equalsValueClause, default);
 
     /// <summary>Creates a new PropertyDeclarationSyntax instance.</summary>
     public static PropertyDeclarationSyntax PropertyDeclaration(IdentifierNameSyntax name)
-        => SyntaxFactory.PropertyDeclaration(name, default, default, default);
+        => SyntaxFactory.PropertyDeclaration(default(SyntaxTokenList), name, default, default, default);
 
     /// <summary>Creates a new PropertyDeclarationSyntax instance.</summary>
     public static PropertyDeclarationSyntax PropertyDeclaration(string name)
-        => SyntaxFactory.PropertyDeclaration(SyntaxFactory.IdentifierName(name), default, default, default);
+        => SyntaxFactory.PropertyDeclaration(default(SyntaxTokenList), SyntaxFactory.IdentifierName(name), default, default, default);
 
     /// <summary>Creates a new ConstructorDeclarationSyntax instance.</summary>
-    public static ConstructorDeclarationSyntax ConstructorDeclaration(SyntaxToken constructorKeyword, ParameterListSyntax parameterList, BlockSyntax? body)
+    public static ConstructorDeclarationSyntax ConstructorDeclaration(SyntaxTokenList modifiers, SyntaxToken constructorKeyword, ParameterListSyntax parameterList, BlockSyntax? body)
     {
         if (constructorKeyword.Kind() != SyntaxKind.ConstructorKeyword) throw new ArgumentException(nameof(constructorKeyword));
         if (parameterList == null) throw new ArgumentNullException(nameof(parameterList));
-        return (ConstructorDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.ConstructorDeclaration((Syntax.InternalSyntax.SyntaxToken)constructorKeyword.Node!, (Syntax.InternalSyntax.ParameterListSyntax)parameterList.Green, body == null ? null : (Syntax.InternalSyntax.BlockSyntax)body.Green).CreateRed();
+        return (ConstructorDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.ConstructorDeclaration(modifiers.Node.ToGreenList<Syntax.InternalSyntax.SyntaxToken>(), (Syntax.InternalSyntax.SyntaxToken)constructorKeyword.Node!, (Syntax.InternalSyntax.ParameterListSyntax)parameterList.Green, body == null ? null : (Syntax.InternalSyntax.BlockSyntax)body.Green).CreateRed();
     }
 
     /// <summary>Creates a new ConstructorDeclarationSyntax instance.</summary>
-    public static ConstructorDeclarationSyntax ConstructorDeclaration(ParameterListSyntax parameterList, BlockSyntax? body)
-        => SyntaxFactory.ConstructorDeclaration(SyntaxFactory.Token(SyntaxKind.ConstructorKeyword), parameterList, body);
+    public static ConstructorDeclarationSyntax ConstructorDeclaration(SyntaxTokenList modifiers, ParameterListSyntax parameterList, BlockSyntax? body)
+        => SyntaxFactory.ConstructorDeclaration(modifiers, SyntaxFactory.Token(SyntaxKind.ConstructorKeyword), parameterList, body);
 
     /// <summary>Creates a new ConstructorDeclarationSyntax instance.</summary>
     public static ConstructorDeclarationSyntax ConstructorDeclaration()
-        => SyntaxFactory.ConstructorDeclaration(SyntaxFactory.Token(SyntaxKind.ConstructorKeyword), SyntaxFactory.ParameterList(), default);
+        => SyntaxFactory.ConstructorDeclaration(default(SyntaxTokenList), SyntaxFactory.Token(SyntaxKind.ConstructorKeyword), SyntaxFactory.ParameterList(), default);
+
+    /// <summary>Creates a new GetAccessorDeclarationSyntax instance.</summary>
+    public static GetAccessorDeclarationSyntax GetAccessorDeclaration(SyntaxTokenList modifiers, SyntaxToken getKeyword, IdentifierNameSyntax name, SyntaxToken openParenToken, SyntaxToken closeParenToken, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
+    {
+        if (getKeyword.Kind() != SyntaxKind.GetKeyword) throw new ArgumentException(nameof(getKeyword));
+        if (name == null) throw new ArgumentNullException(nameof(name));
+        if (openParenToken.Kind() != SyntaxKind.OpenParenToken) throw new ArgumentException(nameof(openParenToken));
+        if (closeParenToken.Kind() != SyntaxKind.CloseParenToken) throw new ArgumentException(nameof(closeParenToken));
+        return (GetAccessorDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.GetAccessorDeclaration(modifiers.Node.ToGreenList<Syntax.InternalSyntax.SyntaxToken>(), (Syntax.InternalSyntax.SyntaxToken)getKeyword.Node!, (Syntax.InternalSyntax.IdentifierNameSyntax)name.Green, (Syntax.InternalSyntax.SyntaxToken)openParenToken.Node!, (Syntax.InternalSyntax.SyntaxToken)closeParenToken.Node!, typeAnnotation == null ? null : (Syntax.InternalSyntax.TypeAnnotationSyntax)typeAnnotation.Green, body == null ? null : (Syntax.InternalSyntax.BlockSyntax)body.Green).CreateRed();
+    }
+
+    /// <summary>Creates a new GetAccessorDeclarationSyntax instance.</summary>
+    public static GetAccessorDeclarationSyntax GetAccessorDeclaration(SyntaxTokenList modifiers, IdentifierNameSyntax name, TypeAnnotationSyntax? typeAnnotation, BlockSyntax? body)
+        => SyntaxFactory.GetAccessorDeclaration(modifiers, SyntaxFactory.Token(SyntaxKind.GetKeyword), name, SyntaxFactory.Token(SyntaxKind.OpenParenToken), SyntaxFactory.Token(SyntaxKind.CloseParenToken), typeAnnotation, body);
+
+    /// <summary>Creates a new GetAccessorDeclarationSyntax instance.</summary>
+    public static GetAccessorDeclarationSyntax GetAccessorDeclaration(IdentifierNameSyntax name)
+        => SyntaxFactory.GetAccessorDeclaration(default(SyntaxTokenList), SyntaxFactory.Token(SyntaxKind.GetKeyword), name, SyntaxFactory.Token(SyntaxKind.OpenParenToken), SyntaxFactory.Token(SyntaxKind.CloseParenToken), default, default);
+
+    /// <summary>Creates a new GetAccessorDeclarationSyntax instance.</summary>
+    public static GetAccessorDeclarationSyntax GetAccessorDeclaration(string name)
+        => SyntaxFactory.GetAccessorDeclaration(default(SyntaxTokenList), SyntaxFactory.Token(SyntaxKind.GetKeyword), SyntaxFactory.IdentifierName(name), SyntaxFactory.Token(SyntaxKind.OpenParenToken), SyntaxFactory.Token(SyntaxKind.CloseParenToken), default, default);
+
+    /// <summary>Creates a new SetAccessorDeclarationSyntax instance.</summary>
+    public static SetAccessorDeclarationSyntax SetAccessorDeclaration(SyntaxTokenList modifiers, SyntaxToken setKeyword, IdentifierNameSyntax name, ParameterListSyntax parameterList, BlockSyntax? body)
+    {
+        if (setKeyword.Kind() != SyntaxKind.SetKeyword) throw new ArgumentException(nameof(setKeyword));
+        if (name == null) throw new ArgumentNullException(nameof(name));
+        if (parameterList == null) throw new ArgumentNullException(nameof(parameterList));
+        return (SetAccessorDeclarationSyntax)Syntax.InternalSyntax.SyntaxFactory.SetAccessorDeclaration(modifiers.Node.ToGreenList<Syntax.InternalSyntax.SyntaxToken>(), (Syntax.InternalSyntax.SyntaxToken)setKeyword.Node!, (Syntax.InternalSyntax.IdentifierNameSyntax)name.Green, (Syntax.InternalSyntax.ParameterListSyntax)parameterList.Green, body == null ? null : (Syntax.InternalSyntax.BlockSyntax)body.Green).CreateRed();
+    }
+
+    /// <summary>Creates a new SetAccessorDeclarationSyntax instance.</summary>
+    public static SetAccessorDeclarationSyntax SetAccessorDeclaration(SyntaxTokenList modifiers, IdentifierNameSyntax name, ParameterListSyntax parameterList, BlockSyntax? body)
+        => SyntaxFactory.SetAccessorDeclaration(modifiers, SyntaxFactory.Token(SyntaxKind.SetKeyword), name, parameterList, body);
+
+    /// <summary>Creates a new SetAccessorDeclarationSyntax instance.</summary>
+    public static SetAccessorDeclarationSyntax SetAccessorDeclaration(IdentifierNameSyntax name)
+        => SyntaxFactory.SetAccessorDeclaration(default(SyntaxTokenList), SyntaxFactory.Token(SyntaxKind.SetKeyword), name, SyntaxFactory.ParameterList(), default);
+
+    /// <summary>Creates a new SetAccessorDeclarationSyntax instance.</summary>
+    public static SetAccessorDeclarationSyntax SetAccessorDeclaration(string name)
+        => SyntaxFactory.SetAccessorDeclaration(default(SyntaxTokenList), SyntaxFactory.Token(SyntaxKind.SetKeyword), SyntaxFactory.IdentifierName(name), SyntaxFactory.ParameterList(), default);
 
     /// <summary>Creates a new ImportDeclarationSyntax instance.</summary>
     public static ImportDeclarationSyntax ImportDeclaration(SyntaxToken importKeyword, ImportClauseSyntax? importClause, SyntaxToken fromKeyword, ExpressionSyntax moduleSpecifier, SyntaxToken semicolonToken)

@@ -574,6 +574,47 @@
     <Field Name="Statement" Type="StatementSyntax"/>
   </Node>
 
+  <Node Name="ForInStatementSyntax" Base="StatementSyntax">
+    <Kind Name="ForInStatement"/>
+    <Field Name="ForKeyword" Type="SyntaxToken">
+        <Kind Name="ForKeyword"/>
+    </Field>
+    <Field Name="OpenParenToken" Type="SyntaxToken">
+        <Kind Name="OpenParenToken"/>
+    </Field>
+    <Field Name="Initializer" Type="TypeScriptSyntaxNode"/>
+    <Field Name="InKeyword" Type="SyntaxToken">
+        <Kind Name="InKeyword"/>
+    </Field>
+    <Field Name="Expression" Type="ExpressionSyntax"/>
+    <Field Name="CloseParenToken" Type="SyntaxToken">
+        <Kind Name="CloseParenToken"/>
+    </Field>
+    <Field Name="Statement" Type="StatementSyntax"/>
+  </Node>
+
+  <Node Name="ForOfStatementSyntax" Base="StatementSyntax">
+    <Kind Name="ForOfStatement"/>
+    <Field Name="ForKeyword" Type="SyntaxToken">
+        <Kind Name="ForKeyword"/>
+    </Field>
+    <Field Name="AwaitKeyword" Type="SyntaxToken" Optional="true">
+        <Kind Name="AwaitKeyword"/>
+    </Field>
+    <Field Name="OpenParenToken" Type="SyntaxToken">
+        <Kind Name="OpenParenToken"/>
+    </Field>
+    <Field Name="Initializer" Type="TypeScriptSyntaxNode"/>
+    <Field Name="OfKeyword" Type="SyntaxToken">
+        <Kind Name="OfKeyword"/>
+    </Field>
+    <Field Name="Expression" Type="ExpressionSyntax"/>
+    <Field Name="CloseParenToken" Type="SyntaxToken">
+        <Kind Name="CloseParenToken"/>
+    </Field>
+    <Field Name="Statement" Type="StatementSyntax"/>
+  </Node>
+
   <Node Name="VariableDeclarationSyntax" Base="TypeScriptSyntaxNode">
     <Kind Name="VariableDeclaration"/>
     <Field Name="Identifier" Type="SyntaxToken">
@@ -621,6 +662,7 @@
 
   <Node Name="TypeAliasDeclarationSyntax" Base="DeclarationStatementSyntax">
     <Kind Name="TypeAliasDeclaration"/>
+    <Field Name="Modifiers" Type="SyntaxList&lt;SyntaxToken&gt;"/>
     <Field Name="TypeKeyword" Type="SyntaxToken">
       <Kind Name="TypeKeyword"/>
     </Field>
@@ -639,6 +681,7 @@
 
   <Node Name="EnumDeclarationSyntax" Base="DeclarationStatementSyntax">
     <Kind Name="EnumDeclaration"/>
+    <Field Name="Modifiers" Type="SyntaxList&lt;SyntaxToken&gt;"/>
     <Field Name="EnumKeyword" Type="SyntaxToken">
       <Kind Name="EnumKeyword"/>
     </Field>
@@ -664,9 +707,7 @@
 
   <Node Name="FunctionDeclarationSyntax" Base="DeclarationStatementSyntax">
     <Kind Name="FunctionDeclaration"/>
-    <Field Name="AsyncKeyword" Type="SyntaxToken" Optional="true">
-      <Kind Name="AsyncKeyword"/>
-    </Field>
+    <Field Name="Modifiers" Type="SyntaxList&lt;SyntaxToken&gt;"/>
     <Field Name="FunctionKeyword" Type="SyntaxToken">
       <Kind Name="FunctionKeyword"/>
     </Field>
@@ -681,6 +722,7 @@
 
   <Node Name="InterfaceDeclarationSyntax" Base="DeclarationStatementSyntax">
     <Kind Name="InterfaceDeclaration"/>
+    <Field Name="Modifiers" Type="SyntaxList&lt;SyntaxToken&gt;"/>
     <Field Name="InterfaceKeyword" Type="SyntaxToken">
       <Kind Name="InterfaceKeyword"/>
     </Field>
@@ -699,6 +741,7 @@
 
   <Node Name="ClassDeclarationSyntax" Base="DeclarationStatementSyntax">
     <Kind Name="ClassDeclaration"/>
+    <Field Name="Modifiers" Type="SyntaxList&lt;SyntaxToken&gt;"/>
     <Field Name="ClassKeyword" Type="SyntaxToken">
       <Kind Name="ClassKeyword"/>
     </Field>
@@ -717,9 +760,7 @@
 
   <Node Name="MethodDeclarationSyntax" Base="ClassElementSyntax">
     <Kind Name="MethodDeclaration"/>
-    <Field Name="AsyncKeyword" Type="SyntaxToken" Optional="true">
-      <Kind Name="AsyncKeyword"/>
-    </Field>
+    <Field Name="Modifiers" Type="SyntaxList&lt;SyntaxToken&gt;"/>
     <Field Name="Name" Type="IdentifierNameSyntax"/>
     <Field Name="TypeParameters" Type="TypeParameterListSyntax" Optional="true"/>
     <Field Name="ParameterList" Type="ParameterListSyntax"/>
@@ -729,6 +770,7 @@
 
   <Node Name="PropertyDeclarationSyntax" Base="ClassElementSyntax">
     <Kind Name="PropertyDeclaration"/>
+    <Field Name="Modifiers" Type="SyntaxList&lt;SyntaxToken&gt;"/>
     <Field Name="Name" Type="IdentifierNameSyntax"/>
     <Field Name="TypeAnnotation" Type="TypeAnnotationSyntax" Optional="true"/>
     <Field Name="EqualsValueClause" Type="EqualsValueClauseSyntax" Optional="true"/>
@@ -739,9 +781,38 @@
 
   <Node Name="ConstructorDeclarationSyntax" Base="ClassElementSyntax">
     <Kind Name="ConstructorDeclaration"/>
+    <Field Name="Modifiers" Type="SyntaxList&lt;SyntaxToken&gt;"/>
     <Field Name="ConstructorKeyword" Type="SyntaxToken">
         <Kind Name="ConstructorKeyword"/>
     </Field>
+    <Field Name="ParameterList" Type="ParameterListSyntax"/>
+    <Field Name="Body" Type="BlockSyntax" Optional="true"/>
+  </Node>
+
+  <Node Name="GetAccessorDeclarationSyntax" Base="ClassElementSyntax">
+    <Kind Name="GetAccessor"/>
+    <Field Name="Modifiers" Type="SyntaxList&lt;SyntaxToken&gt;"/>
+    <Field Name="GetKeyword" Type="SyntaxToken">
+      <Kind Name="GetKeyword"/>
+    </Field>
+    <Field Name="Name" Type="IdentifierNameSyntax"/>
+    <Field Name="OpenParenToken" Type="SyntaxToken">
+      <Kind Name="OpenParenToken"/>
+    </Field>
+    <Field Name="CloseParenToken" Type="SyntaxToken">
+      <Kind Name="CloseParenToken"/>
+    </Field>
+    <Field Name="TypeAnnotation" Type="TypeAnnotationSyntax" Optional="true"/>
+    <Field Name="Body" Type="BlockSyntax" Optional="true"/>
+  </Node>
+
+  <Node Name="SetAccessorDeclarationSyntax" Base="ClassElementSyntax">
+    <Kind Name="SetAccessor"/>
+    <Field Name="Modifiers" Type="SyntaxList&lt;SyntaxToken&gt;"/>
+    <Field Name="SetKeyword" Type="SyntaxToken">
+      <Kind Name="SetKeyword"/>
+    </Field>
+    <Field Name="Name" Type="IdentifierNameSyntax"/>
     <Field Name="ParameterList" Type="ParameterListSyntax"/>
     <Field Name="Body" Type="BlockSyntax" Optional="true"/>
   </Node>
