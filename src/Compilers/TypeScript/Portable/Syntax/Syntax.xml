@@ -43,6 +43,12 @@
     <Kind Name="LogicalAndExpression"/>
     <Kind Name="LogicalOrExpression"/>
     <Kind Name="AssignmentExpression"/>
+    <Kind Name="BitwiseAndExpression"/>
+    <Kind Name="BitwiseOrExpression"/>
+    <Kind Name="ExclusiveOrExpression"/>
+    <Kind Name="LeftShiftExpression"/>
+    <Kind Name="RightShiftExpression"/>
+    <Kind Name="UnsignedRightShiftExpression"/>
     <Field Name="Left" Type="ExpressionSyntax"/>
     <Field Name="OperatorToken" Type="SyntaxToken"/>
     <Field Name="Right" Type="ExpressionSyntax"/>
@@ -91,6 +97,19 @@
       <Kind Name="VoidKeyword"/>
     </Field>
     <Field Name="Expression" Type="ExpressionSyntax"/>
+  </Node>
+
+  <Node Name="ConditionalExpressionSyntax" Base="ExpressionSyntax">
+    <Kind Name="ConditionalExpression"/>
+    <Field Name="Condition" Type="ExpressionSyntax"/>
+    <Field Name="QuestionToken" Type="SyntaxToken">
+        <Kind Name="QuestionToken"/>
+    </Field>
+    <Field Name="WhenTrue" Type="ExpressionSyntax"/>
+    <Field Name="ColonToken" Type="SyntaxToken">
+        <Kind Name="ColonToken"/>
+    </Field>
+    <Field Name="WhenFalse" Type="ExpressionSyntax"/>
   </Node>
 
   <Node Name="ThisExpressionSyntax" Base="ExpressionSyntax">

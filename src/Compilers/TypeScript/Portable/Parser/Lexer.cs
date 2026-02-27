@@ -205,13 +205,26 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                 case '~': _textWindow.AdvanceChar(); return SyntaxKind.TildeToken;
                 case '<':
                     _textWindow.AdvanceChar();
+                    if (_textWindow.PeekChar() == '<') {
+                        _textWindow.AdvanceChar();
+                        if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.LessThanLessThanEqualsToken; }
+                        return SyntaxKind.LessThanLessThanToken;
+                    }
                     if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.LessThanEqualsToken; } // <=
-                    // <<
                     return SyntaxKind.LessThanToken;
                 case '>':
                     _textWindow.AdvanceChar();
+                    if (_textWindow.PeekChar() == '>') {
+                        _textWindow.AdvanceChar();
+                        if (_textWindow.PeekChar() == '>') {
+                            _textWindow.AdvanceChar();
+                            if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken; }
+                            return SyntaxKind.GreaterThanGreaterThanGreaterThanToken;
+                        }
+                        if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.GreaterThanGreaterThanEqualsToken; }
+                        return SyntaxKind.GreaterThanGreaterThanToken;
+                    }
                     if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.GreaterThanEqualsToken; } // >=
-                    // >>, >>>
                     return SyntaxKind.GreaterThanToken;
                 case '=':
                     _textWindow.AdvanceChar();
@@ -232,40 +245,40 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                     return SyntaxKind.ExclamationToken;
                 case '+':
                     _textWindow.AdvanceChar();
-                    if (_textWindow.PeekChar() == '+') { _textWindow.AdvanceChar(); return SyntaxKind.PlusPlusToken; } // Need to add
-                    if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.PlusEqualsToken; } // Need to add
+                    if (_textWindow.PeekChar() == '+') { _textWindow.AdvanceChar(); return SyntaxKind.PlusPlusToken; }
+                    if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.PlusEqualsToken; }
                     return SyntaxKind.PlusToken;
                 case '-':
                     _textWindow.AdvanceChar();
-                    if (_textWindow.PeekChar() == '-') { _textWindow.AdvanceChar(); return SyntaxKind.MinusMinusToken; } // Need to add
-                    if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.MinusEqualsToken; } // Need to add
+                    if (_textWindow.PeekChar() == '-') { _textWindow.AdvanceChar(); return SyntaxKind.MinusMinusToken; }
+                    if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.MinusEqualsToken; }
                     return SyntaxKind.MinusToken;
                 case '*':
                     _textWindow.AdvanceChar();
-                    if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.AsteriskEqualsToken; } // Need to add
+                    if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.AsteriskEqualsToken; }
                     return SyntaxKind.AsteriskToken;
                 case '/':
                     _textWindow.AdvanceChar();
-                    if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.SlashEqualsToken; } // Need to add
+                    if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.SlashEqualsToken; }
                     return SyntaxKind.SlashToken;
                 case '%':
                     _textWindow.AdvanceChar();
-                    if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.PercentEqualsToken; } // Need to add
+                    if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.PercentEqualsToken; }
                     return SyntaxKind.PercentToken;
                 case '&':
                     _textWindow.AdvanceChar();
-                    if (_textWindow.PeekChar() == '&') { _textWindow.AdvanceChar(); return SyntaxKind.AmpersandAmpersandToken; } // Need to add
-                    if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.AmpersandEqualsToken; } // Need to add
+                    if (_textWindow.PeekChar() == '&') { _textWindow.AdvanceChar(); return SyntaxKind.AmpersandAmpersandToken; }
+                    if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.AmpersandEqualsToken; }
                     return SyntaxKind.AmpersandToken;
                 case '|':
                     _textWindow.AdvanceChar();
-                    if (_textWindow.PeekChar() == '|') { _textWindow.AdvanceChar(); return SyntaxKind.BarBarToken; } // Need to add
-                    if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.BarEqualsToken; } // Need to add
+                    if (_textWindow.PeekChar() == '|') { _textWindow.AdvanceChar(); return SyntaxKind.BarBarToken; }
+                    if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.BarEqualsToken; }
                     return SyntaxKind.BarToken;
                 case '^':
                     _textWindow.AdvanceChar();
-                    if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.CaretEqualsToken; } // Need to add
-                    return SyntaxKind.CaretToken; // Need to add
+                    if (_textWindow.PeekChar() == '=') { _textWindow.AdvanceChar(); return SyntaxKind.CaretEqualsToken; }
+                    return SyntaxKind.CaretToken;
                 case '"':
                 case '\'':
                     return ScanStringLiteral();

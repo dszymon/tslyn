@@ -766,6 +766,109 @@ internal sealed partial class VoidExpressionSyntax : ExpressionSyntax
         => new VoidExpressionSyntax(this.Kind, this.voidKeyword, this.expression, GetDiagnostics(), annotations);
 }
 
+internal sealed partial class ConditionalExpressionSyntax : ExpressionSyntax
+{
+    internal readonly ExpressionSyntax condition;
+    internal readonly SyntaxToken questionToken;
+    internal readonly ExpressionSyntax whenTrue;
+    internal readonly SyntaxToken colonToken;
+    internal readonly ExpressionSyntax whenFalse;
+
+    internal ConditionalExpressionSyntax(SyntaxKind kind, ExpressionSyntax condition, SyntaxToken questionToken, ExpressionSyntax whenTrue, SyntaxToken colonToken, ExpressionSyntax whenFalse, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 5;
+        this.AdjustFlagsAndWidth(condition);
+        this.condition = condition;
+        this.AdjustFlagsAndWidth(questionToken);
+        this.questionToken = questionToken;
+        this.AdjustFlagsAndWidth(whenTrue);
+        this.whenTrue = whenTrue;
+        this.AdjustFlagsAndWidth(colonToken);
+        this.colonToken = colonToken;
+        this.AdjustFlagsAndWidth(whenFalse);
+        this.whenFalse = whenFalse;
+    }
+
+    internal ConditionalExpressionSyntax(SyntaxKind kind, ExpressionSyntax condition, SyntaxToken questionToken, ExpressionSyntax whenTrue, SyntaxToken colonToken, ExpressionSyntax whenFalse, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 5;
+        this.AdjustFlagsAndWidth(condition);
+        this.condition = condition;
+        this.AdjustFlagsAndWidth(questionToken);
+        this.questionToken = questionToken;
+        this.AdjustFlagsAndWidth(whenTrue);
+        this.whenTrue = whenTrue;
+        this.AdjustFlagsAndWidth(colonToken);
+        this.colonToken = colonToken;
+        this.AdjustFlagsAndWidth(whenFalse);
+        this.whenFalse = whenFalse;
+    }
+
+    internal ConditionalExpressionSyntax(SyntaxKind kind, ExpressionSyntax condition, SyntaxToken questionToken, ExpressionSyntax whenTrue, SyntaxToken colonToken, ExpressionSyntax whenFalse)
+      : base(kind)
+    {
+        this.SlotCount = 5;
+        this.AdjustFlagsAndWidth(condition);
+        this.condition = condition;
+        this.AdjustFlagsAndWidth(questionToken);
+        this.questionToken = questionToken;
+        this.AdjustFlagsAndWidth(whenTrue);
+        this.whenTrue = whenTrue;
+        this.AdjustFlagsAndWidth(colonToken);
+        this.colonToken = colonToken;
+        this.AdjustFlagsAndWidth(whenFalse);
+        this.whenFalse = whenFalse;
+    }
+
+    public ExpressionSyntax Condition => this.condition;
+    public SyntaxToken QuestionToken => this.questionToken;
+    public ExpressionSyntax WhenTrue => this.whenTrue;
+    public SyntaxToken ColonToken => this.colonToken;
+    public ExpressionSyntax WhenFalse => this.whenFalse;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.condition,
+            1 => this.questionToken,
+            2 => this.whenTrue,
+            3 => this.colonToken,
+            4 => this.whenFalse,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.ConditionalExpressionSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitConditionalExpression(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitConditionalExpression(this);
+
+    public ConditionalExpressionSyntax Update(ExpressionSyntax condition, SyntaxToken questionToken, ExpressionSyntax whenTrue, SyntaxToken colonToken, ExpressionSyntax whenFalse)
+    {
+        if (condition != this.Condition || questionToken != this.QuestionToken || whenTrue != this.WhenTrue || colonToken != this.ColonToken || whenFalse != this.WhenFalse)
+        {
+            var newNode = SyntaxFactory.ConditionalExpression(condition, questionToken, whenTrue, colonToken, whenFalse);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new ConditionalExpressionSyntax(this.Kind, this.condition, this.questionToken, this.whenTrue, this.colonToken, this.whenFalse, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new ConditionalExpressionSyntax(this.Kind, this.condition, this.questionToken, this.whenTrue, this.colonToken, this.whenFalse, GetDiagnostics(), annotations);
+}
+
 internal sealed partial class ThisExpressionSyntax : ExpressionSyntax
 {
     internal readonly SyntaxToken thisKeyword;
@@ -6971,6 +7074,7 @@ internal partial class TypeScriptSyntaxVisitor<TResult>
     public virtual TResult VisitDeleteExpression(DeleteExpressionSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitTypeOfExpression(TypeOfExpressionSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitVoidExpression(VoidExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitConditionalExpression(ConditionalExpressionSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitThisExpression(ThisExpressionSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitArgument(ArgumentSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitArgumentList(ArgumentListSyntax node) => this.DefaultVisit(node);
@@ -7045,6 +7149,7 @@ internal partial class TypeScriptSyntaxVisitor
     public virtual void VisitDeleteExpression(DeleteExpressionSyntax node) => this.DefaultVisit(node);
     public virtual void VisitTypeOfExpression(TypeOfExpressionSyntax node) => this.DefaultVisit(node);
     public virtual void VisitVoidExpression(VoidExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitConditionalExpression(ConditionalExpressionSyntax node) => this.DefaultVisit(node);
     public virtual void VisitThisExpression(ThisExpressionSyntax node) => this.DefaultVisit(node);
     public virtual void VisitArgument(ArgumentSyntax node) => this.DefaultVisit(node);
     public virtual void VisitArgumentList(ArgumentListSyntax node) => this.DefaultVisit(node);
@@ -7136,6 +7241,9 @@ internal partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<TypeSc
 
     public override TypeScriptSyntaxNode VisitVoidExpression(VoidExpressionSyntax node)
         => node.Update((SyntaxToken)Visit(node.VoidKeyword), (ExpressionSyntax)Visit(node.Expression));
+
+    public override TypeScriptSyntaxNode VisitConditionalExpression(ConditionalExpressionSyntax node)
+        => node.Update((ExpressionSyntax)Visit(node.Condition), (SyntaxToken)Visit(node.QuestionToken), (ExpressionSyntax)Visit(node.WhenTrue), (SyntaxToken)Visit(node.ColonToken), (ExpressionSyntax)Visit(node.WhenFalse));
 
     public override TypeScriptSyntaxNode VisitThisExpression(ThisExpressionSyntax node)
         => node.Update((SyntaxToken)Visit(node.ThisKeyword));
@@ -7393,7 +7501,13 @@ internal partial class ContextAwareSyntax
             case SyntaxKind.GreaterThanOrEqualExpression:
             case SyntaxKind.LogicalAndExpression:
             case SyntaxKind.LogicalOrExpression:
-            case SyntaxKind.AssignmentExpression: break;
+            case SyntaxKind.AssignmentExpression:
+            case SyntaxKind.BitwiseAndExpression:
+            case SyntaxKind.BitwiseOrExpression:
+            case SyntaxKind.ExclusiveOrExpression:
+            case SyntaxKind.LeftShiftExpression:
+            case SyntaxKind.RightShiftExpression:
+            case SyntaxKind.UnsignedRightShiftExpression: break;
             default: throw new ArgumentException(nameof(kind));
         }
 #if DEBUG
@@ -7538,6 +7652,21 @@ internal partial class ContextAwareSyntax
         }
 
         return result;
+    }
+
+    public ConditionalExpressionSyntax ConditionalExpression(ExpressionSyntax condition, SyntaxToken questionToken, ExpressionSyntax whenTrue, SyntaxToken colonToken, ExpressionSyntax whenFalse)
+    {
+#if DEBUG
+        if (condition == null) throw new ArgumentNullException(nameof(condition));
+        if (questionToken == null) throw new ArgumentNullException(nameof(questionToken));
+        if (questionToken.Kind != SyntaxKind.QuestionToken) throw new ArgumentException(nameof(questionToken));
+        if (whenTrue == null) throw new ArgumentNullException(nameof(whenTrue));
+        if (colonToken == null) throw new ArgumentNullException(nameof(colonToken));
+        if (colonToken.Kind != SyntaxKind.ColonToken) throw new ArgumentException(nameof(colonToken));
+        if (whenFalse == null) throw new ArgumentNullException(nameof(whenFalse));
+#endif
+
+        return new ConditionalExpressionSyntax(SyntaxKind.ConditionalExpression, condition, questionToken, whenTrue, colonToken, whenFalse, this.context);
     }
 
     public ThisExpressionSyntax ThisExpression(SyntaxToken thisKeyword)
@@ -8957,7 +9086,13 @@ internal static partial class SyntaxFactory
             case SyntaxKind.GreaterThanOrEqualExpression:
             case SyntaxKind.LogicalAndExpression:
             case SyntaxKind.LogicalOrExpression:
-            case SyntaxKind.AssignmentExpression: break;
+            case SyntaxKind.AssignmentExpression:
+            case SyntaxKind.BitwiseAndExpression:
+            case SyntaxKind.BitwiseOrExpression:
+            case SyntaxKind.ExclusiveOrExpression:
+            case SyntaxKind.LeftShiftExpression:
+            case SyntaxKind.RightShiftExpression:
+            case SyntaxKind.UnsignedRightShiftExpression: break;
             default: throw new ArgumentException(nameof(kind));
         }
 #if DEBUG
@@ -9102,6 +9237,21 @@ internal static partial class SyntaxFactory
         }
 
         return result;
+    }
+
+    public static ConditionalExpressionSyntax ConditionalExpression(ExpressionSyntax condition, SyntaxToken questionToken, ExpressionSyntax whenTrue, SyntaxToken colonToken, ExpressionSyntax whenFalse)
+    {
+#if DEBUG
+        if (condition == null) throw new ArgumentNullException(nameof(condition));
+        if (questionToken == null) throw new ArgumentNullException(nameof(questionToken));
+        if (questionToken.Kind != SyntaxKind.QuestionToken) throw new ArgumentException(nameof(questionToken));
+        if (whenTrue == null) throw new ArgumentNullException(nameof(whenTrue));
+        if (colonToken == null) throw new ArgumentNullException(nameof(colonToken));
+        if (colonToken.Kind != SyntaxKind.ColonToken) throw new ArgumentException(nameof(colonToken));
+        if (whenFalse == null) throw new ArgumentNullException(nameof(whenFalse));
+#endif
+
+        return new ConditionalExpressionSyntax(SyntaxKind.ConditionalExpression, condition, questionToken, whenTrue, colonToken, whenFalse);
     }
 
     public static ThisExpressionSyntax ThisExpression(SyntaxToken thisKeyword)
