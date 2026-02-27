@@ -130,6 +130,7 @@
   <Folder Name="/Compilers/TypeScript/">
     <Project Path="src/Compilers/TypeScript/Portable/Microsoft.CodeAnalysis.TypeScript.csproj" />
     <Project Path="src/Compilers/TypeScript/Test/Microsoft.CodeAnalysis.TypeScript.UnitTests.csproj" />
+    <Project Path="src/Compilers/TypeScript/Tools/ParserStatus/Microsoft.CodeAnalysis.TypeScript.ParserStatus.csproj" />
   </Folder>
   <Folder Name="/Compilers/VisualBasic/">
     <Project Path="src/Compilers/Test/Utilities/VisualBasic/Microsoft.CodeAnalysis.VisualBasic.Test.Utilities.vbproj" />

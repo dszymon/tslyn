@@ -315,7 +315,15 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
              {
                  while (_currentToken.Kind != SyntaxKind.CloseBraceToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
                  {
-                     elements.Add(ParseImportSpecifier());
+                     var specifier = ParseImportSpecifier();
+                     if (specifier.FullWidth == 0)
+                     {
+                         EatToken(); // error recovery
+                     }
+                     else
+                     {
+                         elements.Add(specifier);
+                     }
                      if (_currentToken.Kind == SyntaxKind.CommaToken)
                          elements.AddSeparator(EatToken());
                      else
@@ -411,7 +419,15 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
              {
                  while (_currentToken.Kind != SyntaxKind.CloseBraceToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
                  {
-                     elements.Add(ParseExportSpecifier());
+                     var specifier = ParseExportSpecifier();
+                     if (specifier.FullWidth == 0)
+                     {
+                         EatToken(); // error recovery
+                     }
+                     else
+                     {
+                         elements.Add(specifier);
+                     }
                      if (_currentToken.Kind == SyntaxKind.CommaToken)
                          elements.AddSeparator(EatToken());
                      else
@@ -479,7 +495,15 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                    _currentToken.Kind != SyntaxKind.CloseBraceToken &&
                    _currentToken.Kind != SyntaxKind.EndOfFileToken)
             {
-                statements.Add(ParseStatement());
+                var stmt = ParseStatement();
+                if (stmt.FullWidth == 0)
+                {
+                    EatToken(); // error recovery
+                }
+                else
+                {
+                    statements.Add(stmt);
+                }
             }
             return statements.ToList();
         }
@@ -706,7 +730,15 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             var members = new SyntaxListBuilder<TypeElementSyntax>(8);
             while (_currentToken.Kind != SyntaxKind.CloseBraceToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
             {
-                members.Add(ParseTypeElement());
+                var member = ParseTypeElement();
+                if (member.FullWidth == 0)
+                {
+                    EatToken(); // error recovery
+                }
+                else
+                {
+                    members.Add(member);
+                }
             }
 
             var closeBrace = EatToken(SyntaxKind.CloseBraceToken);
@@ -737,7 +769,15 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             {
                 while (_currentToken.Kind != SyntaxKind.CloseBraceToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
                 {
-                    members.Add(ParseEnumMember());
+                    var member = ParseEnumMember();
+                    if (member.FullWidth == 0)
+                    {
+                        EatToken(); // error recovery
+                    }
+                    else
+                    {
+                        members.Add(member);
+                    }
 
                     if (_currentToken.Kind == SyntaxKind.CommaToken)
                     {
@@ -775,7 +815,15 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             var members = new SyntaxListBuilder<ClassElementSyntax>(8);
             while (_currentToken.Kind != SyntaxKind.CloseBraceToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
             {
-                members.Add(ParseClassElement());
+                var member = ParseClassElement();
+                if (member.FullWidth == 0)
+                {
+                    EatToken(); // error recovery
+                }
+                else
+                {
+                    members.Add(member);
+                }
             }
 
             var closeBrace = EatToken(SyntaxKind.CloseBraceToken);
@@ -790,11 +838,24 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                 var lessThanToken = EatToken();
                 var parameters = new SeparatedSyntaxListBuilder<TypeParameterSyntax>(8);
 
-                parameters.Add(ParseTypeParameter());
+                var firstParam = ParseTypeParameter();
+                if (firstParam.FullWidth > 0)
+                {
+                    parameters.Add(firstParam);
+                }
+
                 while (_currentToken.Kind == SyntaxKind.CommaToken)
                 {
                     parameters.AddSeparator(EatToken());
-                    parameters.Add(ParseTypeParameter());
+                    var nextParam = ParseTypeParameter();
+                    if (nextParam.FullWidth == 0)
+                    {
+                        EatToken(); // recovery
+                    }
+                    else
+                    {
+                        parameters.Add(nextParam);
+                    }
                 }
 
                 var greaterThanToken = EatToken(SyntaxKind.GreaterThanToken);
@@ -997,7 +1058,15 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             var statements = new SyntaxListBuilder<StatementSyntax>(8);
             while (_currentToken.Kind != SyntaxKind.CloseBraceToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
             {
-                statements.Add(ParseStatement());
+                var stmt = ParseStatement();
+                if (stmt.FullWidth == 0)
+                {
+                    EatToken(); // error recovery
+                }
+                else
+                {
+                    statements.Add(stmt);
+                }
             }
             var closeBrace = EatToken(SyntaxKind.CloseBraceToken);
             return SyntaxFactory.Block(openBrace, statements.ToList(), closeBrace);
@@ -1227,11 +1296,23 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             {
                  var lessThan = EatToken();
                  var args = new SeparatedSyntaxListBuilder<TypeSyntax>(8);
-                 args.Add(ParseType());
+                 var firstArg = ParseType();
+                 if (firstArg.FullWidth > 0)
+                 {
+                     args.Add(firstArg);
+                 }
                  while (_currentToken.Kind == SyntaxKind.CommaToken)
                  {
                      args.AddSeparator(EatToken());
-                     args.Add(ParseType());
+                     var nextArg = ParseType();
+                     if (nextArg.FullWidth == 0)
+                     {
+                         EatToken();
+                     }
+                     else
+                     {
+                         args.Add(nextArg);
+                     }
                  }
                  var greaterThan = EatToken(SyntaxKind.GreaterThanToken);
                  return SyntaxFactory.TypeArgumentList(lessThan, args.ToList(), greaterThan);
@@ -1849,7 +1930,15 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             {
                 while (_currentToken.Kind != SyntaxKind.CloseBracketToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
                 {
-                    elements.Add(ParseExpression());
+                    var expr = ParseExpression();
+                    if (expr.FullWidth == 0)
+                    {
+                        EatToken(); // error recovery
+                    }
+                    else
+                    {
+                        elements.Add(expr);
+                    }
 
                     if (_currentToken.Kind == SyntaxKind.CommaToken)
                     {
@@ -1875,7 +1964,15 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             {
                 while (_currentToken.Kind != SyntaxKind.CloseBraceToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
                 {
-                    properties.Add(ParsePropertyAssignment());
+                    var prop = ParsePropertyAssignment();
+                    if (prop.FullWidth == 0)
+                    {
+                        EatToken(); // error recovery
+                    }
+                    else
+                    {
+                        properties.Add(prop);
+                    }
 
                     if (_currentToken.Kind == SyntaxKind.CommaToken)
                     {

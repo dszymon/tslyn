@@ -50,7 +50,7 @@ namespace Microsoft.CodeAnalysis.TypeScript
 
         protected abstract override SyntaxNode GetRootCore(CancellationToken cancellationToken);
 
-        protected abstract override bool TryGetRootCore(out SyntaxNode? root);
+        protected abstract override bool TryGetRootCore(out SyntaxNode root);
 
         // Internal implementation
         internal class ParsedSyntaxTree : TypeScriptSyntaxTree
@@ -90,7 +90,7 @@ namespace Microsoft.CodeAnalysis.TypeScript
                 return SourceText.From(_root!.ToFullString());
             }
 
-            public override bool TryGetText(out SourceText? text)
+            public override bool TryGetText(out SourceText text)
             {
                 text = _text;
                 return text != null;
@@ -129,7 +129,7 @@ namespace Microsoft.CodeAnalysis.TypeScript
                  }
             }
 
-            protected override bool TryGetRootCore(out SyntaxNode? root)
+            protected override bool TryGetRootCore(out SyntaxNode root)
             {
                 if (_root != null)
                 {
