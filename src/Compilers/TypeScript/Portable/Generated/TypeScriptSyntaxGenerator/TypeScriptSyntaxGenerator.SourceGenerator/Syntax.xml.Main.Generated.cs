@@ -118,6 +118,9 @@ public partial class TypeScriptSyntaxVisitor<TResult>
     /// <summary>Called when the visitor visits a ParenthesizedTypeSyntax node.</summary>
     public virtual TResult? VisitParenthesizedType(ParenthesizedTypeSyntax node) => this.DefaultVisit(node);
 
+    /// <summary>Called when the visitor visits a ParenthesizedExpressionSyntax node.</summary>
+    public virtual TResult? VisitParenthesizedExpression(ParenthesizedExpressionSyntax node) => this.DefaultVisit(node);
+
     /// <summary>Called when the visitor visits a PropertySignatureSyntax node.</summary>
     public virtual TResult? VisitPropertySignature(PropertySignatureSyntax node) => this.DefaultVisit(node);
 
@@ -360,6 +363,9 @@ public partial class TypeScriptSyntaxVisitor
 
     /// <summary>Called when the visitor visits a ParenthesizedTypeSyntax node.</summary>
     public virtual void VisitParenthesizedType(ParenthesizedTypeSyntax node) => this.DefaultVisit(node);
+
+    /// <summary>Called when the visitor visits a ParenthesizedExpressionSyntax node.</summary>
+    public virtual void VisitParenthesizedExpression(ParenthesizedExpressionSyntax node) => this.DefaultVisit(node);
 
     /// <summary>Called when the visitor visits a PropertySignatureSyntax node.</summary>
     public virtual void VisitPropertySignature(PropertySignatureSyntax node) => this.DefaultVisit(node);
@@ -604,6 +610,9 @@ public partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<SyntaxNo
     public override SyntaxNode? VisitParenthesizedType(ParenthesizedTypeSyntax node)
         => node.Update(VisitToken(node.OpenParenToken), (TypeSyntax?)Visit(node.Type) ?? throw new ArgumentNullException("type"), VisitToken(node.CloseParenToken));
 
+    public override SyntaxNode? VisitParenthesizedExpression(ParenthesizedExpressionSyntax node)
+        => node.Update(VisitToken(node.OpenParenToken), (ExpressionSyntax?)Visit(node.Expression) ?? throw new ArgumentNullException("expression"), VisitToken(node.CloseParenToken));
+
     public override SyntaxNode? VisitPropertySignature(PropertySignatureSyntax node)
         => node.Update((IdentifierNameSyntax?)Visit(node.Name) ?? throw new ArgumentNullException("name"), VisitToken(node.QuestionToken), (TypeAnnotationSyntax?)Visit(node.TypeAnnotation), VisitToken(node.SemicolonToken));
 
@@ -677,7 +686,7 @@ public partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<SyntaxNo
         => node.Update(VisitToken(node.DeclarationKeyword), (VariableDeclarationSyntax?)Visit(node.Declaration) ?? throw new ArgumentNullException("declaration"), VisitToken(node.SemicolonToken));
 
     public override SyntaxNode? VisitParameter(ParameterSyntax node)
-        => node.Update(VisitToken(node.Identifier), (TypeAnnotationSyntax?)Visit(node.TypeAnnotation));
+        => node.Update(VisitList(node.Modifiers), VisitToken(node.DotDotDotToken), VisitToken(node.Identifier), VisitToken(node.QuestionToken), (TypeAnnotationSyntax?)Visit(node.TypeAnnotation), (EqualsValueClauseSyntax?)Visit(node.Initializer));
 
     public override SyntaxNode? VisitParameterList(ParameterListSyntax node)
         => node.Update(VisitToken(node.OpenParenToken), VisitList(node.Parameters), VisitToken(node.CloseParenToken));
@@ -1202,6 +1211,19 @@ public static partial class SyntaxFactory
     public static ParenthesizedTypeSyntax ParenthesizedType(TypeSyntax type)
         => SyntaxFactory.ParenthesizedType(SyntaxFactory.Token(SyntaxKind.OpenParenToken), type, SyntaxFactory.Token(SyntaxKind.CloseParenToken));
 
+    /// <summary>Creates a new ParenthesizedExpressionSyntax instance.</summary>
+    public static ParenthesizedExpressionSyntax ParenthesizedExpression(SyntaxToken openParenToken, ExpressionSyntax expression, SyntaxToken closeParenToken)
+    {
+        if (openParenToken.Kind() != SyntaxKind.OpenParenToken) throw new ArgumentException(nameof(openParenToken));
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+        if (closeParenToken.Kind() != SyntaxKind.CloseParenToken) throw new ArgumentException(nameof(closeParenToken));
+        return (ParenthesizedExpressionSyntax)Syntax.InternalSyntax.SyntaxFactory.ParenthesizedExpression((Syntax.InternalSyntax.SyntaxToken)openParenToken.Node!, (Syntax.InternalSyntax.ExpressionSyntax)expression.Green, (Syntax.InternalSyntax.SyntaxToken)closeParenToken.Node!).CreateRed();
+    }
+
+    /// <summary>Creates a new ParenthesizedExpressionSyntax instance.</summary>
+    public static ParenthesizedExpressionSyntax ParenthesizedExpression(ExpressionSyntax expression)
+        => SyntaxFactory.ParenthesizedExpression(SyntaxFactory.Token(SyntaxKind.OpenParenToken), expression, SyntaxFactory.Token(SyntaxKind.CloseParenToken));
+
     /// <summary>Creates a new PropertySignatureSyntax instance.</summary>
     public static PropertySignatureSyntax PropertySignature(IdentifierNameSyntax name, SyntaxToken questionToken, TypeAnnotationSyntax? typeAnnotation, SyntaxToken semicolonToken)
     {
@@ -1619,19 +1641,35 @@ public static partial class SyntaxFactory
         => SyntaxFactory.VariableStatement(declarationKeyword, declaration, default);
 
     /// <summary>Creates a new ParameterSyntax instance.</summary>
-    public static ParameterSyntax Parameter(SyntaxToken identifier, TypeAnnotationSyntax? typeAnnotation)
+    public static ParameterSyntax Parameter(SyntaxTokenList modifiers, SyntaxToken dotDotDotToken, SyntaxToken identifier, SyntaxToken questionToken, TypeAnnotationSyntax? typeAnnotation, EqualsValueClauseSyntax? initializer)
     {
+        switch (dotDotDotToken.Kind())
+        {
+            case SyntaxKind.DotDotDotToken:
+            case SyntaxKind.None: break;
+            default: throw new ArgumentException(nameof(dotDotDotToken));
+        }
         if (identifier.Kind() != SyntaxKind.IdentifierToken) throw new ArgumentException(nameof(identifier));
-        return (ParameterSyntax)Syntax.InternalSyntax.SyntaxFactory.Parameter((Syntax.InternalSyntax.SyntaxToken)identifier.Node!, typeAnnotation == null ? null : (Syntax.InternalSyntax.TypeAnnotationSyntax)typeAnnotation.Green).CreateRed();
+        switch (questionToken.Kind())
+        {
+            case SyntaxKind.QuestionToken:
+            case SyntaxKind.None: break;
+            default: throw new ArgumentException(nameof(questionToken));
+        }
+        return (ParameterSyntax)Syntax.InternalSyntax.SyntaxFactory.Parameter(modifiers.Node.ToGreenList<Syntax.InternalSyntax.SyntaxToken>(), (Syntax.InternalSyntax.SyntaxToken?)dotDotDotToken.Node, (Syntax.InternalSyntax.SyntaxToken)identifier.Node!, (Syntax.InternalSyntax.SyntaxToken?)questionToken.Node, typeAnnotation == null ? null : (Syntax.InternalSyntax.TypeAnnotationSyntax)typeAnnotation.Green, initializer == null ? null : (Syntax.InternalSyntax.EqualsValueClauseSyntax)initializer.Green).CreateRed();
     }
 
     /// <summary>Creates a new ParameterSyntax instance.</summary>
+    public static ParameterSyntax Parameter(SyntaxTokenList modifiers, SyntaxToken identifier, TypeAnnotationSyntax? typeAnnotation, EqualsValueClauseSyntax? initializer)
+        => SyntaxFactory.Parameter(modifiers, default, identifier, default, typeAnnotation, initializer);
+
+    /// <summary>Creates a new ParameterSyntax instance.</summary>
     public static ParameterSyntax Parameter(SyntaxToken identifier)
-        => SyntaxFactory.Parameter(identifier, default);
+        => SyntaxFactory.Parameter(default(SyntaxTokenList), default, identifier, default, default, default);
 
     /// <summary>Creates a new ParameterSyntax instance.</summary>
     public static ParameterSyntax Parameter(string identifier)
-        => SyntaxFactory.Parameter(SyntaxFactory.Identifier(identifier), default);
+        => SyntaxFactory.Parameter(default(SyntaxTokenList), default, SyntaxFactory.Identifier(identifier), default, default, default);
 
     /// <summary>Creates a new ParameterListSyntax instance.</summary>
     public static ParameterListSyntax ParameterList(SyntaxToken openParenToken, SeparatedSyntaxList<ParameterSyntax> parameters, SyntaxToken closeParenToken)

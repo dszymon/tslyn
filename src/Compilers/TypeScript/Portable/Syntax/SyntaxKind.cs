@@ -276,6 +276,9 @@ namespace Microsoft.CodeAnalysis.TypeScript
         TupleElement,
         ParenthesizedType,
 
+        // Expressions
+        ParenthesizedExpression,
+
         // Structured Trivia
         StructuredTrivia = 9000,
     }

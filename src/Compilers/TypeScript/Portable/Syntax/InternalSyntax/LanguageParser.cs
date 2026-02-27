@@ -40,6 +40,18 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             return _tokenBuffer[n - 1];
         }
 
+        private SyntaxToken PeekTokenAt(int index)
+        {
+             // index 0 is _currentToken
+             if (index == 0) return _currentToken;
+             // index 1 is _tokenBuffer[0]
+             while (_tokenBuffer.Count < index)
+             {
+                 _tokenBuffer.Add(_lexer.Lex());
+             }
+             return _tokenBuffer[index - 1];
+        }
+
         private SyntaxToken EatToken()
         {
             var token = _currentToken;
@@ -933,9 +945,23 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
         internal ParameterSyntax ParseParameter()
         {
+            var modifiers = ParseModifiers();
+            SyntaxToken? dotDotDot = null;
+            if (_currentToken.Kind == SyntaxKind.DotDotDotToken)
+            {
+                dotDotDot = EatToken();
+            }
+
             var identifier = ParseIdentifierToken();
+            var questionToken = EatOptionalToken(SyntaxKind.QuestionToken);
             var typeAnnotation = ParseOptionalTypeAnnotation();
-            return SyntaxFactory.Parameter(identifier, typeAnnotation);
+            EqualsValueClauseSyntax? initializer = null;
+            if (_currentToken.Kind == SyntaxKind.EqualsToken)
+            {
+                initializer = ParseEqualsValueClause();
+            }
+
+            return SyntaxFactory.Parameter(modifiers, dotDotDot, identifier, questionToken, typeAnnotation, initializer);
         }
 
         internal VariableStatementSyntax ParseVariableStatement()
@@ -1227,6 +1253,24 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
         internal ExpressionSyntax ParseAssignmentExpression()
         {
+            // Arrow function with identifier only? "a => ..."
+            // We can't know until we parse "a".
+            // But ParseConditionalExpression parses binary expressions.
+            // If we have "a => b", ParseConditionalExpression calls ParseBinary...
+            // "=>" is not a binary operator.
+            // So ParseConditionalExpression returns "a" (IdentifierName).
+            // Then we check here.
+
+            // Wait, what if we have "async a => ..."?
+            // "async" is identifier.
+            // ParseConditionalExpression returns "async".
+            // Then "a" follows. Unexpected token for assignment?
+            // Actually "async a =>" is special.
+            // If "async" is parsed as identifier, we might have issues if we didn't handle it in ParsePrimaryExpression.
+            // ParsePrimaryExpression handles "async (params) => ..." and "async identifier => ...".
+            // So "async a =>" should be handled there.
+
+            // However, "a => ..." where "a" is simple identifier.
             var left = ParseConditionalExpression();
 
             if (_currentToken.Kind == SyntaxKind.EqualsGreaterThanToken && IsSimpleParameter(left))
@@ -1657,32 +1701,102 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
         internal ExpressionSyntax ParseParenthesizedOrArrowExpression(SyntaxToken? asyncKeyword = null)
         {
-            var open = EatToken(SyntaxKind.OpenParenToken);
-            if (_currentToken.Kind == SyntaxKind.CloseParenToken)
+            // We need to look ahead to see if this is an arrow function.
+            // If it is, we parse it as parameters.
+            // If not, we parse as ParenthesizedExpression.
+            // But we don't have infinite lookahead easily, or rather we can use PeekToken.
+            // However, (a, b) vs (a, b) => ... is distinguishable by `=>` or `:`.
+            // But `(a)` vs `(a) =>` requires parsing `a` then checking.
+
+            if (IsArrowFunction())
             {
-                var closeParen = EatToken();
-                if (_currentToken.Kind == SyntaxKind.EqualsGreaterThanToken)
-                {
-                    var arrow = EatToken();
-                    var body = ParseArrowFunctionBody();
-                    var paramList = SyntaxFactory.ParameterList(open, default(Microsoft.CodeAnalysis.Syntax.InternalSyntax.SeparatedSyntaxList<ParameterSyntax>), closeParen);
-                    return SyntaxFactory.ArrowFunctionExpression(asyncKeyword, null, paramList, null, arrow, body);
-                }
-                return SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken));
+                return ParseArrowFunctionSignature(asyncKeyword);
             }
 
+            var open = EatToken(SyntaxKind.OpenParenToken);
             var expr = ParseExpression();
             var close = EatToken(SyntaxKind.CloseParenToken);
+            return SyntaxFactory.ParenthesizedExpression(open, expr, close);
+        }
 
-            if (_currentToken.Kind == SyntaxKind.EqualsGreaterThanToken)
+        private bool IsArrowFunction()
+        {
+            // Scan from current token (which should be OpenParen).
+            // We need to find the matching CloseParen and check if next token is `=>` or `:`.
+            // This is a simplified scan that balances parens.
+
+            if (_currentToken.Kind != SyntaxKind.OpenParenToken) return false;
+
+            int depth = 0;
+            int i = 0;
+            while (true)
             {
-                var arrow = EatToken();
-                var body = ParseArrowFunctionBody();
-                var paramList = ConvertToParameterList(open, expr, close);
-                return SyntaxFactory.ArrowFunctionExpression(asyncKeyword, null, paramList, null, arrow, body);
-            }
+                var token = PeekTokenAt(i);
+                if (token.Kind == SyntaxKind.EndOfFileToken) return false;
 
-            return expr;
+                if (token.Kind == SyntaxKind.OpenParenToken)
+                {
+                    depth++;
+                }
+                else if (token.Kind == SyntaxKind.CloseParenToken)
+                {
+                    depth--;
+                    if (depth == 0)
+                    {
+                        // Found matching close paren. Check next token.
+                        var next = PeekTokenAt(i + 1);
+                        if (next.Kind == SyntaxKind.EqualsGreaterThanToken)
+                        {
+                            return true;
+                        }
+                        if (next.Kind == SyntaxKind.ColonToken)
+                        {
+                             // Could be `(a): type =>` or `condition ? (a) : b` or `case (a):`.
+                             // We must find `=>` after the type annotation to be sure it's an arrow function.
+                             int j = i + 2;
+                             int typeDepth = 0;
+                             while (true)
+                             {
+                                 var t = PeekTokenAt(j);
+                                 if (t.Kind == SyntaxKind.EndOfFileToken || t.Kind == SyntaxKind.SemicolonToken || t.Kind == SyntaxKind.OpenBraceToken)
+                                 {
+                                     return false;
+                                 }
+                                 if (t.Kind == SyntaxKind.LessThanToken || t.Kind == SyntaxKind.OpenParenToken || t.Kind == SyntaxKind.OpenBracketToken) typeDepth++;
+                                 if (t.Kind == SyntaxKind.GreaterThanToken || t.Kind == SyntaxKind.CloseParenToken || t.Kind == SyntaxKind.CloseBracketToken) typeDepth--;
+
+                                 if (typeDepth == 0 && t.Kind == SyntaxKind.EqualsGreaterThanToken)
+                                 {
+                                     return true;
+                                 }
+                                 // Stop early if we see something that can't be in a type annotation at top level
+                                 // To be safe, if we hit a comma or assignment, it's not a type annotation
+                                 // But realistically, scanning until `=>` or end of statement is simple.
+                                 j++;
+                             }
+                        }
+                        return false;
+                    }
+                }
+                i++;
+            }
+        }
+
+        internal ArrowFunctionExpressionSyntax ParseArrowFunctionSignature(SyntaxToken? asyncKeyword)
+        {
+             var parameterList = ParseParameterList();
+             TypeAnnotationSyntax? typeAnnotation = null;
+             if (_currentToken.Kind == SyntaxKind.ColonToken)
+             {
+                 var colon = EatToken();
+                 var type = ParseType();
+                 typeAnnotation = SyntaxFactory.TypeAnnotation(colon, type);
+             }
+
+             var arrow = EatToken(SyntaxKind.EqualsGreaterThanToken);
+             var body = ParseArrowFunctionBody();
+
+             return SyntaxFactory.ArrowFunctionExpression(asyncKeyword, null, parameterList, typeAnnotation, arrow, body);
         }
 
         internal TypeScriptSyntaxNode ParseArrowFunctionBody()
@@ -1699,7 +1813,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             var list = new SeparatedSyntaxListBuilder<ParameterSyntax>(4);
             if (expr is IdentifierNameSyntax id)
             {
-                list.Add(SyntaxFactory.Parameter(id.Identifier, null));
+                list.Add(SyntaxFactory.Parameter(default, null, id.Identifier, null, null, null));
             }
             return SyntaxFactory.ParameterList(open, list.ToList(), close);
         }
@@ -1707,7 +1821,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         internal ParameterListSyntax ConvertToParameterList(IdentifierNameSyntax identifier)
         {
             var list = new SeparatedSyntaxListBuilder<ParameterSyntax>(4);
-            list.Add(SyntaxFactory.Parameter(identifier.Identifier, null));
+            list.Add(SyntaxFactory.Parameter(default, null, identifier.Identifier, null, null, null));
             return SyntaxFactory.ParameterList(CreateMissingToken(SyntaxKind.OpenParenToken), list.ToList(), CreateMissingToken(SyntaxKind.CloseParenToken));
         }
 
@@ -1716,7 +1830,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             var list = new SeparatedSyntaxListBuilder<ParameterSyntax>(4);
             if (expr is IdentifierNameSyntax id)
             {
-                list.Add(SyntaxFactory.Parameter(id.Identifier, null));
+                list.Add(SyntaxFactory.Parameter(default, null, id.Identifier, null, null, null));
             }
             return SyntaxFactory.ParameterList(CreateMissingToken(SyntaxKind.OpenParenToken), list.ToList(), CreateMissingToken(SyntaxKind.CloseParenToken));
         }
