@@ -1828,6 +1828,51 @@ public sealed partial class ParenthesizedTypeSyntax : TypeSyntax
 /// <remarks>
 /// <para>This node is associated with the following syntax kinds:</para>
 /// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.ParenthesizedExpression"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ParenthesizedExpressionSyntax : ExpressionSyntax
+{
+    private ExpressionSyntax? expression;
+
+    internal ParenthesizedExpressionSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SyntaxToken OpenParenToken => new SyntaxToken(this, ((InternalSyntax.ParenthesizedExpressionSyntax)this.Green).openParenToken, Position, 0);
+
+    public ExpressionSyntax Expression => GetRed(ref this.expression, 1)!;
+
+    public SyntaxToken CloseParenToken => new SyntaxToken(this, ((InternalSyntax.ParenthesizedExpressionSyntax)this.Green).closeParenToken, GetChildPosition(2), GetChildIndex(2));
+
+    internal override SyntaxNode? GetNodeSlot(int index) => index == 1 ? GetRed(ref this.expression, 1)! : null;
+
+    internal override SyntaxNode? GetCachedSlot(int index) => index == 1 ? this.expression : null;
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitParenthesizedExpression(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitParenthesizedExpression(this);
+
+    public ParenthesizedExpressionSyntax Update(SyntaxToken openParenToken, ExpressionSyntax expression, SyntaxToken closeParenToken)
+    {
+        if (openParenToken != this.OpenParenToken || expression != this.Expression || closeParenToken != this.CloseParenToken)
+        {
+            var newNode = SyntaxFactory.ParenthesizedExpression(openParenToken, expression, closeParenToken);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ParenthesizedExpressionSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ParenthesizedExpressionSyntax WithOpenParenToken(SyntaxToken openParenToken) => Update(openParenToken, this.Expression, this.CloseParenToken);
+    public ParenthesizedExpressionSyntax WithExpression(ExpressionSyntax expression) => Update(this.OpenParenToken, expression, this.CloseParenToken);
+    public ParenthesizedExpressionSyntax WithCloseParenToken(SyntaxToken closeParenToken) => Update(this.OpenParenToken, this.Expression, closeParenToken);
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
 /// <item><description><see cref="SyntaxKind.PropertySignature"/></description></item>
 /// </list>
 /// </remarks>
@@ -3271,28 +3316,70 @@ public sealed partial class VariableStatementSyntax : StatementSyntax
 public sealed partial class ParameterSyntax : TypeScriptSyntaxNode
 {
     private TypeAnnotationSyntax? typeAnnotation;
+    private EqualsValueClauseSyntax? initializer;
 
     internal ParameterSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
       : base(green, parent, position)
     {
     }
 
-    public SyntaxToken Identifier => new SyntaxToken(this, ((InternalSyntax.ParameterSyntax)this.Green).identifier, Position, 0);
+    public SyntaxTokenList Modifiers
+    {
+        get
+        {
+            var slot = this.Green.GetSlot(0);
+            return slot != null ? new SyntaxTokenList(this, slot, Position, 0) : default;
+        }
+    }
 
-    public TypeAnnotationSyntax? TypeAnnotation => GetRed(ref this.typeAnnotation, 1);
+    public SyntaxToken DotDotDotToken
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.ParameterSyntax)this.Green).dotDotDotToken;
+            return slot != null ? new SyntaxToken(this, slot, GetChildPosition(1), GetChildIndex(1)) : default;
+        }
+    }
 
-    internal override SyntaxNode? GetNodeSlot(int index) => index == 1 ? GetRed(ref this.typeAnnotation, 1) : null;
+    public SyntaxToken Identifier => new SyntaxToken(this, ((InternalSyntax.ParameterSyntax)this.Green).identifier, GetChildPosition(2), GetChildIndex(2));
 
-    internal override SyntaxNode? GetCachedSlot(int index) => index == 1 ? this.typeAnnotation : null;
+    public SyntaxToken QuestionToken
+    {
+        get
+        {
+            var slot = ((Syntax.InternalSyntax.ParameterSyntax)this.Green).questionToken;
+            return slot != null ? new SyntaxToken(this, slot, GetChildPosition(3), GetChildIndex(3)) : default;
+        }
+    }
+
+    public TypeAnnotationSyntax? TypeAnnotation => GetRed(ref this.typeAnnotation, 4);
+
+    public EqualsValueClauseSyntax? Initializer => GetRed(ref this.initializer, 5);
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            4 => GetRed(ref this.typeAnnotation, 4),
+            5 => GetRed(ref this.initializer, 5),
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            4 => this.typeAnnotation,
+            5 => this.initializer,
+            _ => null,
+        };
 
     public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitParameter(this);
     public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitParameter(this);
 
-    public ParameterSyntax Update(SyntaxToken identifier, TypeAnnotationSyntax? typeAnnotation)
+    public ParameterSyntax Update(SyntaxTokenList modifiers, SyntaxToken dotDotDotToken, SyntaxToken identifier, SyntaxToken questionToken, TypeAnnotationSyntax? typeAnnotation, EqualsValueClauseSyntax? initializer)
     {
-        if (identifier != this.Identifier || typeAnnotation != this.TypeAnnotation)
+        if (modifiers != this.Modifiers || dotDotDotToken != this.DotDotDotToken || identifier != this.Identifier || questionToken != this.QuestionToken || typeAnnotation != this.TypeAnnotation || initializer != this.Initializer)
         {
-            var newNode = SyntaxFactory.Parameter(identifier, typeAnnotation);
+            var newNode = SyntaxFactory.Parameter(modifiers, dotDotDotToken, identifier, questionToken, typeAnnotation, initializer);
             var annotations = GetAnnotations();
             return annotations?.Length > 0 ? (ParameterSyntax)newNode.WithAnnotations(annotations) : newNode;
         }
@@ -3300,8 +3387,14 @@ public sealed partial class ParameterSyntax : TypeScriptSyntaxNode
         return this;
     }
 
-    public ParameterSyntax WithIdentifier(SyntaxToken identifier) => Update(identifier, this.TypeAnnotation);
-    public ParameterSyntax WithTypeAnnotation(TypeAnnotationSyntax? typeAnnotation) => Update(this.Identifier, typeAnnotation);
+    public ParameterSyntax WithModifiers(SyntaxTokenList modifiers) => Update(modifiers, this.DotDotDotToken, this.Identifier, this.QuestionToken, this.TypeAnnotation, this.Initializer);
+    public ParameterSyntax WithDotDotDotToken(SyntaxToken dotDotDotToken) => Update(this.Modifiers, dotDotDotToken, this.Identifier, this.QuestionToken, this.TypeAnnotation, this.Initializer);
+    public ParameterSyntax WithIdentifier(SyntaxToken identifier) => Update(this.Modifiers, this.DotDotDotToken, identifier, this.QuestionToken, this.TypeAnnotation, this.Initializer);
+    public ParameterSyntax WithQuestionToken(SyntaxToken questionToken) => Update(this.Modifiers, this.DotDotDotToken, this.Identifier, questionToken, this.TypeAnnotation, this.Initializer);
+    public ParameterSyntax WithTypeAnnotation(TypeAnnotationSyntax? typeAnnotation) => Update(this.Modifiers, this.DotDotDotToken, this.Identifier, this.QuestionToken, typeAnnotation, this.Initializer);
+    public ParameterSyntax WithInitializer(EqualsValueClauseSyntax? initializer) => Update(this.Modifiers, this.DotDotDotToken, this.Identifier, this.QuestionToken, this.TypeAnnotation, initializer);
+
+    public ParameterSyntax AddModifiers(params SyntaxToken[] items) => WithModifiers(this.Modifiers.AddRange(items));
 }
 
 /// <remarks>

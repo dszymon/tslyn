@@ -331,6 +331,17 @@
     </Field>
   </Node>
 
+  <Node Name="ParenthesizedExpressionSyntax" Base="ExpressionSyntax">
+    <Kind Name="ParenthesizedExpression"/>
+    <Field Name="OpenParenToken" Type="SyntaxToken">
+      <Kind Name="OpenParenToken"/>
+    </Field>
+    <Field Name="Expression" Type="ExpressionSyntax"/>
+    <Field Name="CloseParenToken" Type="SyntaxToken">
+      <Kind Name="CloseParenToken"/>
+    </Field>
+  </Node>
+
   <!-- Type Elements (Interface Members) -->
   <Node Name="PropertySignatureSyntax" Base="TypeElementSyntax">
     <Kind Name="PropertySignature"/>
@@ -643,10 +654,18 @@
 
   <Node Name="ParameterSyntax" Base="TypeScriptSyntaxNode">
     <Kind Name="Parameter"/>
+    <Field Name="Modifiers" Type="SyntaxList&lt;SyntaxToken&gt;"/>
+    <Field Name="DotDotDotToken" Type="SyntaxToken" Optional="true">
+        <Kind Name="DotDotDotToken"/>
+    </Field>
     <Field Name="Identifier" Type="SyntaxToken">
         <Kind Name="IdentifierToken"/>
     </Field>
+    <Field Name="QuestionToken" Type="SyntaxToken" Optional="true">
+        <Kind Name="QuestionToken"/>
+    </Field>
     <Field Name="TypeAnnotation" Type="TypeAnnotationSyntax" Optional="true"/>
+    <Field Name="Initializer" Type="EqualsValueClauseSyntax" Optional="true"/>
   </Node>
 
   <Node Name="ParameterListSyntax" Base="TypeScriptSyntaxNode">
