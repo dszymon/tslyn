@@ -156,6 +156,9 @@
 
   <Node Name="ArrowFunctionExpressionSyntax" Base="ExpressionSyntax">
     <Kind Name="ArrowFunctionExpression"/>
+    <Field Name="AsyncKeyword" Type="SyntaxToken" Optional="true">
+      <Kind Name="AsyncKeyword"/>
+    </Field>
     <Field Name="TypeParameters" Type="TypeParameterListSyntax" Optional="true"/>
     <Field Name="ParameterList" Type="ParameterListSyntax"/>
     <Field Name="TypeAnnotation" Type="TypeAnnotationSyntax" Optional="true"/>
@@ -163,6 +166,14 @@
       <Kind Name="EqualsGreaterThanToken"/>
     </Field>
     <Field Name="Body" Type="TypeScriptSyntaxNode"/>
+  </Node>
+
+  <Node Name="AwaitExpressionSyntax" Base="ExpressionSyntax">
+    <Kind Name="AwaitExpression"/>
+    <Field Name="AwaitKeyword" Type="SyntaxToken">
+      <Kind Name="AwaitKeyword"/>
+    </Field>
+    <Field Name="Expression" Type="ExpressionSyntax"/>
   </Node>
 
   <Node Name="PropertyAssignmentSyntax" Base="TypeScriptSyntaxNode">
@@ -587,6 +598,9 @@
 
   <Node Name="FunctionDeclarationSyntax" Base="DeclarationStatementSyntax">
     <Kind Name="FunctionDeclaration"/>
+    <Field Name="AsyncKeyword" Type="SyntaxToken" Optional="true">
+      <Kind Name="AsyncKeyword"/>
+    </Field>
     <Field Name="FunctionKeyword" Type="SyntaxToken">
       <Kind Name="FunctionKeyword"/>
     </Field>
@@ -637,6 +651,9 @@
 
   <Node Name="MethodDeclarationSyntax" Base="ClassElementSyntax">
     <Kind Name="MethodDeclaration"/>
+    <Field Name="AsyncKeyword" Type="SyntaxToken" Optional="true">
+      <Kind Name="AsyncKeyword"/>
+    </Field>
     <Field Name="Name" Type="IdentifierNameSyntax"/>
     <Field Name="TypeParameters" Type="TypeParameterListSyntax" Optional="true"/>
     <Field Name="ParameterList" Type="ParameterListSyntax"/>
