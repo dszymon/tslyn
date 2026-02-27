@@ -127,6 +127,10 @@
     <Project Path="src/Compilers/Server/VBCSCompiler/VBCSCompilerCommandLine.shproj" />
     <Project Path="src/Compilers/Server/VBCSCompilerTests/VBCSCompiler.UnitTests.csproj" />
   </Folder>
+  <Folder Name="/Compilers/TypeScript/">
+    <Project Path="src/Compilers/TypeScript/Portable/Microsoft.CodeAnalysis.TypeScript.csproj" />
+    <Project Path="src/Compilers/TypeScript/Test/Microsoft.CodeAnalysis.TypeScript.UnitTests.csproj" />
+  </Folder>
   <Folder Name="/Compilers/VisualBasic/">
     <Project Path="src/Compilers/Test/Utilities/VisualBasic/Microsoft.CodeAnalysis.VisualBasic.Test.Utilities.vbproj" />
     <Project Path="src/Compilers/VisualBasic/BasicAnalyzerDriver/BasicAnalyzerDriver.shproj" />
