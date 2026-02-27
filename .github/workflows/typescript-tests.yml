@@ -30,3 +30,8 @@ jobs:
 
     - name: Test
       run: dotnet test src/Compilers/TypeScript/Test/Microsoft.CodeAnalysis.TypeScript.UnitTests.csproj --no-build --verbosity normal
+
+    - name: TypeScript Parser Status
+      run: |
+        chmod +x scripts/typescript_report/run-parser-status.sh
+        ./scripts/typescript_report/run-parser-status.sh
