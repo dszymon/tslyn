@@ -423,6 +423,49 @@
     <Field Name="Statement" Type="StatementSyntax"/>
   </Node>
 
+  <Node Name="DoStatementSyntax" Base="StatementSyntax">
+    <Kind Name="DoStatement"/>
+    <Field Name="DoKeyword" Type="SyntaxToken">
+        <Kind Name="DoKeyword"/>
+    </Field>
+    <Field Name="Statement" Type="StatementSyntax"/>
+    <Field Name="WhileKeyword" Type="SyntaxToken">
+        <Kind Name="WhileKeyword"/>
+    </Field>
+    <Field Name="OpenParenToken" Type="SyntaxToken">
+        <Kind Name="OpenParenToken"/>
+    </Field>
+    <Field Name="Condition" Type="ExpressionSyntax"/>
+    <Field Name="CloseParenToken" Type="SyntaxToken">
+        <Kind Name="CloseParenToken"/>
+    </Field>
+    <Field Name="SemicolonToken" Type="SyntaxToken" Optional="true">
+        <Kind Name="SemicolonToken"/>
+    </Field>
+  </Node>
+
+  <Node Name="BreakStatementSyntax" Base="StatementSyntax">
+    <Kind Name="BreakStatement"/>
+    <Field Name="BreakKeyword" Type="SyntaxToken">
+        <Kind Name="BreakKeyword"/>
+    </Field>
+    <Field Name="Label" Type="IdentifierNameSyntax" Optional="true"/>
+    <Field Name="SemicolonToken" Type="SyntaxToken" Optional="true">
+        <Kind Name="SemicolonToken"/>
+    </Field>
+  </Node>
+
+  <Node Name="ContinueStatementSyntax" Base="StatementSyntax">
+    <Kind Name="ContinueStatement"/>
+    <Field Name="ContinueKeyword" Type="SyntaxToken">
+        <Kind Name="ContinueKeyword"/>
+    </Field>
+    <Field Name="Label" Type="IdentifierNameSyntax" Optional="true"/>
+    <Field Name="SemicolonToken" Type="SyntaxToken" Optional="true">
+        <Kind Name="SemicolonToken"/>
+    </Field>
+  </Node>
+
   <Node Name="ForStatementSyntax" Base="StatementSyntax">
     <Kind Name="ForStatement"/>
     <Field Name="ForKeyword" Type="SyntaxToken">
@@ -486,6 +529,49 @@
     <Field Name="CloseParenToken" Type="SyntaxToken">
         <Kind Name="CloseParenToken"/>
     </Field>
+  </Node>
+
+  <Node Name="TypeAliasDeclarationSyntax" Base="DeclarationStatementSyntax">
+    <Kind Name="TypeAliasDeclaration"/>
+    <Field Name="TypeKeyword" Type="SyntaxToken">
+      <Kind Name="TypeKeyword"/>
+    </Field>
+    <Field Name="Identifier" Type="SyntaxToken">
+      <Kind Name="IdentifierToken"/>
+    </Field>
+    <Field Name="TypeParameters" Type="TypeParameterListSyntax" Optional="true"/>
+    <Field Name="EqualsToken" Type="SyntaxToken">
+      <Kind Name="EqualsToken"/>
+    </Field>
+    <Field Name="Type" Type="TypeSyntax"/>
+    <Field Name="SemicolonToken" Type="SyntaxToken" Optional="true">
+      <Kind Name="SemicolonToken"/>
+    </Field>
+  </Node>
+
+  <Node Name="EnumDeclarationSyntax" Base="DeclarationStatementSyntax">
+    <Kind Name="EnumDeclaration"/>
+    <Field Name="EnumKeyword" Type="SyntaxToken">
+      <Kind Name="EnumKeyword"/>
+    </Field>
+    <Field Name="Identifier" Type="SyntaxToken">
+      <Kind Name="IdentifierToken"/>
+    </Field>
+    <Field Name="OpenBraceToken" Type="SyntaxToken">
+      <Kind Name="OpenBraceToken"/>
+    </Field>
+    <Field Name="Members" Type="SeparatedSyntaxList&lt;EnumMemberSyntax&gt;"/>
+    <Field Name="CloseBraceToken" Type="SyntaxToken">
+      <Kind Name="CloseBraceToken"/>
+    </Field>
+  </Node>
+
+  <Node Name="EnumMemberSyntax" Base="TypeScriptSyntaxNode">
+    <Kind Name="EnumMember"/>
+    <Field Name="Identifier" Type="SyntaxToken">
+      <Kind Name="IdentifierToken"/>
+    </Field>
+    <Field Name="EqualsValueClause" Type="EqualsValueClauseSyntax" Optional="true"/>
   </Node>
 
   <Node Name="FunctionDeclarationSyntax" Base="DeclarationStatementSyntax">

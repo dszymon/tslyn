@@ -216,6 +216,12 @@ namespace Microsoft.CodeAnalysis.TypeScript
         CatchClause,
         FinallyClause,
         ThrowStatement,
+        DoStatement,
+        BreakStatement,
+        ContinueStatement,
+        TypeAliasDeclaration,
+        EnumDeclaration,
+        EnumMember,
 
         // New Expressions
         CallExpression,
