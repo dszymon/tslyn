@@ -786,6 +786,7 @@ public static partial class SyntaxFactory
             case SyntaxKind.SubtractExpression:
             case SyntaxKind.MultiplyExpression:
             case SyntaxKind.DivideExpression:
+            case SyntaxKind.ModuloExpression:
             case SyntaxKind.EqualsExpression:
             case SyntaxKind.NotEqualsExpression:
             case SyntaxKind.LessThanExpression:
@@ -795,6 +796,17 @@ public static partial class SyntaxFactory
             case SyntaxKind.LogicalAndExpression:
             case SyntaxKind.LogicalOrExpression:
             case SyntaxKind.AssignmentExpression:
+            case SyntaxKind.AddAssignmentExpression:
+            case SyntaxKind.SubtractAssignmentExpression:
+            case SyntaxKind.MultiplyAssignmentExpression:
+            case SyntaxKind.DivideAssignmentExpression:
+            case SyntaxKind.ModuloAssignmentExpression:
+            case SyntaxKind.BitwiseAndAssignmentExpression:
+            case SyntaxKind.BitwiseOrAssignmentExpression:
+            case SyntaxKind.ExclusiveOrAssignmentExpression:
+            case SyntaxKind.LeftShiftAssignmentExpression:
+            case SyntaxKind.RightShiftAssignmentExpression:
+            case SyntaxKind.UnsignedRightShiftAssignmentExpression:
             case SyntaxKind.BitwiseAndExpression:
             case SyntaxKind.BitwiseOrExpression:
             case SyntaxKind.ExclusiveOrExpression:

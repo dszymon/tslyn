@@ -42,6 +42,11 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             return SyntaxToken.Identifier(text);
         }
 
+        public static SyntaxToken IdentifierToken(string text)
+        {
+            return SyntaxToken.Identifier(text);
+        }
+
         public static SyntaxToken Token(string text)
         {
              // Try to find keyword

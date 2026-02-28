@@ -34,6 +34,7 @@
     <Kind Name="SubtractExpression"/>
     <Kind Name="MultiplyExpression"/>
     <Kind Name="DivideExpression"/>
+    <Kind Name="ModuloExpression"/>
     <Kind Name="EqualsExpression"/>
     <Kind Name="NotEqualsExpression"/>
     <Kind Name="LessThanExpression"/>
@@ -43,6 +44,17 @@
     <Kind Name="LogicalAndExpression"/>
     <Kind Name="LogicalOrExpression"/>
     <Kind Name="AssignmentExpression"/>
+    <Kind Name="AddAssignmentExpression"/>
+    <Kind Name="SubtractAssignmentExpression"/>
+    <Kind Name="MultiplyAssignmentExpression"/>
+    <Kind Name="DivideAssignmentExpression"/>
+    <Kind Name="ModuloAssignmentExpression"/>
+    <Kind Name="BitwiseAndAssignmentExpression"/>
+    <Kind Name="BitwiseOrAssignmentExpression"/>
+    <Kind Name="ExclusiveOrAssignmentExpression"/>
+    <Kind Name="LeftShiftAssignmentExpression"/>
+    <Kind Name="RightShiftAssignmentExpression"/>
+    <Kind Name="UnsignedRightShiftAssignmentExpression"/>
     <Kind Name="BitwiseAndExpression"/>
     <Kind Name="BitwiseOrExpression"/>
     <Kind Name="ExclusiveOrExpression"/>

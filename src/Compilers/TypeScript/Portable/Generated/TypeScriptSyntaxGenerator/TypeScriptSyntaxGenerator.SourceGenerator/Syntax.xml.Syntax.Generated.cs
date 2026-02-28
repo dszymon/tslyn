@@ -147,6 +147,7 @@ public sealed partial class LiteralExpressionSyntax : ExpressionSyntax
 /// <item><description><see cref="SyntaxKind.SubtractExpression"/></description></item>
 /// <item><description><see cref="SyntaxKind.MultiplyExpression"/></description></item>
 /// <item><description><see cref="SyntaxKind.DivideExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.ModuloExpression"/></description></item>
 /// <item><description><see cref="SyntaxKind.EqualsExpression"/></description></item>
 /// <item><description><see cref="SyntaxKind.NotEqualsExpression"/></description></item>
 /// <item><description><see cref="SyntaxKind.LessThanExpression"/></description></item>
@@ -156,6 +157,17 @@ public sealed partial class LiteralExpressionSyntax : ExpressionSyntax
 /// <item><description><see cref="SyntaxKind.LogicalAndExpression"/></description></item>
 /// <item><description><see cref="SyntaxKind.LogicalOrExpression"/></description></item>
 /// <item><description><see cref="SyntaxKind.AssignmentExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.AddAssignmentExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.SubtractAssignmentExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.MultiplyAssignmentExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.DivideAssignmentExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.ModuloAssignmentExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.BitwiseAndAssignmentExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.BitwiseOrAssignmentExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.ExclusiveOrAssignmentExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.LeftShiftAssignmentExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.RightShiftAssignmentExpression"/></description></item>
+/// <item><description><see cref="SyntaxKind.UnsignedRightShiftAssignmentExpression"/></description></item>
 /// <item><description><see cref="SyntaxKind.BitwiseAndExpression"/></description></item>
 /// <item><description><see cref="SyntaxKind.BitwiseOrExpression"/></description></item>
 /// <item><description><see cref="SyntaxKind.ExclusiveOrExpression"/></description></item>

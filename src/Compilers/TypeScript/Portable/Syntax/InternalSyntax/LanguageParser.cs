@@ -1474,8 +1474,11 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                 case SyntaxKind.MinusToken: return SyntaxKind.SubtractExpression;
                 case SyntaxKind.AsteriskToken: return SyntaxKind.MultiplyExpression;
                 case SyntaxKind.SlashToken: return SyntaxKind.DivideExpression;
+                case SyntaxKind.PercentToken: return SyntaxKind.ModuloExpression;
                 case SyntaxKind.EqualsEqualsToken: return SyntaxKind.EqualsExpression;
+                case SyntaxKind.EqualsEqualsEqualsToken: return SyntaxKind.EqualsExpression; // Strict equality
                 case SyntaxKind.ExclamationEqualsToken: return SyntaxKind.NotEqualsExpression;
+                case SyntaxKind.ExclamationEqualsEqualsToken: return SyntaxKind.NotEqualsExpression; // Strict inequality
                 case SyntaxKind.LessThanToken: return SyntaxKind.LessThanExpression;
                 case SyntaxKind.LessThanEqualsToken: return SyntaxKind.LessThanOrEqualExpression;
                 case SyntaxKind.GreaterThanToken: return SyntaxKind.GreaterThanExpression;
@@ -1483,6 +1486,17 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                 case SyntaxKind.AmpersandAmpersandToken: return SyntaxKind.LogicalAndExpression;
                 case SyntaxKind.BarBarToken: return SyntaxKind.LogicalOrExpression;
                 case SyntaxKind.EqualsToken: return SyntaxKind.AssignmentExpression;
+                case SyntaxKind.PlusEqualsToken: return SyntaxKind.AddAssignmentExpression;
+                case SyntaxKind.MinusEqualsToken: return SyntaxKind.SubtractAssignmentExpression;
+                case SyntaxKind.AsteriskEqualsToken: return SyntaxKind.MultiplyAssignmentExpression;
+                case SyntaxKind.SlashEqualsToken: return SyntaxKind.DivideAssignmentExpression;
+                case SyntaxKind.PercentEqualsToken: return SyntaxKind.ModuloAssignmentExpression;
+                case SyntaxKind.AmpersandEqualsToken: return SyntaxKind.BitwiseAndAssignmentExpression;
+                case SyntaxKind.BarEqualsToken: return SyntaxKind.BitwiseOrAssignmentExpression;
+                case SyntaxKind.CaretEqualsToken: return SyntaxKind.ExclusiveOrAssignmentExpression;
+                case SyntaxKind.LessThanLessThanEqualsToken: return SyntaxKind.LeftShiftAssignmentExpression;
+                case SyntaxKind.GreaterThanGreaterThanEqualsToken: return SyntaxKind.RightShiftAssignmentExpression;
+                case SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken: return SyntaxKind.UnsignedRightShiftAssignmentExpression;
                 case SyntaxKind.AmpersandToken: return SyntaxKind.BitwiseAndExpression;
                 case SyntaxKind.BarToken: return SyntaxKind.BitwiseOrExpression;
                 case SyntaxKind.CaretToken: return SyntaxKind.ExclusiveOrExpression;
@@ -1928,25 +1942,52 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
             if (_currentToken.Kind != SyntaxKind.CloseBracketToken)
             {
-                while (_currentToken.Kind != SyntaxKind.CloseBracketToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
+                if (_currentToken.Kind == SyntaxKind.CommaToken)
+                {
+                    // Omitted expression element (e.g. `[ , ]`)
+                    // For now, we skip or add missing identifier, but standard TS tree has OmittedExpression.
+                    // We will add missing identifier to avoid assertion failures.
+                    elements.Add(SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken)));
+                }
+                else
                 {
                     var expr = ParseExpression();
                     if (expr.FullWidth == 0)
                     {
                         EatToken(); // error recovery
+                        elements.Add(SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken)));
                     }
                     else
                     {
                         elements.Add(expr);
                     }
+                }
+
+                while (_currentToken.Kind == SyntaxKind.CommaToken)
+                {
+                    elements.AddSeparator(EatToken());
+                    if (_currentToken.Kind == SyntaxKind.CloseBracketToken || _currentToken.Kind == SyntaxKind.EndOfFileToken)
+                    {
+                        // trailing comma, need to add missing element to satisfy separated syntax list
+                        elements.Add(SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken)));
+                        break;
+                    }
 
                     if (_currentToken.Kind == SyntaxKind.CommaToken)
                     {
-                        elements.AddSeparator(EatToken());
+                        elements.Add(SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken)));
+                        continue;
+                    }
+
+                    var nextExpr = ParseExpression();
+                    if (nextExpr.FullWidth == 0)
+                    {
+                        EatToken(); // error recovery
+                        elements.Add(SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken)));
                     }
                     else
                     {
-                        break;
+                        elements.Add(nextExpr);
                     }
                 }
             }
@@ -1962,25 +2003,49 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
             if (_currentToken.Kind != SyntaxKind.CloseBraceToken)
             {
-                while (_currentToken.Kind != SyntaxKind.CloseBraceToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
+                if (_currentToken.Kind == SyntaxKind.CommaToken)
+                {
+                    // Error recovery: missing first property
+                    properties.Add(SyntaxFactory.PropertyAssignment(SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken)), CreateMissingToken(SyntaxKind.ColonToken), SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken))));
+                }
+                else
                 {
                     var prop = ParsePropertyAssignment();
                     if (prop.FullWidth == 0)
                     {
                         EatToken(); // error recovery
+                        properties.Add(SyntaxFactory.PropertyAssignment(SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken)), CreateMissingToken(SyntaxKind.ColonToken), SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken))));
                     }
                     else
                     {
                         properties.Add(prop);
                     }
+                }
+
+                while (_currentToken.Kind == SyntaxKind.CommaToken)
+                {
+                    properties.AddSeparator(EatToken());
+                    if (_currentToken.Kind == SyntaxKind.CloseBraceToken || _currentToken.Kind == SyntaxKind.EndOfFileToken)
+                    {
+                        properties.Add(SyntaxFactory.PropertyAssignment(SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken)), CreateMissingToken(SyntaxKind.ColonToken), SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken))));
+                        break;
+                    }
 
                     if (_currentToken.Kind == SyntaxKind.CommaToken)
                     {
-                        properties.AddSeparator(EatToken());
+                        properties.Add(SyntaxFactory.PropertyAssignment(SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken)), CreateMissingToken(SyntaxKind.ColonToken), SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken))));
+                        continue;
+                    }
+
+                    var nextProp = ParsePropertyAssignment();
+                    if (nextProp.FullWidth == 0)
+                    {
+                        EatToken(); // error recovery
+                        properties.Add(SyntaxFactory.PropertyAssignment(SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken)), CreateMissingToken(SyntaxKind.ColonToken), SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken))));
                     }
                     else
                     {
-                        break;
+                        properties.Add(nextProp);
                     }
                 }
             }
@@ -1992,8 +2057,32 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         internal PropertyAssignmentSyntax ParsePropertyAssignment()
         {
             var name = ParseIdentifierName();
-            var colon = EatToken(SyntaxKind.ColonToken);
-            var expr = ParseExpression();
+            SyntaxToken? colon = null;
+            ExpressionSyntax? expr = null;
+
+            if (_currentToken.Kind == SyntaxKind.ColonToken)
+            {
+                colon = EatToken(SyntaxKind.ColonToken);
+                expr = ParseExpression();
+            }
+            else if (_currentToken.Kind == SyntaxKind.OpenParenToken || _currentToken.Kind == SyntaxKind.LessThanToken)
+            {
+                 // Method shorthand parsing not fully implemented, fall back
+                 // Create dummy missing tokens to prevent SeparatedSyntaxList error
+                 colon = CreateMissingToken(SyntaxKind.ColonToken);
+                 expr = SyntaxFactory.IdentifierName(CreateMissingToken(SyntaxKind.IdentifierToken));
+                 // recover to next comma or close brace
+                 while (_currentToken.Kind != SyntaxKind.CommaToken && _currentToken.Kind != SyntaxKind.CloseBraceToken && _currentToken.Kind != SyntaxKind.EndOfFileToken)
+                 {
+                     EatToken();
+                 }
+            }
+            else
+            {
+                // Shorthand property assignment. Use the identifier as expression.
+                colon = CreateMissingToken(SyntaxKind.ColonToken);
+                expr = SyntaxFactory.IdentifierName(SyntaxFactory.IdentifierToken(name.Identifier.Text));
+            }
             return SyntaxFactory.PropertyAssignment(name, colon, expr);
         }
 
