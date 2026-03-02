@@ -18,7 +18,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Parser
             var stmt = Assert.IsType<ForInStatementSyntax>(root.Statements[0]);
             var decl = Assert.IsType<VariableStatementSyntax>(stmt.Initializer);
             Assert.Equal("var", decl.DeclarationKeyword.Text);
-            Assert.Equal("x", decl.Declaration.Identifier.Text);
+            Assert.Equal("x", decl.DeclarationList.Declarations[0].Identifier.Text);
 
             Assert.IsType<IdentifierNameSyntax>(stmt.Expression); // y
         }

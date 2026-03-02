@@ -289,6 +289,67 @@ public sealed partial class MemberAccessExpressionSyntax : ExpressionSyntax
 /// <remarks>
 /// <para>This node is associated with the following syntax kinds:</para>
 /// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.ElementAccessExpression"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class ElementAccessExpressionSyntax : ExpressionSyntax
+{
+    private ExpressionSyntax? expression;
+    private ExpressionSyntax? argumentExpression;
+
+    internal ElementAccessExpressionSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public ExpressionSyntax Expression => GetRedAtZero(ref this.expression)!;
+
+    public SyntaxToken OpenBracketToken => new SyntaxToken(this, ((InternalSyntax.ElementAccessExpressionSyntax)this.Green).openBracketToken, GetChildPosition(1), GetChildIndex(1));
+
+    public ExpressionSyntax ArgumentExpression => GetRed(ref this.argumentExpression, 2)!;
+
+    public SyntaxToken CloseBracketToken => new SyntaxToken(this, ((InternalSyntax.ElementAccessExpressionSyntax)this.Green).closeBracketToken, GetChildPosition(3), GetChildIndex(3));
+
+    internal override SyntaxNode? GetNodeSlot(int index)
+        => index switch
+        {
+            0 => GetRedAtZero(ref this.expression)!,
+            2 => GetRed(ref this.argumentExpression, 2)!,
+            _ => null,
+        };
+
+    internal override SyntaxNode? GetCachedSlot(int index)
+        => index switch
+        {
+            0 => this.expression,
+            2 => this.argumentExpression,
+            _ => null,
+        };
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitElementAccessExpression(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitElementAccessExpression(this);
+
+    public ElementAccessExpressionSyntax Update(ExpressionSyntax expression, SyntaxToken openBracketToken, ExpressionSyntax argumentExpression, SyntaxToken closeBracketToken)
+    {
+        if (expression != this.Expression || openBracketToken != this.OpenBracketToken || argumentExpression != this.ArgumentExpression || closeBracketToken != this.CloseBracketToken)
+        {
+            var newNode = SyntaxFactory.ElementAccessExpression(expression, openBracketToken, argumentExpression, closeBracketToken);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (ElementAccessExpressionSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public ElementAccessExpressionSyntax WithExpression(ExpressionSyntax expression) => Update(expression, this.OpenBracketToken, this.ArgumentExpression, this.CloseBracketToken);
+    public ElementAccessExpressionSyntax WithOpenBracketToken(SyntaxToken openBracketToken) => Update(this.Expression, openBracketToken, this.ArgumentExpression, this.CloseBracketToken);
+    public ElementAccessExpressionSyntax WithArgumentExpression(ExpressionSyntax argumentExpression) => Update(this.Expression, this.OpenBracketToken, argumentExpression, this.CloseBracketToken);
+    public ElementAccessExpressionSyntax WithCloseBracketToken(SyntaxToken closeBracketToken) => Update(this.Expression, this.OpenBracketToken, this.ArgumentExpression, closeBracketToken);
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
 /// <item><description><see cref="SyntaxKind.PrefixUnaryExpression"/></description></item>
 /// </list>
 /// </remarks>
@@ -2940,7 +3001,7 @@ public sealed partial class ContinueStatementSyntax : StatementSyntax
 /// </remarks>
 public sealed partial class ForStatementSyntax : StatementSyntax
 {
-    private StatementSyntax? initializer;
+    private TypeScriptSyntaxNode? initializer;
     private ExpressionSyntax? condition;
     private ExpressionSyntax? increment;
     private StatementSyntax? statement;
@@ -2954,25 +3015,27 @@ public sealed partial class ForStatementSyntax : StatementSyntax
 
     public SyntaxToken OpenParenToken => new SyntaxToken(this, ((InternalSyntax.ForStatementSyntax)this.Green).openParenToken, GetChildPosition(1), GetChildIndex(1));
 
-    public StatementSyntax? Initializer => GetRed(ref this.initializer, 2);
+    public TypeScriptSyntaxNode? Initializer => GetRed(ref this.initializer, 2);
 
-    public ExpressionSyntax? Condition => GetRed(ref this.condition, 3);
+    public SyntaxToken FirstSemicolonToken => new SyntaxToken(this, ((InternalSyntax.ForStatementSyntax)this.Green).firstSemicolonToken, GetChildPosition(3), GetChildIndex(3));
 
-    public SyntaxToken SecondSemicolonToken => new SyntaxToken(this, ((InternalSyntax.ForStatementSyntax)this.Green).secondSemicolonToken, GetChildPosition(4), GetChildIndex(4));
+    public ExpressionSyntax? Condition => GetRed(ref this.condition, 4);
 
-    public ExpressionSyntax? Increment => GetRed(ref this.increment, 5);
+    public SyntaxToken SecondSemicolonToken => new SyntaxToken(this, ((InternalSyntax.ForStatementSyntax)this.Green).secondSemicolonToken, GetChildPosition(5), GetChildIndex(5));
 
-    public SyntaxToken CloseParenToken => new SyntaxToken(this, ((InternalSyntax.ForStatementSyntax)this.Green).closeParenToken, GetChildPosition(6), GetChildIndex(6));
+    public ExpressionSyntax? Increment => GetRed(ref this.increment, 6);
 
-    public StatementSyntax Statement => GetRed(ref this.statement, 7)!;
+    public SyntaxToken CloseParenToken => new SyntaxToken(this, ((InternalSyntax.ForStatementSyntax)this.Green).closeParenToken, GetChildPosition(7), GetChildIndex(7));
+
+    public StatementSyntax Statement => GetRed(ref this.statement, 8)!;
 
     internal override SyntaxNode? GetNodeSlot(int index)
         => index switch
         {
             2 => GetRed(ref this.initializer, 2),
-            3 => GetRed(ref this.condition, 3),
-            5 => GetRed(ref this.increment, 5),
-            7 => GetRed(ref this.statement, 7)!,
+            4 => GetRed(ref this.condition, 4),
+            6 => GetRed(ref this.increment, 6),
+            8 => GetRed(ref this.statement, 8)!,
             _ => null,
         };
 
@@ -2980,20 +3043,20 @@ public sealed partial class ForStatementSyntax : StatementSyntax
         => index switch
         {
             2 => this.initializer,
-            3 => this.condition,
-            5 => this.increment,
-            7 => this.statement,
+            4 => this.condition,
+            6 => this.increment,
+            8 => this.statement,
             _ => null,
         };
 
     public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitForStatement(this);
     public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitForStatement(this);
 
-    public ForStatementSyntax Update(SyntaxToken forKeyword, SyntaxToken openParenToken, StatementSyntax? initializer, ExpressionSyntax? condition, SyntaxToken secondSemicolonToken, ExpressionSyntax? increment, SyntaxToken closeParenToken, StatementSyntax statement)
+    public ForStatementSyntax Update(SyntaxToken forKeyword, SyntaxToken openParenToken, TypeScriptSyntaxNode? initializer, SyntaxToken firstSemicolonToken, ExpressionSyntax? condition, SyntaxToken secondSemicolonToken, ExpressionSyntax? increment, SyntaxToken closeParenToken, StatementSyntax statement)
     {
-        if (forKeyword != this.ForKeyword || openParenToken != this.OpenParenToken || initializer != this.Initializer || condition != this.Condition || secondSemicolonToken != this.SecondSemicolonToken || increment != this.Increment || closeParenToken != this.CloseParenToken || statement != this.Statement)
+        if (forKeyword != this.ForKeyword || openParenToken != this.OpenParenToken || initializer != this.Initializer || firstSemicolonToken != this.FirstSemicolonToken || condition != this.Condition || secondSemicolonToken != this.SecondSemicolonToken || increment != this.Increment || closeParenToken != this.CloseParenToken || statement != this.Statement)
         {
-            var newNode = SyntaxFactory.ForStatement(forKeyword, openParenToken, initializer, condition, secondSemicolonToken, increment, closeParenToken, statement);
+            var newNode = SyntaxFactory.ForStatement(forKeyword, openParenToken, initializer, firstSemicolonToken, condition, secondSemicolonToken, increment, closeParenToken, statement);
             var annotations = GetAnnotations();
             return annotations?.Length > 0 ? (ForStatementSyntax)newNode.WithAnnotations(annotations) : newNode;
         }
@@ -3001,14 +3064,15 @@ public sealed partial class ForStatementSyntax : StatementSyntax
         return this;
     }
 
-    public ForStatementSyntax WithForKeyword(SyntaxToken forKeyword) => Update(forKeyword, this.OpenParenToken, this.Initializer, this.Condition, this.SecondSemicolonToken, this.Increment, this.CloseParenToken, this.Statement);
-    public ForStatementSyntax WithOpenParenToken(SyntaxToken openParenToken) => Update(this.ForKeyword, openParenToken, this.Initializer, this.Condition, this.SecondSemicolonToken, this.Increment, this.CloseParenToken, this.Statement);
-    public ForStatementSyntax WithInitializer(StatementSyntax? initializer) => Update(this.ForKeyword, this.OpenParenToken, initializer, this.Condition, this.SecondSemicolonToken, this.Increment, this.CloseParenToken, this.Statement);
-    public ForStatementSyntax WithCondition(ExpressionSyntax? condition) => Update(this.ForKeyword, this.OpenParenToken, this.Initializer, condition, this.SecondSemicolonToken, this.Increment, this.CloseParenToken, this.Statement);
-    public ForStatementSyntax WithSecondSemicolonToken(SyntaxToken secondSemicolonToken) => Update(this.ForKeyword, this.OpenParenToken, this.Initializer, this.Condition, secondSemicolonToken, this.Increment, this.CloseParenToken, this.Statement);
-    public ForStatementSyntax WithIncrement(ExpressionSyntax? increment) => Update(this.ForKeyword, this.OpenParenToken, this.Initializer, this.Condition, this.SecondSemicolonToken, increment, this.CloseParenToken, this.Statement);
-    public ForStatementSyntax WithCloseParenToken(SyntaxToken closeParenToken) => Update(this.ForKeyword, this.OpenParenToken, this.Initializer, this.Condition, this.SecondSemicolonToken, this.Increment, closeParenToken, this.Statement);
-    public ForStatementSyntax WithStatement(StatementSyntax statement) => Update(this.ForKeyword, this.OpenParenToken, this.Initializer, this.Condition, this.SecondSemicolonToken, this.Increment, this.CloseParenToken, statement);
+    public ForStatementSyntax WithForKeyword(SyntaxToken forKeyword) => Update(forKeyword, this.OpenParenToken, this.Initializer, this.FirstSemicolonToken, this.Condition, this.SecondSemicolonToken, this.Increment, this.CloseParenToken, this.Statement);
+    public ForStatementSyntax WithOpenParenToken(SyntaxToken openParenToken) => Update(this.ForKeyword, openParenToken, this.Initializer, this.FirstSemicolonToken, this.Condition, this.SecondSemicolonToken, this.Increment, this.CloseParenToken, this.Statement);
+    public ForStatementSyntax WithInitializer(TypeScriptSyntaxNode? initializer) => Update(this.ForKeyword, this.OpenParenToken, initializer, this.FirstSemicolonToken, this.Condition, this.SecondSemicolonToken, this.Increment, this.CloseParenToken, this.Statement);
+    public ForStatementSyntax WithFirstSemicolonToken(SyntaxToken firstSemicolonToken) => Update(this.ForKeyword, this.OpenParenToken, this.Initializer, firstSemicolonToken, this.Condition, this.SecondSemicolonToken, this.Increment, this.CloseParenToken, this.Statement);
+    public ForStatementSyntax WithCondition(ExpressionSyntax? condition) => Update(this.ForKeyword, this.OpenParenToken, this.Initializer, this.FirstSemicolonToken, condition, this.SecondSemicolonToken, this.Increment, this.CloseParenToken, this.Statement);
+    public ForStatementSyntax WithSecondSemicolonToken(SyntaxToken secondSemicolonToken) => Update(this.ForKeyword, this.OpenParenToken, this.Initializer, this.FirstSemicolonToken, this.Condition, secondSemicolonToken, this.Increment, this.CloseParenToken, this.Statement);
+    public ForStatementSyntax WithIncrement(ExpressionSyntax? increment) => Update(this.ForKeyword, this.OpenParenToken, this.Initializer, this.FirstSemicolonToken, this.Condition, this.SecondSemicolonToken, increment, this.CloseParenToken, this.Statement);
+    public ForStatementSyntax WithCloseParenToken(SyntaxToken closeParenToken) => Update(this.ForKeyword, this.OpenParenToken, this.Initializer, this.FirstSemicolonToken, this.Condition, this.SecondSemicolonToken, this.Increment, closeParenToken, this.Statement);
+    public ForStatementSyntax WithStatement(StatementSyntax statement) => Update(this.ForKeyword, this.OpenParenToken, this.Initializer, this.FirstSemicolonToken, this.Condition, this.SecondSemicolonToken, this.Increment, this.CloseParenToken, statement);
 }
 
 /// <remarks>
@@ -3270,12 +3334,60 @@ public sealed partial class EqualsValueClauseSyntax : TypeScriptSyntaxNode
 /// <remarks>
 /// <para>This node is associated with the following syntax kinds:</para>
 /// <list type="bullet">
+/// <item><description><see cref="SyntaxKind.VariableDeclarationList"/></description></item>
+/// </list>
+/// </remarks>
+public sealed partial class VariableDeclarationListSyntax : TypeScriptSyntaxNode
+{
+    private SyntaxNode? declarations;
+
+    internal VariableDeclarationListSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
+      : base(green, parent, position)
+    {
+    }
+
+    public SeparatedSyntaxList<VariableDeclarationSyntax> Declarations
+    {
+        get
+        {
+            var red = GetRed(ref this.declarations, 0);
+            return red != null ? new SeparatedSyntaxList<VariableDeclarationSyntax>(red, 0) : default;
+        }
+    }
+
+    internal override SyntaxNode? GetNodeSlot(int index) => index == 0 ? GetRedAtZero(ref this.declarations)! : null;
+
+    internal override SyntaxNode? GetCachedSlot(int index) => index == 0 ? this.declarations : null;
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitVariableDeclarationList(this);
+    public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitVariableDeclarationList(this);
+
+    public VariableDeclarationListSyntax Update(SeparatedSyntaxList<VariableDeclarationSyntax> declarations)
+    {
+        if (declarations != this.Declarations)
+        {
+            var newNode = SyntaxFactory.VariableDeclarationList(declarations);
+            var annotations = GetAnnotations();
+            return annotations?.Length > 0 ? (VariableDeclarationListSyntax)newNode.WithAnnotations(annotations) : newNode;
+        }
+
+        return this;
+    }
+
+    public VariableDeclarationListSyntax WithDeclarations(SeparatedSyntaxList<VariableDeclarationSyntax> declarations) => Update(declarations);
+
+    public VariableDeclarationListSyntax AddDeclarations(params VariableDeclarationSyntax[] items) => WithDeclarations(this.Declarations.AddRange(items));
+}
+
+/// <remarks>
+/// <para>This node is associated with the following syntax kinds:</para>
+/// <list type="bullet">
 /// <item><description><see cref="SyntaxKind.VariableStatement"/></description></item>
 /// </list>
 /// </remarks>
 public sealed partial class VariableStatementSyntax : StatementSyntax
 {
-    private VariableDeclarationSyntax? declaration;
+    private VariableDeclarationListSyntax? declarationList;
 
     internal VariableStatementSyntax(InternalSyntax.TypeScriptSyntaxNode green, SyntaxNode? parent, int position)
       : base(green, parent, position)
@@ -3284,7 +3396,7 @@ public sealed partial class VariableStatementSyntax : StatementSyntax
 
     public SyntaxToken DeclarationKeyword => new SyntaxToken(this, ((InternalSyntax.VariableStatementSyntax)this.Green).declarationKeyword, Position, 0);
 
-    public VariableDeclarationSyntax Declaration => GetRed(ref this.declaration, 1)!;
+    public VariableDeclarationListSyntax DeclarationList => GetRed(ref this.declarationList, 1)!;
 
     public SyntaxToken SemicolonToken
     {
@@ -3295,18 +3407,18 @@ public sealed partial class VariableStatementSyntax : StatementSyntax
         }
     }
 
-    internal override SyntaxNode? GetNodeSlot(int index) => index == 1 ? GetRed(ref this.declaration, 1)! : null;
+    internal override SyntaxNode? GetNodeSlot(int index) => index == 1 ? GetRed(ref this.declarationList, 1)! : null;
 
-    internal override SyntaxNode? GetCachedSlot(int index) => index == 1 ? this.declaration : null;
+    internal override SyntaxNode? GetCachedSlot(int index) => index == 1 ? this.declarationList : null;
 
     public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitVariableStatement(this);
     public override TResult? Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) where TResult : default => visitor.VisitVariableStatement(this);
 
-    public VariableStatementSyntax Update(SyntaxToken declarationKeyword, VariableDeclarationSyntax declaration, SyntaxToken semicolonToken)
+    public VariableStatementSyntax Update(SyntaxToken declarationKeyword, VariableDeclarationListSyntax declarationList, SyntaxToken semicolonToken)
     {
-        if (declarationKeyword != this.DeclarationKeyword || declaration != this.Declaration || semicolonToken != this.SemicolonToken)
+        if (declarationKeyword != this.DeclarationKeyword || declarationList != this.DeclarationList || semicolonToken != this.SemicolonToken)
         {
-            var newNode = SyntaxFactory.VariableStatement(declarationKeyword, declaration, semicolonToken);
+            var newNode = SyntaxFactory.VariableStatement(declarationKeyword, declarationList, semicolonToken);
             var annotations = GetAnnotations();
             return annotations?.Length > 0 ? (VariableStatementSyntax)newNode.WithAnnotations(annotations) : newNode;
         }
@@ -3314,9 +3426,11 @@ public sealed partial class VariableStatementSyntax : StatementSyntax
         return this;
     }
 
-    public VariableStatementSyntax WithDeclarationKeyword(SyntaxToken declarationKeyword) => Update(declarationKeyword, this.Declaration, this.SemicolonToken);
-    public VariableStatementSyntax WithDeclaration(VariableDeclarationSyntax declaration) => Update(this.DeclarationKeyword, declaration, this.SemicolonToken);
-    public VariableStatementSyntax WithSemicolonToken(SyntaxToken semicolonToken) => Update(this.DeclarationKeyword, this.Declaration, semicolonToken);
+    public VariableStatementSyntax WithDeclarationKeyword(SyntaxToken declarationKeyword) => Update(declarationKeyword, this.DeclarationList, this.SemicolonToken);
+    public VariableStatementSyntax WithDeclarationList(VariableDeclarationListSyntax declarationList) => Update(this.DeclarationKeyword, declarationList, this.SemicolonToken);
+    public VariableStatementSyntax WithSemicolonToken(SyntaxToken semicolonToken) => Update(this.DeclarationKeyword, this.DeclarationList, semicolonToken);
+
+    public VariableStatementSyntax AddDeclarationListDeclarations(params VariableDeclarationSyntax[] items) => WithDeclarationList(this.DeclarationList.WithDeclarations(this.DeclarationList.Declarations.AddRange(items)));
 }
 
 /// <remarks>

@@ -386,6 +386,100 @@ internal sealed partial class MemberAccessExpressionSyntax : ExpressionSyntax
         => new MemberAccessExpressionSyntax(this.Kind, this.expression, this.dotToken, this.name, GetDiagnostics(), annotations);
 }
 
+internal sealed partial class ElementAccessExpressionSyntax : ExpressionSyntax
+{
+    internal readonly ExpressionSyntax expression;
+    internal readonly SyntaxToken openBracketToken;
+    internal readonly ExpressionSyntax argumentExpression;
+    internal readonly SyntaxToken closeBracketToken;
+
+    internal ElementAccessExpressionSyntax(SyntaxKind kind, ExpressionSyntax expression, SyntaxToken openBracketToken, ExpressionSyntax argumentExpression, SyntaxToken closeBracketToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 4;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+        this.AdjustFlagsAndWidth(openBracketToken);
+        this.openBracketToken = openBracketToken;
+        this.AdjustFlagsAndWidth(argumentExpression);
+        this.argumentExpression = argumentExpression;
+        this.AdjustFlagsAndWidth(closeBracketToken);
+        this.closeBracketToken = closeBracketToken;
+    }
+
+    internal ElementAccessExpressionSyntax(SyntaxKind kind, ExpressionSyntax expression, SyntaxToken openBracketToken, ExpressionSyntax argumentExpression, SyntaxToken closeBracketToken, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 4;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+        this.AdjustFlagsAndWidth(openBracketToken);
+        this.openBracketToken = openBracketToken;
+        this.AdjustFlagsAndWidth(argumentExpression);
+        this.argumentExpression = argumentExpression;
+        this.AdjustFlagsAndWidth(closeBracketToken);
+        this.closeBracketToken = closeBracketToken;
+    }
+
+    internal ElementAccessExpressionSyntax(SyntaxKind kind, ExpressionSyntax expression, SyntaxToken openBracketToken, ExpressionSyntax argumentExpression, SyntaxToken closeBracketToken)
+      : base(kind)
+    {
+        this.SlotCount = 4;
+        this.AdjustFlagsAndWidth(expression);
+        this.expression = expression;
+        this.AdjustFlagsAndWidth(openBracketToken);
+        this.openBracketToken = openBracketToken;
+        this.AdjustFlagsAndWidth(argumentExpression);
+        this.argumentExpression = argumentExpression;
+        this.AdjustFlagsAndWidth(closeBracketToken);
+        this.closeBracketToken = closeBracketToken;
+    }
+
+    public ExpressionSyntax Expression => this.expression;
+    public SyntaxToken OpenBracketToken => this.openBracketToken;
+    public ExpressionSyntax ArgumentExpression => this.argumentExpression;
+    public SyntaxToken CloseBracketToken => this.closeBracketToken;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.expression,
+            1 => this.openBracketToken,
+            2 => this.argumentExpression,
+            3 => this.closeBracketToken,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.ElementAccessExpressionSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitElementAccessExpression(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitElementAccessExpression(this);
+
+    public ElementAccessExpressionSyntax Update(ExpressionSyntax expression, SyntaxToken openBracketToken, ExpressionSyntax argumentExpression, SyntaxToken closeBracketToken)
+    {
+        if (expression != this.Expression || openBracketToken != this.OpenBracketToken || argumentExpression != this.ArgumentExpression || closeBracketToken != this.CloseBracketToken)
+        {
+            var newNode = SyntaxFactory.ElementAccessExpression(expression, openBracketToken, argumentExpression, closeBracketToken);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new ElementAccessExpressionSyntax(this.Kind, this.expression, this.openBracketToken, this.argumentExpression, this.closeBracketToken, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new ElementAccessExpressionSyntax(this.Kind, this.expression, this.openBracketToken, this.argumentExpression, this.closeBracketToken, GetDiagnostics(), annotations);
+}
+
 internal sealed partial class PrefixUnaryExpressionSyntax : ExpressionSyntax
 {
     internal readonly SyntaxToken operatorToken;
@@ -4922,17 +5016,18 @@ internal sealed partial class ForStatementSyntax : StatementSyntax
 {
     internal readonly SyntaxToken forKeyword;
     internal readonly SyntaxToken openParenToken;
-    internal readonly StatementSyntax? initializer;
+    internal readonly TypeScriptSyntaxNode? initializer;
+    internal readonly SyntaxToken firstSemicolonToken;
     internal readonly ExpressionSyntax? condition;
     internal readonly SyntaxToken secondSemicolonToken;
     internal readonly ExpressionSyntax? increment;
     internal readonly SyntaxToken closeParenToken;
     internal readonly StatementSyntax statement;
 
-    internal ForStatementSyntax(SyntaxKind kind, SyntaxToken forKeyword, SyntaxToken openParenToken, StatementSyntax? initializer, ExpressionSyntax? condition, SyntaxToken secondSemicolonToken, ExpressionSyntax? increment, SyntaxToken closeParenToken, StatementSyntax statement, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+    internal ForStatementSyntax(SyntaxKind kind, SyntaxToken forKeyword, SyntaxToken openParenToken, TypeScriptSyntaxNode? initializer, SyntaxToken firstSemicolonToken, ExpressionSyntax? condition, SyntaxToken secondSemicolonToken, ExpressionSyntax? increment, SyntaxToken closeParenToken, StatementSyntax statement, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
       : base(kind, diagnostics, annotations)
     {
-        this.SlotCount = 8;
+        this.SlotCount = 9;
         this.AdjustFlagsAndWidth(forKeyword);
         this.forKeyword = forKeyword;
         this.AdjustFlagsAndWidth(openParenToken);
@@ -4942,6 +5037,8 @@ internal sealed partial class ForStatementSyntax : StatementSyntax
             this.AdjustFlagsAndWidth(initializer);
             this.initializer = initializer;
         }
+        this.AdjustFlagsAndWidth(firstSemicolonToken);
+        this.firstSemicolonToken = firstSemicolonToken;
         if (condition != null)
         {
             this.AdjustFlagsAndWidth(condition);
@@ -4960,11 +5057,11 @@ internal sealed partial class ForStatementSyntax : StatementSyntax
         this.statement = statement;
     }
 
-    internal ForStatementSyntax(SyntaxKind kind, SyntaxToken forKeyword, SyntaxToken openParenToken, StatementSyntax? initializer, ExpressionSyntax? condition, SyntaxToken secondSemicolonToken, ExpressionSyntax? increment, SyntaxToken closeParenToken, StatementSyntax statement, SyntaxFactoryContext context)
+    internal ForStatementSyntax(SyntaxKind kind, SyntaxToken forKeyword, SyntaxToken openParenToken, TypeScriptSyntaxNode? initializer, SyntaxToken firstSemicolonToken, ExpressionSyntax? condition, SyntaxToken secondSemicolonToken, ExpressionSyntax? increment, SyntaxToken closeParenToken, StatementSyntax statement, SyntaxFactoryContext context)
       : base(kind)
     {
         this.SetFactoryContext(context);
-        this.SlotCount = 8;
+        this.SlotCount = 9;
         this.AdjustFlagsAndWidth(forKeyword);
         this.forKeyword = forKeyword;
         this.AdjustFlagsAndWidth(openParenToken);
@@ -4974,6 +5071,8 @@ internal sealed partial class ForStatementSyntax : StatementSyntax
             this.AdjustFlagsAndWidth(initializer);
             this.initializer = initializer;
         }
+        this.AdjustFlagsAndWidth(firstSemicolonToken);
+        this.firstSemicolonToken = firstSemicolonToken;
         if (condition != null)
         {
             this.AdjustFlagsAndWidth(condition);
@@ -4992,10 +5091,10 @@ internal sealed partial class ForStatementSyntax : StatementSyntax
         this.statement = statement;
     }
 
-    internal ForStatementSyntax(SyntaxKind kind, SyntaxToken forKeyword, SyntaxToken openParenToken, StatementSyntax? initializer, ExpressionSyntax? condition, SyntaxToken secondSemicolonToken, ExpressionSyntax? increment, SyntaxToken closeParenToken, StatementSyntax statement)
+    internal ForStatementSyntax(SyntaxKind kind, SyntaxToken forKeyword, SyntaxToken openParenToken, TypeScriptSyntaxNode? initializer, SyntaxToken firstSemicolonToken, ExpressionSyntax? condition, SyntaxToken secondSemicolonToken, ExpressionSyntax? increment, SyntaxToken closeParenToken, StatementSyntax statement)
       : base(kind)
     {
-        this.SlotCount = 8;
+        this.SlotCount = 9;
         this.AdjustFlagsAndWidth(forKeyword);
         this.forKeyword = forKeyword;
         this.AdjustFlagsAndWidth(openParenToken);
@@ -5005,6 +5104,8 @@ internal sealed partial class ForStatementSyntax : StatementSyntax
             this.AdjustFlagsAndWidth(initializer);
             this.initializer = initializer;
         }
+        this.AdjustFlagsAndWidth(firstSemicolonToken);
+        this.firstSemicolonToken = firstSemicolonToken;
         if (condition != null)
         {
             this.AdjustFlagsAndWidth(condition);
@@ -5025,7 +5126,8 @@ internal sealed partial class ForStatementSyntax : StatementSyntax
 
     public SyntaxToken ForKeyword => this.forKeyword;
     public SyntaxToken OpenParenToken => this.openParenToken;
-    public StatementSyntax? Initializer => this.initializer;
+    public TypeScriptSyntaxNode? Initializer => this.initializer;
+    public SyntaxToken FirstSemicolonToken => this.firstSemicolonToken;
     public ExpressionSyntax? Condition => this.condition;
     public SyntaxToken SecondSemicolonToken => this.secondSemicolonToken;
     public ExpressionSyntax? Increment => this.increment;
@@ -5038,11 +5140,12 @@ internal sealed partial class ForStatementSyntax : StatementSyntax
             0 => this.forKeyword,
             1 => this.openParenToken,
             2 => this.initializer,
-            3 => this.condition,
-            4 => this.secondSemicolonToken,
-            5 => this.increment,
-            6 => this.closeParenToken,
-            7 => this.statement,
+            3 => this.firstSemicolonToken,
+            4 => this.condition,
+            5 => this.secondSemicolonToken,
+            6 => this.increment,
+            7 => this.closeParenToken,
+            8 => this.statement,
             _ => null,
         };
 
@@ -5051,11 +5154,11 @@ internal sealed partial class ForStatementSyntax : StatementSyntax
     public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitForStatement(this);
     public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitForStatement(this);
 
-    public ForStatementSyntax Update(SyntaxToken forKeyword, SyntaxToken openParenToken, StatementSyntax initializer, ExpressionSyntax condition, SyntaxToken secondSemicolonToken, ExpressionSyntax increment, SyntaxToken closeParenToken, StatementSyntax statement)
+    public ForStatementSyntax Update(SyntaxToken forKeyword, SyntaxToken openParenToken, TypeScriptSyntaxNode initializer, SyntaxToken firstSemicolonToken, ExpressionSyntax condition, SyntaxToken secondSemicolonToken, ExpressionSyntax increment, SyntaxToken closeParenToken, StatementSyntax statement)
     {
-        if (forKeyword != this.ForKeyword || openParenToken != this.OpenParenToken || initializer != this.Initializer || condition != this.Condition || secondSemicolonToken != this.SecondSemicolonToken || increment != this.Increment || closeParenToken != this.CloseParenToken || statement != this.Statement)
+        if (forKeyword != this.ForKeyword || openParenToken != this.OpenParenToken || initializer != this.Initializer || firstSemicolonToken != this.FirstSemicolonToken || condition != this.Condition || secondSemicolonToken != this.SecondSemicolonToken || increment != this.Increment || closeParenToken != this.CloseParenToken || statement != this.Statement)
         {
-            var newNode = SyntaxFactory.ForStatement(forKeyword, openParenToken, initializer, condition, secondSemicolonToken, increment, closeParenToken, statement);
+            var newNode = SyntaxFactory.ForStatement(forKeyword, openParenToken, initializer, firstSemicolonToken, condition, secondSemicolonToken, increment, closeParenToken, statement);
             var diags = GetDiagnostics();
             if (diags?.Length > 0)
                 newNode = newNode.WithDiagnosticsGreen(diags);
@@ -5069,10 +5172,10 @@ internal sealed partial class ForStatementSyntax : StatementSyntax
     }
 
     internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
-        => new ForStatementSyntax(this.Kind, this.forKeyword, this.openParenToken, this.initializer, this.condition, this.secondSemicolonToken, this.increment, this.closeParenToken, this.statement, diagnostics, GetAnnotations());
+        => new ForStatementSyntax(this.Kind, this.forKeyword, this.openParenToken, this.initializer, this.firstSemicolonToken, this.condition, this.secondSemicolonToken, this.increment, this.closeParenToken, this.statement, diagnostics, GetAnnotations());
 
     internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
-        => new ForStatementSyntax(this.Kind, this.forKeyword, this.openParenToken, this.initializer, this.condition, this.secondSemicolonToken, this.increment, this.closeParenToken, this.statement, GetDiagnostics(), annotations);
+        => new ForStatementSyntax(this.Kind, this.forKeyword, this.openParenToken, this.initializer, this.firstSemicolonToken, this.condition, this.secondSemicolonToken, this.increment, this.closeParenToken, this.statement, GetDiagnostics(), annotations);
 }
 
 internal sealed partial class ForInStatementSyntax : StatementSyntax
@@ -5514,81 +5617,59 @@ internal sealed partial class EqualsValueClauseSyntax : TypeScriptSyntaxNode
         => new EqualsValueClauseSyntax(this.Kind, this.equalsToken, this.value, GetDiagnostics(), annotations);
 }
 
-internal sealed partial class VariableStatementSyntax : StatementSyntax
+internal sealed partial class VariableDeclarationListSyntax : TypeScriptSyntaxNode
 {
-    internal readonly SyntaxToken declarationKeyword;
-    internal readonly VariableDeclarationSyntax declaration;
-    internal readonly SyntaxToken? semicolonToken;
+    internal readonly GreenNode? declarations;
 
-    internal VariableStatementSyntax(SyntaxKind kind, SyntaxToken declarationKeyword, VariableDeclarationSyntax declaration, SyntaxToken? semicolonToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+    internal VariableDeclarationListSyntax(SyntaxKind kind, GreenNode? declarations, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
       : base(kind, diagnostics, annotations)
     {
-        this.SlotCount = 3;
-        this.AdjustFlagsAndWidth(declarationKeyword);
-        this.declarationKeyword = declarationKeyword;
-        this.AdjustFlagsAndWidth(declaration);
-        this.declaration = declaration;
-        if (semicolonToken != null)
+        this.SlotCount = 1;
+        if (declarations != null)
         {
-            this.AdjustFlagsAndWidth(semicolonToken);
-            this.semicolonToken = semicolonToken;
+            this.AdjustFlagsAndWidth(declarations);
+            this.declarations = declarations;
         }
     }
 
-    internal VariableStatementSyntax(SyntaxKind kind, SyntaxToken declarationKeyword, VariableDeclarationSyntax declaration, SyntaxToken? semicolonToken, SyntaxFactoryContext context)
+    internal VariableDeclarationListSyntax(SyntaxKind kind, GreenNode? declarations, SyntaxFactoryContext context)
       : base(kind)
     {
         this.SetFactoryContext(context);
-        this.SlotCount = 3;
-        this.AdjustFlagsAndWidth(declarationKeyword);
-        this.declarationKeyword = declarationKeyword;
-        this.AdjustFlagsAndWidth(declaration);
-        this.declaration = declaration;
-        if (semicolonToken != null)
+        this.SlotCount = 1;
+        if (declarations != null)
         {
-            this.AdjustFlagsAndWidth(semicolonToken);
-            this.semicolonToken = semicolonToken;
+            this.AdjustFlagsAndWidth(declarations);
+            this.declarations = declarations;
         }
     }
 
-    internal VariableStatementSyntax(SyntaxKind kind, SyntaxToken declarationKeyword, VariableDeclarationSyntax declaration, SyntaxToken? semicolonToken)
+    internal VariableDeclarationListSyntax(SyntaxKind kind, GreenNode? declarations)
       : base(kind)
     {
-        this.SlotCount = 3;
-        this.AdjustFlagsAndWidth(declarationKeyword);
-        this.declarationKeyword = declarationKeyword;
-        this.AdjustFlagsAndWidth(declaration);
-        this.declaration = declaration;
-        if (semicolonToken != null)
+        this.SlotCount = 1;
+        if (declarations != null)
         {
-            this.AdjustFlagsAndWidth(semicolonToken);
-            this.semicolonToken = semicolonToken;
+            this.AdjustFlagsAndWidth(declarations);
+            this.declarations = declarations;
         }
     }
 
-    public SyntaxToken DeclarationKeyword => this.declarationKeyword;
-    public VariableDeclarationSyntax Declaration => this.declaration;
-    public SyntaxToken? SemicolonToken => this.semicolonToken;
+    public CoreSyntax.SeparatedSyntaxList<VariableDeclarationSyntax> Declarations => new CoreSyntax.SeparatedSyntaxList<VariableDeclarationSyntax>(new CoreSyntax.SyntaxList<TypeScriptSyntaxNode>(this.declarations));
 
     internal override GreenNode? GetSlot(int index)
-        => index switch
-        {
-            0 => this.declarationKeyword,
-            1 => this.declaration,
-            2 => this.semicolonToken,
-            _ => null,
-        };
+        => index == 0 ? this.declarations : null;
 
-    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.VariableStatementSyntax(this, parent, position);
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.VariableDeclarationListSyntax(this, parent, position);
 
-    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitVariableStatement(this);
-    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitVariableStatement(this);
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitVariableDeclarationList(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitVariableDeclarationList(this);
 
-    public VariableStatementSyntax Update(SyntaxToken declarationKeyword, VariableDeclarationSyntax declaration, SyntaxToken semicolonToken)
+    public VariableDeclarationListSyntax Update(CoreSyntax.SeparatedSyntaxList<VariableDeclarationSyntax> declarations)
     {
-        if (declarationKeyword != this.DeclarationKeyword || declaration != this.Declaration || semicolonToken != this.SemicolonToken)
+        if (declarations != this.Declarations)
         {
-            var newNode = SyntaxFactory.VariableStatement(declarationKeyword, declaration, semicolonToken);
+            var newNode = SyntaxFactory.VariableDeclarationList(declarations);
             var diags = GetDiagnostics();
             if (diags?.Length > 0)
                 newNode = newNode.WithDiagnosticsGreen(diags);
@@ -5602,10 +5683,104 @@ internal sealed partial class VariableStatementSyntax : StatementSyntax
     }
 
     internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
-        => new VariableStatementSyntax(this.Kind, this.declarationKeyword, this.declaration, this.semicolonToken, diagnostics, GetAnnotations());
+        => new VariableDeclarationListSyntax(this.Kind, this.declarations, diagnostics, GetAnnotations());
 
     internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
-        => new VariableStatementSyntax(this.Kind, this.declarationKeyword, this.declaration, this.semicolonToken, GetDiagnostics(), annotations);
+        => new VariableDeclarationListSyntax(this.Kind, this.declarations, GetDiagnostics(), annotations);
+}
+
+internal sealed partial class VariableStatementSyntax : StatementSyntax
+{
+    internal readonly SyntaxToken declarationKeyword;
+    internal readonly VariableDeclarationListSyntax declarationList;
+    internal readonly SyntaxToken? semicolonToken;
+
+    internal VariableStatementSyntax(SyntaxKind kind, SyntaxToken declarationKeyword, VariableDeclarationListSyntax declarationList, SyntaxToken? semicolonToken, DiagnosticInfo[]? diagnostics, SyntaxAnnotation[]? annotations)
+      : base(kind, diagnostics, annotations)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(declarationKeyword);
+        this.declarationKeyword = declarationKeyword;
+        this.AdjustFlagsAndWidth(declarationList);
+        this.declarationList = declarationList;
+        if (semicolonToken != null)
+        {
+            this.AdjustFlagsAndWidth(semicolonToken);
+            this.semicolonToken = semicolonToken;
+        }
+    }
+
+    internal VariableStatementSyntax(SyntaxKind kind, SyntaxToken declarationKeyword, VariableDeclarationListSyntax declarationList, SyntaxToken? semicolonToken, SyntaxFactoryContext context)
+      : base(kind)
+    {
+        this.SetFactoryContext(context);
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(declarationKeyword);
+        this.declarationKeyword = declarationKeyword;
+        this.AdjustFlagsAndWidth(declarationList);
+        this.declarationList = declarationList;
+        if (semicolonToken != null)
+        {
+            this.AdjustFlagsAndWidth(semicolonToken);
+            this.semicolonToken = semicolonToken;
+        }
+    }
+
+    internal VariableStatementSyntax(SyntaxKind kind, SyntaxToken declarationKeyword, VariableDeclarationListSyntax declarationList, SyntaxToken? semicolonToken)
+      : base(kind)
+    {
+        this.SlotCount = 3;
+        this.AdjustFlagsAndWidth(declarationKeyword);
+        this.declarationKeyword = declarationKeyword;
+        this.AdjustFlagsAndWidth(declarationList);
+        this.declarationList = declarationList;
+        if (semicolonToken != null)
+        {
+            this.AdjustFlagsAndWidth(semicolonToken);
+            this.semicolonToken = semicolonToken;
+        }
+    }
+
+    public SyntaxToken DeclarationKeyword => this.declarationKeyword;
+    public VariableDeclarationListSyntax DeclarationList => this.declarationList;
+    public SyntaxToken? SemicolonToken => this.semicolonToken;
+
+    internal override GreenNode? GetSlot(int index)
+        => index switch
+        {
+            0 => this.declarationKeyword,
+            1 => this.declarationList,
+            2 => this.semicolonToken,
+            _ => null,
+        };
+
+    internal override SyntaxNode CreateRed(SyntaxNode? parent, int position) => new TypeScript.Syntax.VariableStatementSyntax(this, parent, position);
+
+    public override void Accept(TypeScriptSyntaxVisitor visitor) => visitor.VisitVariableStatement(this);
+    public override TResult Accept<TResult>(TypeScriptSyntaxVisitor<TResult> visitor) => visitor.VisitVariableStatement(this);
+
+    public VariableStatementSyntax Update(SyntaxToken declarationKeyword, VariableDeclarationListSyntax declarationList, SyntaxToken semicolonToken)
+    {
+        if (declarationKeyword != this.DeclarationKeyword || declarationList != this.DeclarationList || semicolonToken != this.SemicolonToken)
+        {
+            var newNode = SyntaxFactory.VariableStatement(declarationKeyword, declarationList, semicolonToken);
+            var diags = GetDiagnostics();
+            if (diags?.Length > 0)
+                newNode = newNode.WithDiagnosticsGreen(diags);
+            var annotations = GetAnnotations();
+            if (annotations?.Length > 0)
+                newNode = newNode.WithAnnotationsGreen(annotations);
+            return newNode;
+        }
+
+        return this;
+    }
+
+    internal override GreenNode SetDiagnostics(DiagnosticInfo[]? diagnostics)
+        => new VariableStatementSyntax(this.Kind, this.declarationKeyword, this.declarationList, this.semicolonToken, diagnostics, GetAnnotations());
+
+    internal override GreenNode SetAnnotations(SyntaxAnnotation[]? annotations)
+        => new VariableStatementSyntax(this.Kind, this.declarationKeyword, this.declarationList, this.semicolonToken, GetDiagnostics(), annotations);
 }
 
 internal sealed partial class ParameterSyntax : TypeScriptSyntaxNode
@@ -8325,6 +8500,7 @@ internal partial class TypeScriptSyntaxVisitor<TResult>
     public virtual TResult VisitLiteralExpression(LiteralExpressionSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitBinaryExpression(BinaryExpressionSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitMemberAccessExpression(MemberAccessExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitElementAccessExpression(ElementAccessExpressionSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitPrefixUnaryExpression(PrefixUnaryExpressionSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitPostfixUnaryExpression(PostfixUnaryExpressionSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitDeleteExpression(DeleteExpressionSyntax node) => this.DefaultVisit(node);
@@ -8379,6 +8555,7 @@ internal partial class TypeScriptSyntaxVisitor<TResult>
     public virtual TResult VisitForOfStatement(ForOfStatementSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitVariableDeclaration(VariableDeclarationSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitEqualsValueClause(EqualsValueClauseSyntax node) => this.DefaultVisit(node);
+    public virtual TResult VisitVariableDeclarationList(VariableDeclarationListSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitVariableStatement(VariableStatementSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitParameter(ParameterSyntax node) => this.DefaultVisit(node);
     public virtual TResult VisitParameterList(ParameterListSyntax node) => this.DefaultVisit(node);
@@ -8410,6 +8587,7 @@ internal partial class TypeScriptSyntaxVisitor
     public virtual void VisitLiteralExpression(LiteralExpressionSyntax node) => this.DefaultVisit(node);
     public virtual void VisitBinaryExpression(BinaryExpressionSyntax node) => this.DefaultVisit(node);
     public virtual void VisitMemberAccessExpression(MemberAccessExpressionSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitElementAccessExpression(ElementAccessExpressionSyntax node) => this.DefaultVisit(node);
     public virtual void VisitPrefixUnaryExpression(PrefixUnaryExpressionSyntax node) => this.DefaultVisit(node);
     public virtual void VisitPostfixUnaryExpression(PostfixUnaryExpressionSyntax node) => this.DefaultVisit(node);
     public virtual void VisitDeleteExpression(DeleteExpressionSyntax node) => this.DefaultVisit(node);
@@ -8464,6 +8642,7 @@ internal partial class TypeScriptSyntaxVisitor
     public virtual void VisitForOfStatement(ForOfStatementSyntax node) => this.DefaultVisit(node);
     public virtual void VisitVariableDeclaration(VariableDeclarationSyntax node) => this.DefaultVisit(node);
     public virtual void VisitEqualsValueClause(EqualsValueClauseSyntax node) => this.DefaultVisit(node);
+    public virtual void VisitVariableDeclarationList(VariableDeclarationListSyntax node) => this.DefaultVisit(node);
     public virtual void VisitVariableStatement(VariableStatementSyntax node) => this.DefaultVisit(node);
     public virtual void VisitParameter(ParameterSyntax node) => this.DefaultVisit(node);
     public virtual void VisitParameterList(ParameterListSyntax node) => this.DefaultVisit(node);
@@ -8502,6 +8681,9 @@ internal partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<TypeSc
 
     public override TypeScriptSyntaxNode VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
         => node.Update((ExpressionSyntax)Visit(node.Expression), (SyntaxToken)Visit(node.DotToken), (IdentifierNameSyntax)Visit(node.Name));
+
+    public override TypeScriptSyntaxNode VisitElementAccessExpression(ElementAccessExpressionSyntax node)
+        => node.Update((ExpressionSyntax)Visit(node.Expression), (SyntaxToken)Visit(node.OpenBracketToken), (ExpressionSyntax)Visit(node.ArgumentExpression), (SyntaxToken)Visit(node.CloseBracketToken));
 
     public override TypeScriptSyntaxNode VisitPrefixUnaryExpression(PrefixUnaryExpressionSyntax node)
         => node.Update((SyntaxToken)Visit(node.OperatorToken), (ExpressionSyntax)Visit(node.Operand));
@@ -8651,7 +8833,7 @@ internal partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<TypeSc
         => node.Update((SyntaxToken)Visit(node.ContinueKeyword), (IdentifierNameSyntax)Visit(node.Label), (SyntaxToken)Visit(node.SemicolonToken));
 
     public override TypeScriptSyntaxNode VisitForStatement(ForStatementSyntax node)
-        => node.Update((SyntaxToken)Visit(node.ForKeyword), (SyntaxToken)Visit(node.OpenParenToken), (StatementSyntax)Visit(node.Initializer), (ExpressionSyntax)Visit(node.Condition), (SyntaxToken)Visit(node.SecondSemicolonToken), (ExpressionSyntax)Visit(node.Increment), (SyntaxToken)Visit(node.CloseParenToken), (StatementSyntax)Visit(node.Statement));
+        => node.Update((SyntaxToken)Visit(node.ForKeyword), (SyntaxToken)Visit(node.OpenParenToken), (TypeScriptSyntaxNode)Visit(node.Initializer), (SyntaxToken)Visit(node.FirstSemicolonToken), (ExpressionSyntax)Visit(node.Condition), (SyntaxToken)Visit(node.SecondSemicolonToken), (ExpressionSyntax)Visit(node.Increment), (SyntaxToken)Visit(node.CloseParenToken), (StatementSyntax)Visit(node.Statement));
 
     public override TypeScriptSyntaxNode VisitForInStatement(ForInStatementSyntax node)
         => node.Update((SyntaxToken)Visit(node.ForKeyword), (SyntaxToken)Visit(node.OpenParenToken), (TypeScriptSyntaxNode)Visit(node.Initializer), (SyntaxToken)Visit(node.InKeyword), (ExpressionSyntax)Visit(node.Expression), (SyntaxToken)Visit(node.CloseParenToken), (StatementSyntax)Visit(node.Statement));
@@ -8665,8 +8847,11 @@ internal partial class TypeScriptSyntaxRewriter : TypeScriptSyntaxVisitor<TypeSc
     public override TypeScriptSyntaxNode VisitEqualsValueClause(EqualsValueClauseSyntax node)
         => node.Update((SyntaxToken)Visit(node.EqualsToken), (ExpressionSyntax)Visit(node.Value));
 
+    public override TypeScriptSyntaxNode VisitVariableDeclarationList(VariableDeclarationListSyntax node)
+        => node.Update(VisitList(node.Declarations));
+
     public override TypeScriptSyntaxNode VisitVariableStatement(VariableStatementSyntax node)
-        => node.Update((SyntaxToken)Visit(node.DeclarationKeyword), (VariableDeclarationSyntax)Visit(node.Declaration), (SyntaxToken)Visit(node.SemicolonToken));
+        => node.Update((SyntaxToken)Visit(node.DeclarationKeyword), (VariableDeclarationListSyntax)Visit(node.DeclarationList), (SyntaxToken)Visit(node.SemicolonToken));
 
     public override TypeScriptSyntaxNode VisitParameter(ParameterSyntax node)
         => node.Update(VisitList(node.Modifiers), (SyntaxToken)Visit(node.DotDotDotToken), (SyntaxToken)Visit(node.Identifier), (SyntaxToken)Visit(node.QuestionToken), (TypeAnnotationSyntax)Visit(node.TypeAnnotation), (EqualsValueClauseSyntax)Visit(node.Initializer));
@@ -8867,6 +9052,20 @@ internal partial class ContextAwareSyntax
         }
 
         return result;
+    }
+
+    public ElementAccessExpressionSyntax ElementAccessExpression(ExpressionSyntax expression, SyntaxToken openBracketToken, ExpressionSyntax argumentExpression, SyntaxToken closeBracketToken)
+    {
+#if DEBUG
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+        if (openBracketToken == null) throw new ArgumentNullException(nameof(openBracketToken));
+        if (openBracketToken.Kind != SyntaxKind.OpenBracketToken) throw new ArgumentException(nameof(openBracketToken));
+        if (argumentExpression == null) throw new ArgumentNullException(nameof(argumentExpression));
+        if (closeBracketToken == null) throw new ArgumentNullException(nameof(closeBracketToken));
+        if (closeBracketToken.Kind != SyntaxKind.CloseBracketToken) throw new ArgumentException(nameof(closeBracketToken));
+#endif
+
+        return new ElementAccessExpressionSyntax(SyntaxKind.ElementAccessExpression, expression, openBracketToken, argumentExpression, closeBracketToken, this.context);
     }
 
     public PrefixUnaryExpressionSyntax PrefixUnaryExpression(SyntaxToken operatorToken, ExpressionSyntax operand)
@@ -9934,13 +10133,15 @@ internal partial class ContextAwareSyntax
         return result;
     }
 
-    public ForStatementSyntax ForStatement(SyntaxToken forKeyword, SyntaxToken openParenToken, StatementSyntax? initializer, ExpressionSyntax? condition, SyntaxToken secondSemicolonToken, ExpressionSyntax? increment, SyntaxToken closeParenToken, StatementSyntax statement)
+    public ForStatementSyntax ForStatement(SyntaxToken forKeyword, SyntaxToken openParenToken, TypeScriptSyntaxNode? initializer, SyntaxToken firstSemicolonToken, ExpressionSyntax? condition, SyntaxToken secondSemicolonToken, ExpressionSyntax? increment, SyntaxToken closeParenToken, StatementSyntax statement)
     {
 #if DEBUG
         if (forKeyword == null) throw new ArgumentNullException(nameof(forKeyword));
         if (forKeyword.Kind != SyntaxKind.ForKeyword) throw new ArgumentException(nameof(forKeyword));
         if (openParenToken == null) throw new ArgumentNullException(nameof(openParenToken));
         if (openParenToken.Kind != SyntaxKind.OpenParenToken) throw new ArgumentException(nameof(openParenToken));
+        if (firstSemicolonToken == null) throw new ArgumentNullException(nameof(firstSemicolonToken));
+        if (firstSemicolonToken.Kind != SyntaxKind.SemicolonToken) throw new ArgumentException(nameof(firstSemicolonToken));
         if (secondSemicolonToken == null) throw new ArgumentNullException(nameof(secondSemicolonToken));
         if (secondSemicolonToken.Kind != SyntaxKind.SemicolonToken) throw new ArgumentException(nameof(secondSemicolonToken));
         if (closeParenToken == null) throw new ArgumentNullException(nameof(closeParenToken));
@@ -9948,7 +10149,7 @@ internal partial class ContextAwareSyntax
         if (statement == null) throw new ArgumentNullException(nameof(statement));
 #endif
 
-        return new ForStatementSyntax(SyntaxKind.ForStatement, forKeyword, openParenToken, initializer, condition, secondSemicolonToken, increment, closeParenToken, statement, this.context);
+        return new ForStatementSyntax(SyntaxKind.ForStatement, forKeyword, openParenToken, initializer, firstSemicolonToken, condition, secondSemicolonToken, increment, closeParenToken, statement, this.context);
     }
 
     public ForInStatementSyntax ForInStatement(SyntaxToken forKeyword, SyntaxToken openParenToken, TypeScriptSyntaxNode initializer, SyntaxToken inKeyword, ExpressionSyntax expression, SyntaxToken closeParenToken, StatementSyntax statement)
@@ -10039,11 +10240,29 @@ internal partial class ContextAwareSyntax
         return result;
     }
 
-    public VariableStatementSyntax VariableStatement(SyntaxToken declarationKeyword, VariableDeclarationSyntax declaration, SyntaxToken? semicolonToken)
+    public VariableDeclarationListSyntax VariableDeclarationList(CoreSyntax.SeparatedSyntaxList<VariableDeclarationSyntax> declarations)
+    {
+#if DEBUG
+#endif
+
+        int hash;
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.VariableDeclarationList, declarations.Node, this.context, out hash);
+        if (cached != null) return (VariableDeclarationListSyntax)cached;
+
+        var result = new VariableDeclarationListSyntax(SyntaxKind.VariableDeclarationList, declarations.Node, this.context);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public VariableStatementSyntax VariableStatement(SyntaxToken declarationKeyword, VariableDeclarationListSyntax declarationList, SyntaxToken? semicolonToken)
     {
 #if DEBUG
         if (declarationKeyword == null) throw new ArgumentNullException(nameof(declarationKeyword));
-        if (declaration == null) throw new ArgumentNullException(nameof(declaration));
+        if (declarationList == null) throw new ArgumentNullException(nameof(declarationList));
         if (semicolonToken != null)
         {
             switch (semicolonToken.Kind)
@@ -10056,10 +10275,10 @@ internal partial class ContextAwareSyntax
 #endif
 
         int hash;
-        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.VariableStatement, declarationKeyword, declaration, semicolonToken, this.context, out hash);
+        var cached = TypeScriptSyntaxNodeCache.TryGetNode((int)SyntaxKind.VariableStatement, declarationKeyword, declarationList, semicolonToken, this.context, out hash);
         if (cached != null) return (VariableStatementSyntax)cached;
 
-        var result = new VariableStatementSyntax(SyntaxKind.VariableStatement, declarationKeyword, declaration, semicolonToken, this.context);
+        var result = new VariableStatementSyntax(SyntaxKind.VariableStatement, declarationKeyword, declarationList, semicolonToken, this.context);
         if (hash >= 0)
         {
             SyntaxNodeCache.AddNode(result, hash);
@@ -10658,6 +10877,20 @@ internal static partial class SyntaxFactory
         }
 
         return result;
+    }
+
+    public static ElementAccessExpressionSyntax ElementAccessExpression(ExpressionSyntax expression, SyntaxToken openBracketToken, ExpressionSyntax argumentExpression, SyntaxToken closeBracketToken)
+    {
+#if DEBUG
+        if (expression == null) throw new ArgumentNullException(nameof(expression));
+        if (openBracketToken == null) throw new ArgumentNullException(nameof(openBracketToken));
+        if (openBracketToken.Kind != SyntaxKind.OpenBracketToken) throw new ArgumentException(nameof(openBracketToken));
+        if (argumentExpression == null) throw new ArgumentNullException(nameof(argumentExpression));
+        if (closeBracketToken == null) throw new ArgumentNullException(nameof(closeBracketToken));
+        if (closeBracketToken.Kind != SyntaxKind.CloseBracketToken) throw new ArgumentException(nameof(closeBracketToken));
+#endif
+
+        return new ElementAccessExpressionSyntax(SyntaxKind.ElementAccessExpression, expression, openBracketToken, argumentExpression, closeBracketToken);
     }
 
     public static PrefixUnaryExpressionSyntax PrefixUnaryExpression(SyntaxToken operatorToken, ExpressionSyntax operand)
@@ -11725,13 +11958,15 @@ internal static partial class SyntaxFactory
         return result;
     }
 
-    public static ForStatementSyntax ForStatement(SyntaxToken forKeyword, SyntaxToken openParenToken, StatementSyntax? initializer, ExpressionSyntax? condition, SyntaxToken secondSemicolonToken, ExpressionSyntax? increment, SyntaxToken closeParenToken, StatementSyntax statement)
+    public static ForStatementSyntax ForStatement(SyntaxToken forKeyword, SyntaxToken openParenToken, TypeScriptSyntaxNode? initializer, SyntaxToken firstSemicolonToken, ExpressionSyntax? condition, SyntaxToken secondSemicolonToken, ExpressionSyntax? increment, SyntaxToken closeParenToken, StatementSyntax statement)
     {
 #if DEBUG
         if (forKeyword == null) throw new ArgumentNullException(nameof(forKeyword));
         if (forKeyword.Kind != SyntaxKind.ForKeyword) throw new ArgumentException(nameof(forKeyword));
         if (openParenToken == null) throw new ArgumentNullException(nameof(openParenToken));
         if (openParenToken.Kind != SyntaxKind.OpenParenToken) throw new ArgumentException(nameof(openParenToken));
+        if (firstSemicolonToken == null) throw new ArgumentNullException(nameof(firstSemicolonToken));
+        if (firstSemicolonToken.Kind != SyntaxKind.SemicolonToken) throw new ArgumentException(nameof(firstSemicolonToken));
         if (secondSemicolonToken == null) throw new ArgumentNullException(nameof(secondSemicolonToken));
         if (secondSemicolonToken.Kind != SyntaxKind.SemicolonToken) throw new ArgumentException(nameof(secondSemicolonToken));
         if (closeParenToken == null) throw new ArgumentNullException(nameof(closeParenToken));
@@ -11739,7 +11974,7 @@ internal static partial class SyntaxFactory
         if (statement == null) throw new ArgumentNullException(nameof(statement));
 #endif
 
-        return new ForStatementSyntax(SyntaxKind.ForStatement, forKeyword, openParenToken, initializer, condition, secondSemicolonToken, increment, closeParenToken, statement);
+        return new ForStatementSyntax(SyntaxKind.ForStatement, forKeyword, openParenToken, initializer, firstSemicolonToken, condition, secondSemicolonToken, increment, closeParenToken, statement);
     }
 
     public static ForInStatementSyntax ForInStatement(SyntaxToken forKeyword, SyntaxToken openParenToken, TypeScriptSyntaxNode initializer, SyntaxToken inKeyword, ExpressionSyntax expression, SyntaxToken closeParenToken, StatementSyntax statement)
@@ -11830,11 +12065,29 @@ internal static partial class SyntaxFactory
         return result;
     }
 
-    public static VariableStatementSyntax VariableStatement(SyntaxToken declarationKeyword, VariableDeclarationSyntax declaration, SyntaxToken? semicolonToken)
+    public static VariableDeclarationListSyntax VariableDeclarationList(CoreSyntax.SeparatedSyntaxList<VariableDeclarationSyntax> declarations)
+    {
+#if DEBUG
+#endif
+
+        int hash;
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.VariableDeclarationList, declarations.Node, out hash);
+        if (cached != null) return (VariableDeclarationListSyntax)cached;
+
+        var result = new VariableDeclarationListSyntax(SyntaxKind.VariableDeclarationList, declarations.Node);
+        if (hash >= 0)
+        {
+            SyntaxNodeCache.AddNode(result, hash);
+        }
+
+        return result;
+    }
+
+    public static VariableStatementSyntax VariableStatement(SyntaxToken declarationKeyword, VariableDeclarationListSyntax declarationList, SyntaxToken? semicolonToken)
     {
 #if DEBUG
         if (declarationKeyword == null) throw new ArgumentNullException(nameof(declarationKeyword));
-        if (declaration == null) throw new ArgumentNullException(nameof(declaration));
+        if (declarationList == null) throw new ArgumentNullException(nameof(declarationList));
         if (semicolonToken != null)
         {
             switch (semicolonToken.Kind)
@@ -11847,10 +12100,10 @@ internal static partial class SyntaxFactory
 #endif
 
         int hash;
-        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.VariableStatement, declarationKeyword, declaration, semicolonToken, out hash);
+        var cached = SyntaxNodeCache.TryGetNode((int)SyntaxKind.VariableStatement, declarationKeyword, declarationList, semicolonToken, out hash);
         if (cached != null) return (VariableStatementSyntax)cached;
 
-        var result = new VariableStatementSyntax(SyntaxKind.VariableStatement, declarationKeyword, declaration, semicolonToken);
+        var result = new VariableStatementSyntax(SyntaxKind.VariableStatement, declarationKeyword, declarationList, semicolonToken);
         if (hash >= 0)
         {
             SyntaxNodeCache.AddNode(result, hash);

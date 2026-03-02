@@ -175,6 +175,7 @@ namespace Microsoft.CodeAnalysis.TypeScript
         SetAccessor,
 
         // Expressions
+        ElementAccessExpression,
         NumericLiteralExpression,
         StringLiteralExpression,
         TrueLiteralExpression,
@@ -227,6 +228,7 @@ namespace Microsoft.CodeAnalysis.TypeScript
         Block,
         ReturnStatement,
         VariableDeclaration,
+        VariableDeclarationList,
         VariableStatement,
         EqualsValueClause,
         FunctionDeclaration,
