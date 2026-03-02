@@ -98,6 +98,55 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Parser
         }
 
         [Fact]
+        public void Parse_VariableDeclarationList()
+        {
+            var source = "let x = 1, y = 2;";
+            var tree = TypeScriptSyntaxTree.ParseText(source);
+            var diagnostics = tree.GetDiagnostics().ToList();
+
+            Assert.Empty(diagnostics);
+
+            var root = tree.GetRoot();
+            var varStmt = root.DescendantNodes().OfType<VariableStatementSyntax>().FirstOrDefault();
+            Assert.NotNull(varStmt);
+
+            var list = varStmt.DeclarationList;
+            Assert.Equal(2, list.Declarations.Count);
+
+            Assert.Equal("x", list.Declarations[0].Identifier.Text);
+            Assert.Equal("1", ((LiteralExpressionSyntax)list.Declarations[0].EqualsValueClause.Value).Token.Text);
+
+            Assert.Equal("y", list.Declarations[1].Identifier.Text);
+            Assert.Equal("2", ((LiteralExpressionSyntax)list.Declarations[1].EqualsValueClause.Value).Token.Text);
+        }
+
+        [Fact]
+        public void Parse_ElementAccessExpression()
+        {
+            var source = "let x = arr[0];";
+            var tree = TypeScriptSyntaxTree.ParseText(source);
+            var diagnostics = tree.GetDiagnostics().ToList();
+
+            Assert.Empty(diagnostics);
+
+            var root = tree.GetRoot();
+            var varStmt = root.DescendantNodes().OfType<VariableStatementSyntax>().FirstOrDefault();
+            Assert.NotNull(varStmt);
+
+            var list = varStmt.DeclarationList;
+            Assert.Single(list.Declarations);
+
+            var equalsValue = list.Declarations[0].EqualsValueClause;
+            Assert.NotNull(equalsValue);
+
+            var elementAccess = equalsValue.Value as ElementAccessExpressionSyntax;
+            Assert.NotNull(elementAccess);
+
+            Assert.Equal("arr", ((IdentifierNameSyntax)elementAccess.Expression).Identifier.Text);
+            Assert.Equal("0", ((LiteralExpressionSyntax)elementAccess.ArgumentExpression).Token.Text);
+        }
+
+        [Fact]
         public void ParseEnumDeclaration()
         {
             var code = "enum Color { Red, Green, Blue }";

@@ -45,7 +45,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Parser
              var root = (CompilationUnitSyntax)tree.GetRoot();
 
              var varStmt = (VariableStatementSyntax)root.Statements[0];
-             var decl = varStmt.Declaration;
+             var decl = varStmt.DeclarationList.Declarations[0];
              var init = decl.EqualsValueClause;
              Assert.NotNull(init);
              var arrow = Assert.IsType<ArrowFunctionExpressionSyntax>(init.Value);
@@ -60,7 +60,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Parser
              var root = (CompilationUnitSyntax)tree.GetRoot();
 
              var varStmt = (VariableStatementSyntax)root.Statements[0];
-             var decl = varStmt.Declaration;
+             var decl = varStmt.DeclarationList.Declarations[0];
              var init = decl.EqualsValueClause;
              Assert.NotNull(init);
              var arrow = Assert.IsType<ArrowFunctionExpressionSyntax>(init.Value);
@@ -117,7 +117,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Parser
             var root = (CompilationUnitSyntax)tree.GetRoot();
 
             var stmt = (VariableStatementSyntax)root.Statements[0];
-            var decl = stmt.Declaration;
+            var decl = stmt.DeclarationList.Declarations[0];
             Assert.Equal("async", decl.Identifier.Text);
         }
     }

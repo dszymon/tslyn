@@ -637,16 +637,16 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
             if (_currentToken.Kind == SyntaxKind.SemicolonToken)
             {
-                initializerStmt = ParseEmptyStatement();
+                // empty initializer
             }
             else
             {
                 if (_currentToken.Kind == SyntaxKind.VarKeyword || _currentToken.Kind == SyntaxKind.LetKeyword || _currentToken.Kind == SyntaxKind.ConstKeyword)
                 {
                     var declKeyword = EatToken();
-                    var decl = ParseVariableDeclaration();
+                    var list = ParseVariableDeclarationList();
                     // Create VariableStatement without semicolon for now
-                    initializer = SyntaxFactory.VariableStatement(declKeyword, decl, SyntaxToken.CreateMissing(SyntaxKind.SemicolonToken, null, null));
+                    initializer = SyntaxFactory.VariableStatement(declKeyword, list, SyntaxToken.CreateMissing(SyntaxKind.SemicolonToken, null, null));
                 }
                 else
                 {
@@ -674,24 +674,24 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
             }
 
             // Standard For Loop
-            if (initializerStmt == null)
+            SyntaxToken firstSemicolon;
+            if (initializer == null)
+            {
+                firstSemicolon = EatToken(SyntaxKind.SemicolonToken);
+            }
+            else
             {
                 // We parsed initializer as TypeScriptSyntaxNode (VariableStatement or ExpressionStatement with missing semicolon).
                 // We need to consume the actual semicolon now.
-                var firstSemicolon = EatToken(SyntaxKind.SemicolonToken);
+                firstSemicolon = EatToken(SyntaxKind.SemicolonToken);
 
                 if (initializer is VariableStatementSyntax vs)
                 {
-                    initializerStmt = SyntaxFactory.VariableStatement(vs.DeclarationKeyword, vs.Declaration, firstSemicolon);
+                    initializer = SyntaxFactory.VariableStatement(vs.DeclarationKeyword, vs.DeclarationList, firstSemicolon);
                 }
                 else if (initializer is ExpressionStatementSyntax es)
                 {
-                    initializerStmt = SyntaxFactory.ExpressionStatement(es.Expression, firstSemicolon);
-                }
-                else
-                {
-                     // Should not happen if logic matches
-                     initializerStmt = ParseEmptyStatement();
+                    initializer = SyntaxFactory.ExpressionStatement(es.Expression, firstSemicolon);
                 }
             }
 
@@ -711,7 +711,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
 
             var statement = ParseStatement();
 
-            return SyntaxFactory.ForStatement(forKeyword, openParen, initializerStmt, condition, secondSemicolon, increment, closeParen, statement);
+            return SyntaxFactory.ForStatement(forKeyword, openParen, initializer, firstSemicolon, condition, secondSemicolon, increment, closeParen, statement);
         }
 
         internal EmptyStatementSyntax ParseEmptyStatement()
@@ -1028,9 +1028,32 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
         internal VariableStatementSyntax ParseVariableStatement()
         {
             var keyword = EatToken(); // var, let, const
-            var decl = ParseVariableDeclaration(); // TODO: List support
+            var list = ParseVariableDeclarationList();
             var semicolon = EatOptionalToken(SyntaxKind.SemicolonToken);
-            return SyntaxFactory.VariableStatement(keyword, decl, semicolon);
+            return SyntaxFactory.VariableStatement(keyword, list, semicolon);
+        }
+
+        internal VariableDeclarationListSyntax ParseVariableDeclarationList()
+        {
+            var listBuilder = SyntaxListBuilder<GreenNode>.Create();
+
+            while (true)
+            {
+                var decl = ParseVariableDeclaration();
+                listBuilder.Add(decl);
+
+                if (_currentToken.Kind == SyntaxKind.CommaToken)
+                {
+                    listBuilder.Add(EatToken());
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            var separatedList = new Microsoft.CodeAnalysis.Syntax.InternalSyntax.SeparatedSyntaxList<VariableDeclarationSyntax>(new Microsoft.CodeAnalysis.Syntax.InternalSyntax.SyntaxList<TypeScriptSyntaxNode>(listBuilder.ToListNode()));
+            return SyntaxFactory.VariableDeclarationList(separatedList);
         }
 
         internal VariableDeclarationSyntax ParseVariableDeclaration()
@@ -1677,12 +1700,10 @@ namespace Microsoft.CodeAnalysis.TypeScript.Syntax.InternalSyntax
                 }
                 else if (_currentToken.Kind == SyntaxKind.OpenBracketToken)
                 {
-                    // TODO: Indexer access not yet in Syntax.xml?
-                    // For now, break or handle if we add it.
-                    // Given the plan was literals, I might have missed MemberAccess via brackets.
-                    // Sticking to dot for now as per previous implementation, but let's check plan.
-                    // The plan didn't explicitly mention ElementAccessExpression, so I'll skip for now or treat as end of member loop.
-                    break;
+                     var openBracket = EatToken();
+                     var argExpr = ParseExpression();
+                     var closeBracket = EatToken(SyntaxKind.CloseBracketToken);
+                     expr = SyntaxFactory.ElementAccessExpression(expr, openBracket, argExpr, closeBracket);
                 }
                 else
                 {

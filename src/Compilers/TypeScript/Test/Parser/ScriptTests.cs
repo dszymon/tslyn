@@ -20,7 +20,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Parser
             var root = (CompilationUnitSyntax)tree.GetRoot();
 
             var varStmt = Assert.IsType<VariableStatementSyntax>(root.Statements[0]);
-            var decl = varStmt.Declaration;
+            var decl = varStmt.DeclarationList.Declarations[0];
             Assert.Equal("x", decl.Identifier.Text);
 
             // Note: Depending on precedence parser implementation, 1 + 2 * 3
@@ -56,7 +56,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Parser
             root = (CompilationUnitSyntax)tree.GetRoot();
 
             varStmt = Assert.IsType<VariableStatementSyntax>(root.Statements[0]);
-            decl = varStmt.Declaration;
+            decl = varStmt.DeclarationList.Declarations[0];
             init = decl.EqualsValueClause.Value;
 
             // Even "1 + 2" might fail if binary expressions aren't fully hooked up or precedence is broken.

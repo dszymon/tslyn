@@ -75,6 +75,18 @@
     <Field Name="Name" Type="IdentifierNameSyntax"/>
   </Node>
 
+  <Node Name="ElementAccessExpressionSyntax" Base="ExpressionSyntax">
+    <Kind Name="ElementAccessExpression"/>
+    <Field Name="Expression" Type="ExpressionSyntax"/>
+    <Field Name="OpenBracketToken" Type="SyntaxToken">
+        <Kind Name="OpenBracketToken"/>
+    </Field>
+    <Field Name="ArgumentExpression" Type="ExpressionSyntax"/>
+    <Field Name="CloseBracketToken" Type="SyntaxToken">
+        <Kind Name="CloseBracketToken"/>
+    </Field>
+  </Node>
+
   <Node Name="PrefixUnaryExpressionSyntax" Base="ExpressionSyntax">
     <Kind Name="PrefixUnaryExpression"/>
     <Field Name="OperatorToken" Type="SyntaxToken"/>
@@ -585,7 +597,10 @@
     <Field Name="OpenParenToken" Type="SyntaxToken">
         <Kind Name="OpenParenToken"/>
     </Field>
-    <Field Name="Initializer" Type="StatementSyntax" Optional="true"/>
+    <Field Name="Initializer" Type="TypeScriptSyntaxNode" Optional="true"/>
+    <Field Name="FirstSemicolonToken" Type="SyntaxToken">
+        <Kind Name="SemicolonToken"/>
+    </Field>
     <Field Name="Condition" Type="ExpressionSyntax" Optional="true"/>
     <Field Name="SecondSemicolonToken" Type="SyntaxToken">
         <Kind Name="SemicolonToken"/>
@@ -655,10 +670,15 @@
     <Field Name="Value" Type="ExpressionSyntax"/>
   </Node>
 
+  <Node Name="VariableDeclarationListSyntax" Base="TypeScriptSyntaxNode">
+    <Kind Name="VariableDeclarationList"/>
+    <Field Name="Declarations" Type="SeparatedSyntaxList&lt;VariableDeclarationSyntax&gt;"/>
+  </Node>
+
   <Node Name="VariableStatementSyntax" Base="StatementSyntax">
     <Kind Name="VariableStatement"/>
     <Field Name="DeclarationKeyword" Type="SyntaxToken"/> <!-- var, let, const -->
-    <Field Name="Declaration" Type="VariableDeclarationSyntax"/> <!-- Simplified: just one for now -->
+    <Field Name="DeclarationList" Type="VariableDeclarationListSyntax"/>
     <Field Name="SemicolonToken" Type="SyntaxToken" Optional="true">
         <Kind Name="SemicolonToken"/>
     </Field>

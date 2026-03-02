@@ -71,7 +71,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Parser
             var root = (CompilationUnitSyntax)tree.GetRoot();
 
             var varStmt = Assert.IsType<VariableStatementSyntax>(root.Statements[0]);
-            var typeRef = Assert.IsType<TypeReferenceSyntax>(varStmt.Declaration.TypeAnnotation.Type);
+            var typeRef = Assert.IsType<TypeReferenceSyntax>(varStmt.DeclarationList.Declarations[0].TypeAnnotation.Type);
             Assert.Equal("List", typeRef.TypeName.Identifier.Text);
 
             Assert.NotNull(typeRef.TypeArguments);

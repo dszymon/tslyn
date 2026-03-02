@@ -60,7 +60,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Parser
              var root = (CompilationUnitSyntax)tree.GetRoot();
 
              var varStmt = Assert.IsType<VariableStatementSyntax>(root.Statements[0]);
-             var decl = varStmt.Declaration;
+             var decl = varStmt.DeclarationList.Declarations[0];
              var init = decl.EqualsValueClause.Value;
 
              var arrow = Assert.IsType<ArrowFunctionExpressionSyntax>(init);

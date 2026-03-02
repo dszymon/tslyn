@@ -42,7 +42,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Syntax
             var source = "var x: string | number;";
             var node = ParseStatement(source);
             var varStmt = Assert.IsType<VariableStatementSyntax>(node);
-            var decl = varStmt.Declaration;
+            var decl = varStmt.DeclarationList.Declarations[0];
             var type = decl.TypeAnnotation.Type;
             var unionType = Assert.IsType<UnionTypeSyntax>(type);
             Assert.Equal(2, unionType.Types.Count);
@@ -56,7 +56,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Syntax
             var source = "var x: A & B;";
             var node = ParseStatement(source);
             var varStmt = Assert.IsType<VariableStatementSyntax>(node);
-            var decl = varStmt.Declaration;
+            var decl = varStmt.DeclarationList.Declarations[0];
             var type = decl.TypeAnnotation.Type;
             var intersectionType = Assert.IsType<IntersectionTypeSyntax>(type);
             Assert.Equal(2, intersectionType.Types.Count);
@@ -71,7 +71,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Syntax
             var source = "var x: A | B & C;";
             var node = ParseStatement(source);
             var varStmt = Assert.IsType<VariableStatementSyntax>(node);
-            var decl = varStmt.Declaration;
+            var decl = varStmt.DeclarationList.Declarations[0];
             var type = decl.TypeAnnotation.Type;
             var unionType = Assert.IsType<UnionTypeSyntax>(type);
             Assert.Equal(2, unionType.Types.Count);
@@ -85,7 +85,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Syntax
             var source = "var x: (string | number)[];";
             var node = ParseStatement(source);
             var varStmt = Assert.IsType<VariableStatementSyntax>(node);
-            var decl = varStmt.Declaration;
+            var decl = varStmt.DeclarationList.Declarations[0];
             var type = decl.TypeAnnotation.Type;
             var arrayType = Assert.IsType<ArrayTypeSyntax>(type);
             var elementType = arrayType.ElementType;
@@ -99,7 +99,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Syntax
             var source = "var x: [string, number];";
             var node = ParseStatement(source);
             var varStmt = Assert.IsType<VariableStatementSyntax>(node);
-            var decl = varStmt.Declaration;
+            var decl = varStmt.DeclarationList.Declarations[0];
             var type = decl.TypeAnnotation.Type;
             var tupleType = Assert.IsType<TupleTypeSyntax>(type);
             Assert.Equal(2, tupleType.Elements.Count);
@@ -113,7 +113,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Syntax
             var source = "var x: [name: string, age?: number];";
             var node = ParseStatement(source);
             var varStmt = Assert.IsType<VariableStatementSyntax>(node);
-            var decl = varStmt.Declaration;
+            var decl = varStmt.DeclarationList.Declarations[0];
             var type = decl.TypeAnnotation.Type;
             var tupleType = Assert.IsType<TupleTypeSyntax>(type);
             Assert.Equal(2, tupleType.Elements.Count);
@@ -135,7 +135,7 @@ namespace Microsoft.CodeAnalysis.TypeScript.UnitTests.Syntax
             var source = "var x: [string, ...number[]];";
             var node = ParseStatement(source);
             var varStmt = Assert.IsType<VariableStatementSyntax>(node);
-            var decl = varStmt.Declaration;
+            var decl = varStmt.DeclarationList.Declarations[0];
             var type = decl.TypeAnnotation.Type;
             var tupleType = Assert.IsType<TupleTypeSyntax>(type);
 
